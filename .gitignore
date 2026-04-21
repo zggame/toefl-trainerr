@@ -38,3 +38,7 @@ next-env.d.ts
 
 # supabase
 supabase/.env
+
+# worktrees
+.worktrees/
+worktrees/
