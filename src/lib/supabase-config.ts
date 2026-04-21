@@ -23,7 +23,8 @@ export function getSupabaseBrowserConfig(
   const url = env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required');
+    console.warn('[supabase-config] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — using mock mode');
+    return { mode: 'mock', url: MOCK_SUPABASE_URL, anonKey: MOCK_SUPABASE_KEY };
   }
   return { mode: 'live', url, anonKey };
 }
@@ -37,6 +38,9 @@ export function getSupabaseServerConfig(
   const url = env.NEXT_PUBLIC_SUPABASE_URL!;
   const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY!;
-  if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+  if (!serviceRoleKey) {
+    console.warn('[supabase-config] Missing SUPABASE_SERVICE_ROLE_KEY — using mock mode');
+    return { mode: 'mock', url: url || MOCK_SUPABASE_URL, anonKey: anonKey || MOCK_SUPABASE_KEY, serviceRoleKey: MOCK_SUPABASE_KEY };
+  }
   return { mode: 'live', url, anonKey, serviceRoleKey };
 }

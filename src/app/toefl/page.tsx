@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import { Mic, TrendingUp, Flame, Target } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 
 export default function ToeflHome() {
   const [attempts, setAttempts] = useState<any[]>([]);
@@ -12,8 +13,8 @@ export default function ToeflHome() {
   const supabase = getSupabaseBrowser();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push('/auth/signin'); return; }
+    supabase.auth.getUser().then((result: { data: { user: User | null } }) => {
+      if (!result.data.user) { router.push('/auth/signin'); return; }
       fetch('/api/toefl/attempts?limit=5').then(r => r.json()).then(data => {
         setAttempts(data || []);
         setLoading(false);

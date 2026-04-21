@@ -107,7 +107,6 @@ export default function PracticePage() {
       {step === 'prep' && prepCountdown !== null && (
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div style={{
-            display: 'inline-block',
             background: 'var(--color-primary)',
             color: 'white',
             borderRadius: '50%',
