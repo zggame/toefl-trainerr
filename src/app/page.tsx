@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Mic, BarChart3, Target, Repeat } from 'lucide-react';
 
 const features = [
@@ -24,6 +25,7 @@ const features = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'var(--font-comic)' }}>
       {/* Navbar */}
@@ -47,29 +49,33 @@ export default function HomePage() {
           TOEFL Trainer
         </span>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button style={{
-            background: 'var(--color-background)',
-            color: 'var(--color-primary)',
-            border: '3px solid var(--color-primary)',
-            borderRadius: 'var(--radius-pill)',
-            padding: '8px 20px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            transition: 'all 200ms ease',
-          }}>Log in</button>
-          <button style={{
-            background: 'var(--color-cta)',
-            color: 'white',
-            border: '3px solid transparent',
-            borderRadius: 'var(--radius-pill)',
-            padding: '8px 20px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            boxShadow: '0 4px 0 var(--color-cta-dark), 0 4px 12px rgba(34,197,94,0.3)',
-            transition: 'all 200ms ease-out',
-          }}>Get Started</button>
+          <button
+            onClick={() => router.push('/toefl')}
+            style={{
+              background: 'var(--color-background)',
+              color: 'var(--color-primary)',
+              border: '3px solid var(--color-primary)',
+              borderRadius: 'var(--radius-pill)',
+              padding: '8px 20px',
+              fontWeight: 600,
+              fontFamily: 'var(--font-baloo)',
+              cursor: 'pointer',
+              transition: 'all 200ms ease',
+            }}>Log in</button>
+          <button
+            onClick={() => router.push('/toefl')}
+            style={{
+              background: 'var(--color-cta)',
+              color: 'white',
+              border: '3px solid transparent',
+              borderRadius: 'var(--radius-pill)',
+              padding: '8px 20px',
+              fontWeight: 600,
+              fontFamily: 'var(--font-baloo)',
+              cursor: 'pointer',
+              boxShadow: '0 4px 0 var(--color-cta-dark), 0 4px 12px rgba(34,197,94,0.3)',
+              transition: 'all 200ms ease-out',
+            }}>Get Started</button>
         </div>
       </nav>
 
@@ -112,19 +118,21 @@ export default function HomePage() {
           Practice TOEFL speaking tasks with AI-powered scoring, targeted feedback,
           and a retry loop that actually helps you improve — not just get a number.
         </p>
-        <button style={{
-          background: 'var(--color-cta)',
-          color: 'white',
-          border: '3px solid transparent',
-          borderRadius: 'var(--radius-pill)',
-          padding: '16px 40px',
-          fontSize: '18px',
-          fontWeight: 700,
-          fontFamily: 'var(--font-baloo)',
-          cursor: 'pointer',
-          boxShadow: '0 6px 0 var(--color-cta-dark), 0 8px 20px rgba(34,197,94,0.4)',
-          transition: 'all 200ms ease-out',
-        }}>Start Practicing — Free</button>
+        <button
+          onClick={() => router.push('/toefl')}
+          style={{
+            background: 'var(--color-cta)',
+            color: 'white',
+            border: '3px solid transparent',
+            borderRadius: 'var(--radius-pill)',
+            padding: '16px 40px',
+            fontSize: '18px',
+            fontWeight: 700,
+            fontFamily: 'var(--font-baloo)',
+            cursor: 'pointer',
+            boxShadow: '0 6px 0 var(--color-cta-dark), 0 8px 20px rgba(34,197,94,0.4)',
+            transition: 'all 200ms ease-out',
+          }}>Start Practicing — Free</button>
       </section>
 
       {/* Feature Cards */}
@@ -137,15 +145,19 @@ export default function HomePage() {
         gap: '24px',
       }}>
         {features.map(({ icon: Icon, title, description }) => (
-          <div key={title} style={{
-            background: 'var(--color-background)',
-            borderRadius: 'var(--radius-clay)',
-            padding: '28px 24px',
-            border: '3px solid rgba(79,70,229,0.15)',
-            boxShadow: 'var(--shadow-clay-md)',
-            transition: 'all 200ms ease-out',
-            cursor: 'pointer',
-          }}>
+          <div
+            key={title}
+            onClick={() => router.push('/toefl')}
+            style={{
+              background: 'var(--color-background)',
+              borderRadius: 'var(--radius-clay)',
+              padding: '28px 24px',
+              border: '3px solid rgba(79,70,229,0.15)',
+              boxShadow: 'var(--shadow-clay-md)',
+              transition: 'all 200ms ease-out',
+              cursor: 'pointer',
+            }}
+          >
             <div style={{
               width: '48px',
               height: '48px',
@@ -193,19 +205,21 @@ export default function HomePage() {
           color: 'rgba(255,255,255,0.8)',
           marginBottom: '28px',
         }}>Join thousands of students practicing with AI feedback every day.</p>
-        <button style={{
-          background: 'white',
-          color: 'var(--color-primary)',
-          border: '3px solid transparent',
-          borderRadius: 'var(--radius-pill)',
-          padding: '14px 36px',
-          fontSize: '16px',
-          fontWeight: 700,
-          fontFamily: 'var(--font-baloo)',
-          cursor: 'pointer',
-          boxShadow: '0 6px 0 rgba(0,0,0,0.15)',
-          transition: 'all 200ms ease-out',
-        }}>Start Free Practice</button>
+        <button
+          onClick={() => router.push('/toefl')}
+          style={{
+            background: 'white',
+            color: 'var(--color-primary)',
+            border: '3px solid transparent',
+            borderRadius: 'var(--radius-pill)',
+            padding: '14px 36px',
+            fontSize: '16px',
+            fontWeight: 700,
+            fontFamily: 'var(--font-baloo)',
+            cursor: 'pointer',
+            boxShadow: '0 6px 0 rgba(0,0,0,0.15)',
+            transition: 'all 200ms ease-out',
+          }}>Start Free Practice</button>
       </section>
     </div>
   );
