@@ -1,3 +1,5 @@
+'use client';
+
 import { useRouter } from 'next/navigation';
 import { Mic, BarChart3, Target, Repeat } from 'lucide-react';
 
