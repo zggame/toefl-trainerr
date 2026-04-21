@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Comic+Neue:wght@300;400;700&display=swap');
+
+@theme {
+  --font-baloo: 'Baloo 2', sans-serif;
+  --font-comic: 'Comic Neue', sans-serif;
+
+  --color-primary: #4F46E5;
+  --color-primary-dark: #3730A3;
+  --color-secondary: #818CF8;
+  --color-cta: #22C55E;
+  --color-cta-dark: #16A34A;
+  --color-background: #EEF2FF;
+  --color-surface: #ffffff;
+  --color-text: #312E81;
+  --color-text-muted: #6B7280;
+
+  --shadow-clay-sm: 4px 4px 8px rgba(0,0,0,0.08), -2px -2px 6px rgba(255,255,255,0.9);
+  --shadow-clay-md: 6px 6px 12px rgba(0,0,0,0.08), -4px -4px 10px rgba(255,255,255,0.9);
+  --shadow-clay-lg: 8px 8px 16px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.9);
+  --shadow-clay-xl: 12px 12px 24px rgba(0,0,0,0.12), -6px -6px 16px rgba(255,255,255,0.95);
+
+  --radius-clay: 20px;
+  --radius-pill: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-comic);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-baloo);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-baloo);
+}
+
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
