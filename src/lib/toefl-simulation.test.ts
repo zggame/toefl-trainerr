@@ -39,7 +39,7 @@ describe('toefl simulation utilities', () => {
   test('defines the TOEFL 2026 speaking simulation counts', () => {
     expect(SIMULATION_LISTEN_REPEAT_COUNT).toBe(7);
     expect(SIMULATION_INTERVIEW_COUNT).toBe(4);
-    expect(SIMULATION_TOTAL_ITEMS).toBe(11);
+    expect(SIMULATION_TOTAL_ITEMS).toBe(SIMULATION_LISTEN_REPEAT_COUNT + SIMULATION_INTERVIEW_COUNT);
   });
 
   test('builds seven listen-repeat tasks followed by four interview tasks', () => {
