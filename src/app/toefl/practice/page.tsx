@@ -198,6 +198,7 @@ export default function PracticePage() {
         <ScoreCard
           overallScore={result.scoring.overallScore}
           scoring={result.scoring}
+          attemptId={result.attempt.id}
           onFullRetake={() => window.location.reload()}
           onTargetedRetry={() => router.push(`/toefl/attempt/${result.attempt.id}?retry=targeted`)}
           onDone={() => router.push('/toefl')}
