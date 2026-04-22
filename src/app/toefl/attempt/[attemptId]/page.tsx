@@ -57,7 +57,7 @@ export default function AttemptReviewPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
@@ -104,7 +104,7 @@ export default function AttemptReviewPage() {
 
       {/* Task Info */}
       {task && (
-        <Card padding="md">
+        <Card padding="md" className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Tag size={16} style={{ color: 'var(--color-primary)' }} />
             <span className="text-sm font-medium">Task Info</span>
@@ -138,7 +138,7 @@ export default function AttemptReviewPage() {
       )}
 
       {/* Score */}
-      <Card padding="lg" className="text-center">
+      <Card padding="lg" className="text-center mb-4">
         <ScoreDisplay score={attempt.overall_score} size="lg" />
         <div className="flex justify-around mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
           {[
@@ -162,7 +162,7 @@ export default function AttemptReviewPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         {attempt.wpm != null && (
           <Card padding="md" className="text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
@@ -195,7 +195,7 @@ export default function AttemptReviewPage() {
 
       {/* Transcript */}
       {attempt.transcript && (
-        <Card padding="md" className="mb-6">
+        <Card padding="md" className="mb-4">
           <div className="flex items-center gap-2 mb-3">
             <Type size={16} style={{ color: 'var(--color-primary)' }} />
             <span className="text-sm font-medium">Your Transcript</span>
@@ -208,7 +208,7 @@ export default function AttemptReviewPage() {
 
       {/* Audio */}
       {attempt.audio_url && (
-        <Card padding="md" className="mb-6">
+        <Card padding="md" className="mb-4">
           <p className="text-sm mb-2" style={{ color: 'var(--color-text-muted)' }}>
             Your Recording
           </p>
@@ -218,7 +218,7 @@ export default function AttemptReviewPage() {
 
       {/* Suggestion */}
       {attempt.suggestion && (
-        <Card padding="md" className="mb-6">
+        <Card padding="md" className="mb-4">
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
             {attempt.suggestion}
           </p>
@@ -227,7 +227,7 @@ export default function AttemptReviewPage() {
 
       {/* Errors */}
       {attempt.errors?.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-4">
           {attempt.errors.map((e: string) => (
             <span 
               key={e}
@@ -245,7 +245,7 @@ export default function AttemptReviewPage() {
 
       {/* Scoring Details */}
       {attempt.scoring_details && (
-        <Card padding="lg" className="mb-6">
+        <Card padding="lg" className="mb-4">
           <h2 
             className="text-lg font-semibold mb-4"
             style={{ fontFamily: 'var(--font-heading)' }}
