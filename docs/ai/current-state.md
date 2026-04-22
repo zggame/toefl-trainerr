@@ -91,6 +91,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - **Added audio playback to attempt review page** — `<audio>` player shows when `audio_url` is available.
 - **Added recording status indicator to ScoreCard** — shows "Recording will be available on the review page" with a direct link.
 - **Fixed private bucket playback** — score route now stores the storage path (not public URL); attempt fetch generates a signed URL via `createSignedUrl()` for 1-hour playback. Works with private `toefl_recordings` bucket.
+- **Added `scoring_details` JSONB column** — stores full per-dimension feedback (score, evidence, tip) as flexible JSON. Review page renders itemized breakdown with progress bars, evidence quotes, and actionable tips.
 
 ---
 
@@ -122,7 +123,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 ## Follow-ups
 
 - [ ] Deploy to Vercel + new Supabase Cloud project
-- [ ] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
+- [x] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
