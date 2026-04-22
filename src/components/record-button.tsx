@@ -72,10 +72,10 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {recording && (
           <div style={{
-            fontFamily: 'var(--font-baloo)',
+            fontFamily: 'var(--font-mono)',
             fontSize: '28px',
             fontWeight: 700,
-            color: isUrgent ? '#EF4444' : 'var(--color-cta)',
+            color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-primary)',
             transition: 'color 200ms',
           }}>
             {formatTime(remaining)}
@@ -88,26 +88,26 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
             width: '72px',
             height: '72px',
             borderRadius: '50%',
-            border: recording ? '4px solid var(--color-cta)' : '4px solid var(--color-primary)',
-            background: recording ? 'rgba(34,197,94,0.1)' : 'var(--color-primary)',
+            border: recording ? '4px solid var(--color-accent-red)' : '4px solid var(--color-primary)',
+            background: recording ? 'var(--color-accent-red)' : 'var(--color-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: disabled ? 'not-allowed' : 'pointer',
-            boxShadow: recording ? '0 0 0 8px rgba(34,197,94,0.15)' : 'var(--shadow-clay-md)',
+            boxShadow: recording ? '0 0 0 8px rgba(239,68,68,0.2)' : 'var(--shadow-button)',
             transition: 'all 200ms ease',
           }}
         >
-          {recording ? <Square size={28} color='var(--color-cta)' /> : <Mic size={28} color='white' />}
+          {recording ? <Square size={28} color='white' /> : <Mic size={28} color='white' />}
         </button>
       </div>
       <Waveform analyzing={recording} />
       {recording ? (
-        <p style={{ fontFamily: 'var(--font-comic)', color: isUrgent ? '#EF4444' : 'var(--color-cta)', fontSize: '14px', fontWeight: isUrgent ? 700 : 400 }}>
-          {isUrgent ? 'Time is almost up!' : 'Recording... Tap to stop early'}
+        <p style={{ fontFamily: 'var(--font-body)', color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-secondary)', fontSize: '14px', fontWeight: isUrgent ? 600 : 400 }}>
+          {isUrgent ? 'Time is almost up!' : 'Recording... Tap to stop'}
         </p>
       ) : (
-        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
+        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
           Time limit: {maxSeconds} seconds
         </p>
       )}
