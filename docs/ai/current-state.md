@@ -122,6 +122,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 ## Follow-ups
 
 - [ ] Deploy to Vercel + new Supabase Cloud project
+- [ ] **Save scoring evidence + tips per dimension in DB** — needed for review page itemized breakdown; not needed for simulation mode (discarded after ScoreCard)
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
