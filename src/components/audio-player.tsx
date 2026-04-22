@@ -37,7 +37,6 @@ export function AudioPlayer({
   const useTts = isPlaceholderUrl(audioUrl);
   const sourceKey = `${audioUrl}::${transcript ?? ''}`;
   const playing = playingSourceKey === sourceKey;
-  const hasEnded = endedSourceKey === sourceKey;
   const hasStartedOnce = startedSourceKey === sourceKey;
 
   useEffect(() => {
@@ -83,18 +82,6 @@ export function AudioPlayer({
     setPlayingSourceKey(null);
   }, []);
 
-  const pauseTts = useCallback(() => {
-    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-      window.speechSynthesis.pause();
-    }
-  }, []);
-
-  const resumeTts = useCallback(() => {
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
-    }
-  }, []);
-
   const startNativeAudio = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -106,12 +93,6 @@ export function AudioPlayer({
       setStartedSourceKey(current => (current === sourceKey ? null : current));
     });
   }, [sourceKey]);
-
-  const canResumeNativeAudio = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio || audio.ended) return false;
-    return audio.currentTime > 0 && Number.isFinite(audio.duration) && audio.currentTime < audio.duration;
-  }, []);
 
   useEffect(() => {
     if (!autoPlay) return;
@@ -126,20 +107,9 @@ export function AudioPlayer({
   }, [autoPlay, sourceKey, startNativeAudio, startTts, useTts]);
 
   const toggle = () => {
-    if (!allowReplay && hasEnded) return;
     if (useTts) {
       if (!allowReplay) {
-        if (playing) {
-          pauseTts();
-          return;
-        }
-        if (window.speechSynthesis.paused) {
-          resumeTts();
-          return;
-        }
-        if (!hasStartedOnce) {
-          startTts();
-        }
+        if (!hasStartedOnce) startTts();
         return;
       }
       if (playing) stopSpeaking();
@@ -148,17 +118,7 @@ export function AudioPlayer({
     }
     if (!audioRef.current) return;
     if (!allowReplay) {
-      if (playing) {
-        audioRef.current.pause();
-        return;
-      }
-      if (!hasStartedOnce) {
-        startNativeAudio();
-        return;
-      }
-      if (canResumeNativeAudio()) {
-        startNativeAudio();
-      }
+      if (!hasStartedOnce) startNativeAudio();
       return;
     }
     if (playing) {
@@ -195,7 +155,7 @@ export function AudioPlayer({
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
-          disabled={!allowReplay && hasEnded}
+          disabled={!allowReplay && hasStartedOnce}
           onClick={toggle}
           style={{
             width: '48px', height: '48px',
@@ -203,8 +163,8 @@ export function AudioPlayer({
             borderRadius: '50%',
             border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: !allowReplay && hasEnded ? 'not-allowed' : 'pointer',
-            opacity: !allowReplay && hasEnded ? 0.6 : 1,
+            cursor: !allowReplay && hasStartedOnce ? 'not-allowed' : 'pointer',
+            opacity: !allowReplay && hasStartedOnce ? 0.6 : 1,
             boxShadow: 'var(--shadow-clay-sm)',
             transition: 'all 200ms ease',
           }}
