@@ -19,12 +19,10 @@ export function BottomNav() {
   };
 
   return (
-    <nav 
+    <nav
       className="z-50 safe-area-bottom w-full"
       style={{
-        background: 'rgba(var(--color-bg), 0.9)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'var(--color-bg)',
         borderTop: '1px solid var(--color-border)',
       }}
     >
@@ -38,20 +36,20 @@ export function BottomNav() {
               <button
                 key={item.path}
                 onClick={() => handleNav(item.path)}
-                className="touch-target flex flex-col items-center justify-center -mt-6"
+                className="touch-target flex flex-col items-center justify-center -mt-6 active:scale-95"
                 style={{
                   width: '56px',
                   height: '56px',
                   borderRadius: '50%',
                   background: 'var(--color-primary)',
                   boxShadow: 'var(--shadow-fab)',
-                  transform: isActive ? 'translateY(-2px)' : 'translateY(-8px)',
-                  transition: 'all 200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transform: 'translateY(-8px)',
+                  transition: 'transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease',
                 }}
                 aria-label={item.label}
               >
-                <Icon 
-                  size={28} 
+                <Icon
+                  size={28}
                   color="white"
                   strokeWidth={2}
                 />
@@ -63,20 +61,20 @@ export function BottomNav() {
             <button
               key={item.path}
               onClick={() => handleNav(item.path)}
-              className="touch-target flex flex-col items-center justify-center gap-1 px-3"
+              className="touch-target flex flex-col items-center justify-center gap-1 px-3 active:scale-95"
               style={{
                 color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                transition: 'color 150ms ease',
+                transition: 'color 150ms ease, transform 100ms ease',
               }}
               aria-label={item.label}
             >
-              <Icon 
-                size={24} 
+              <Icon
+                size={24}
                 strokeWidth={isActive ? 2.5 : 2}
               />
-              <span 
+              <span
                 className="text-xs font-medium"
-                style={{ 
+                style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: '11px',
                 }}
@@ -84,8 +82,8 @@ export function BottomNav() {
                 {item.label}
               </span>
               {isActive && (
-                <div 
-                  className="absolute bottom-2 w-1 h-1 rounded-full"
+                <div
+                  className="w-1 h-1 rounded-full"
                   style={{ background: 'var(--color-primary)' }}
                 />
               )}
