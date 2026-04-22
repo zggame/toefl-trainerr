@@ -11,6 +11,23 @@ function getGemini(): GoogleGenAI {
   return genAI;
 }
 
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, baseDelayMs = 1000): Promise<T> {
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      const msg = lastError.message;
+      const isRetryable = msg.includes('503') || msg.includes('UNAVAILABLE') || msg.includes('high demand') || msg.includes('rate limit');
+      if (!isRetryable || attempt === maxRetries) throw lastError;
+      const delay = baseDelayMs * Math.pow(2, attempt);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw lastError;
+}
+
 export type ScoringResult = {
   delivery: { score: number; evidence: string; tip: string };
   languageUse: { score: number; evidence: string; tip: string };
@@ -70,11 +87,11 @@ Only respond with the JSON object, no additional text.`;
     inlineData: { mimeType, data: audioBase64 },
   };
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+  const response = await withRetry(() => ai.models.generateContent({
+    model: 'gemini-2.5-flash-lite',
     contents: [{ role: 'user', parts: [{ text: prompt }, audioPart] }],
     config: { responseMimeType: 'application/json' },
-  });
+  }));
 
   const text = response.text;
   if (!text) throw new Error('Gemini returned empty response');
@@ -88,8 +105,8 @@ export async function transcribeAudio(
 ): Promise<string> {
   const ai = getGemini();
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+  const response = await withRetry(() => ai.models.generateContent({
+    model: 'gemini-2.5-flash-lite',
     contents: [{
       role: 'user',
       parts: [
@@ -97,7 +114,7 @@ export async function transcribeAudio(
         { inlineData: { mimeType, data: audioBase64 } },
       ],
     }],
-  });
+  }));
 
   return response.text?.trim() ?? '';
 }
