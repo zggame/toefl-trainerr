@@ -105,7 +105,7 @@ export default function PracticePage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-1">
       {/* Header */}
       <div className="text-center">
         <span 

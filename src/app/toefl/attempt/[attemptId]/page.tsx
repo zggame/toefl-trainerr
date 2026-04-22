@@ -57,7 +57,7 @@ export default function AttemptReviewPage() {
   };
 
   return (
-    <div>
+    <div className="px-1">
       {/* Header */}
       <div className="flex items-center gap-3" style={{ marginBottom: '12px' }}>
         <button

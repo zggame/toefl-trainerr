@@ -85,7 +85,7 @@ export default function DashboardPage() {
   const hasAttempts = stats && stats.totalAttempts > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-1">
       {/* Welcome Header */}
       <div>
         <h1 

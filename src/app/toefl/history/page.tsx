@@ -65,7 +65,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 px-1">
       <div>
         <h1
           className="text-2xl font-bold mb-1"
