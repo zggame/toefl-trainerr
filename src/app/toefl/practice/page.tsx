@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AudioPlayer } from '@/components/audio-player';
 import { RecordButton } from '@/components/record-button';
 import { ScoreCard } from '@/components/score-card';
 import { ScoringResult } from '@/lib/gemini';
+import { getPracticeMode, SIMULATION_TOTAL_ITEMS, type PracticeMode, type SimulationTask } from '@/lib/toefl-simulation';
 import { Loader2 } from 'lucide-react';
 
 type Task = {
@@ -25,58 +26,193 @@ type Attempt = {
 
 type Step = 'loading' | 'playing' | 'record' | 'scoring' | 'score';
 
+type RecordedSimulationAnswer = { task: SimulationTask; base64: string; mimeType: string };
+
+type SimulationScoreResult = {
+  itemNumber: number;
+  task: SimulationTask;
+  attemptId?: string;
+  overallScore?: number;
+  error?: string;
+};
+
+type ScoreResponse = {
+  attempt: Attempt;
+  scoring: ScoringResult;
+};
+
 export default function PracticePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const mode = getPracticeMode(searchParams.get('mode'));
+  const isSimulation = mode === 'simulation';
   const [task, setTask] = useState<Task | null>(null);
+  const [simulationTasks, setSimulationTasks] = useState<SimulationTask[]>([]);
+  const [simulationIndex, setSimulationIndex] = useState(0);
+  const [simulationRecordings, setSimulationRecordings] = useState<RecordedSimulationAnswer[]>([]);
+  const [simulationResults, setSimulationResults] = useState<SimulationScoreResult[]>([]);
   const [showText, setShowText] = useState(false);
   const [step, setStep] = useState<Step>('loading');
   const [result, setResult] = useState<{ attempt: Attempt; scoring: ScoringResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
 
-  // Load task on mount
+  const activeTask = isSimulation ? simulationTasks[simulationIndex] : task;
+
+  // Load task set when mode changes.
   useEffect(() => {
-    fetch('/api/toefl/tasks')
-      .then(r => r.ok ? r.json() : Promise.reject(r))
-      .then(data => {
-        if (data.error) { setError(data.error); return; }
-        setTask(data);
+    let cancelled = false;
+
+    const loadTasks = async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+
+      setTask(null);
+      setSimulationTasks([]);
+      setSimulationIndex(0);
+      setSimulationRecordings([]);
+      setSimulationResults([]);
+      setResult(null);
+      setShowText(false);
+      setError(null);
+      setRecordingError(null);
+      setStep('loading');
+
+      try {
+        const res = await fetch(isSimulation ? '/api/toefl/simulation/tasks' : '/api/toefl/tasks');
+        const data = await res.json().catch(() => ({ error: 'Failed to load task' }));
+
+        if (cancelled) return;
+
+        if (!res.ok || data.error) {
+          setError(data.error || 'Failed to load task');
+          return;
+        }
+
+        if (isSimulation) {
+          setSimulationTasks(data);
+          setTask(null);
+        } else {
+          setTask(data);
+          setSimulationTasks([]);
+        }
         setStep('playing');
-      })
-      .catch(() => setError('Failed to load task'));
-  }, []);
+      } catch {
+        if (!cancelled) setError('Failed to load task');
+      }
+    };
+
+    void loadTasks();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isSimulation]);
 
   const handleAudioEnded = () => {
+    setRecordingError(null);
     setStep('record');
   };
 
-  const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
-    if (!task) return;
-    setStep('scoring');
-
+  const submitScore = async (
+    scoreTask: Task | SimulationTask,
+    base64: string,
+    mimeType: string,
+    practiceMode: PracticeMode
+  ): Promise<ScoreResponse> => {
     const res = await fetch('/api/toefl/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         audioBase64: base64,
-        mimeType: 'audio/webm',
-        taskId: task.id,
-        taskCategory: task.category,
-        taskTranscript: task.transcript,
-        mode: 'guided',
+        mimeType,
+        taskId: scoreTask.id,
+        taskCategory: scoreTask.category,
+        taskTranscript: scoreTask.transcript ?? '',
+        mode: practiceMode,
       }),
     });
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({ error: 'Scoring failed' }));
-      setError(errData.error || 'Scoring failed. Please try again.');
+      throw new Error(errData.error || 'Scoring failed. Please try again.');
+    }
+
+    return res.json();
+  };
+
+  const scoreSimulationRecordings = async (recordings: RecordedSimulationAnswer[]) => {
+    setStep('scoring');
+    setSimulationResults([]);
+
+    for (const recording of recordings) {
+      const itemNumber = recording.task.simulationItemNumber;
+      try {
+        const data = await submitScore(recording.task, recording.base64, recording.mimeType, 'simulation');
+        const scoredResult: SimulationScoreResult = {
+          itemNumber,
+          task: recording.task,
+          attemptId: data.attempt.id,
+          overallScore: data.scoring.overallScore,
+        };
+        setSimulationResults(previous => [...previous, scoredResult]);
+      } catch (err) {
+        const failedResult: SimulationScoreResult = {
+          itemNumber,
+          task: recording.task,
+          error: err instanceof Error ? err.message : 'Scoring failed',
+        };
+        setSimulationResults(previous => [...previous, failedResult]);
+      }
+    }
+
+    setStep('score');
+  };
+
+  const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
+    if (!activeTask) return;
+
+    if (!base64) {
+      setRecordingError('No audio was recorded. Please try again.');
       setStep('record');
       return;
     }
 
-    const data = await res.json();
-    setResult(data);
-    setStep('score');
+    setRecordingError(null);
+    const mimeType = audioBlob.type || 'audio/webm';
+
+    if (isSimulation) {
+      const recording = { task: activeTask as SimulationTask, base64, mimeType };
+      const nextRecordings = [...simulationRecordings, recording];
+      setSimulationRecordings(nextRecordings);
+
+      if (simulationIndex < simulationTasks.length - 1) {
+        setSimulationIndex(index => index + 1);
+        setShowText(false);
+        setStep('playing');
+        return;
+      }
+
+      await scoreSimulationRecordings(nextRecordings);
+      return;
+    }
+
+    setStep('scoring');
+
+    try {
+      const data = await submitScore(activeTask, base64, mimeType, 'guided');
+      setResult(data);
+      setStep('score');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Scoring failed. Please try again.');
+      setStep('record');
+    }
   };
+
+  const successfullyScoredResults = simulationResults.filter(result => result.overallScore !== undefined);
+  const averageSimulationScore = successfullyScoredResults.length > 0
+    ? successfullyScoredResults.reduce((sum, item) => sum + (item.overallScore ?? 0), 0) / successfullyScoredResults.length
+    : null;
 
   if (error) return (
     <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -89,17 +225,23 @@ export default function PracticePage() {
     </div>
   );
 
-  if (!task && step === 'loading') return (
+  if (!activeTask && step === 'loading') return (
     <p style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>
-      Loading task...
+      Loading {isSimulation ? 'simulation' : 'task'}...
     </p>
   );
 
   return (
     <div>
       <h1 style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, marginBottom: '20px' }}>
-        {task?.category === 'listen_repeat' ? 'Listen and Repeat' : 'Interview Question'}
+        {activeTask?.category === 'listen_repeat' ? 'Listen and Repeat' : 'Take an Interview'}
       </h1>
+
+      {isSimulation && (
+        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginBottom: '16px', fontSize: '14px' }}>
+          Simulation · Item {Math.min(simulationIndex + 1, SIMULATION_TOTAL_ITEMS)} of {SIMULATION_TOTAL_ITEMS}
+        </p>
+      )}
 
       {/* Playing: audio prompt */}
       {step === 'playing' && (
@@ -157,44 +299,53 @@ export default function PracticePage() {
         }}>
           <Loader2 size={48} color='var(--color-primary)' style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
           <p style={{ fontFamily: 'var(--font-baloo)', fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>
-            Scoring your response...
+            {isSimulation ? 'Scoring your simulation...' : 'Scoring your response...'}
           </p>
           <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>
-            Analyzing delivery, language use, and topic development
+            {isSimulation
+              ? `${simulationResults.length} of ${simulationRecordings.length} responses scored`
+              : 'Analyzing delivery, language use, and topic development'}
           </p>
         </div>
       )}
 
-      {task && (
+      {activeTask && step !== 'score' && (
         <div style={{ marginBottom: '24px' }}>
           <AudioPlayer
-            audioUrl={task.audio_url}
-            transcript={task.transcript}
+            audioUrl={activeTask.audio_url}
+            transcript={activeTask.transcript ?? ''}
             showTranscript={showText}
-            onTranscriptToggle={() => setShowText(!showText)}
+            onTranscriptToggle={isSimulation ? undefined : () => setShowText(!showText)}
+            allowReplay={!isSimulation}
+            allowTranscript={!isSimulation}
             autoPlay={step === 'playing'}
             onEnded={handleAudioEnded}
           />
         </div>
       )}
 
-      {(step === 'playing' || step === 'record') && task && (
+      {(step === 'playing' || step === 'record') && activeTask && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <RecordButton
             onRecordingComplete={handleRecordingComplete}
             disabled={step !== 'record'}
-            maxSeconds={task?.record_time_seconds || 30}
+            maxSeconds={activeTask.record_time_seconds || 30}
             autoStart={step === 'record'}
           />
-          {step === 'playing' && (
+          {step === 'playing' && !isSimulation && (
             <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
               Recording will start automatically when the prompt finishes
+            </p>
+          )}
+          {recordingError && (
+            <p style={{ fontFamily: 'var(--font-comic)', color: '#EF4444', fontSize: '14px', fontWeight: 600 }}>
+              {recordingError}
             </p>
           )}
         </div>
       )}
 
-      {step === 'score' && result && (
+      {step === 'score' && !isSimulation && result && (
         <ScoreCard
           overallScore={result.scoring.overallScore}
           scoring={result.scoring}
@@ -203,6 +354,89 @@ export default function PracticePage() {
           onTargetedRetry={() => router.push(`/toefl/attempt/${result.attempt.id}?retry=targeted`)}
           onDone={() => router.push('/toefl')}
         />
+      )}
+
+      {isSimulation && step === 'score' && (
+        <div style={{
+          background: 'white',
+          borderRadius: 'var(--radius-clay)',
+          padding: '24px',
+          border: '3px solid rgba(79,70,229,0.15)',
+          boxShadow: 'var(--shadow-clay-lg)',
+        }}>
+          <h2 style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-text)', marginBottom: '16px' }}>
+            Simulation Complete
+          </h2>
+          <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '42px', fontWeight: 700, color: 'var(--color-primary)' }}>
+              {averageSimulationScore === null ? '—' : averageSimulationScore.toFixed(1)}
+              <span style={{ fontSize: '18px', color: 'var(--color-text-muted)' }}> / 4 average</span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)' }}>
+              {successfullyScoredResults.length} of {simulationRecordings.length} items scored successfully
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+            {simulationResults.map(item => (
+              <div
+                key={item.itemNumber}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  padding: '12px',
+                  background: 'var(--color-background)',
+                  borderRadius: '12px',
+                  border: '2px solid rgba(79,70,229,0.1)',
+                  fontFamily: 'var(--font-comic)',
+                }}
+              >
+                <span style={{ color: 'var(--color-text)' }}>
+                  Item {item.itemNumber} · {item.task.category === 'listen_repeat' ? 'Listen and Repeat' : 'Interview'}
+                </span>
+                <span style={{ fontFamily: 'var(--font-baloo)', color: item.error ? '#EF4444' : 'var(--color-primary)', fontWeight: 700 }}>
+                  {item.error ? 'Failed' : `${item.overallScore?.toFixed(1)} / 4`}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                background: 'var(--color-primary)',
+                color: 'white',
+                border: '3px solid transparent',
+                borderRadius: 'var(--radius-pill)',
+                padding: '12px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-baloo)',
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-clay-sm)',
+              }}
+            >
+              Start Another Simulation
+            </button>
+            <button
+              onClick={() => router.push('/toefl')}
+              style={{
+                background: 'white',
+                color: 'var(--color-primary)',
+                border: '3px solid var(--color-primary)',
+                borderRadius: 'var(--radius-pill)',
+                padding: '12px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-baloo)',
+                cursor: 'pointer',
+              }}
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
