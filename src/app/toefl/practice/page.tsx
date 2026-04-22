@@ -6,6 +6,7 @@ import { AudioPlayer } from '@/components/audio-player';
 import { RecordButton } from '@/components/record-button';
 import { ScoreCard } from '@/components/score-card';
 import { ScoringResult } from '@/lib/gemini';
+import { Loader2 } from 'lucide-react';
 
 type Task = {
   id: string;
@@ -22,7 +23,7 @@ type Attempt = {
   overall_score: number;
 };
 
-type Step = 'loading' | 'playing' | 'record' | 'score';
+type Step = 'loading' | 'playing' | 'record' | 'scoring' | 'score';
 
 export default function PracticePage() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function PracticePage() {
 
   const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
     if (!task) return;
-    setStep('score');
+    setStep('scoring');
 
     const res = await fetch('/api/toefl/score', {
       method: 'POST',
@@ -74,6 +75,7 @@ export default function PracticePage() {
 
     const data = await res.json();
     setResult(data);
+    setStep('score');
   };
 
   if (error) return (
@@ -139,6 +141,26 @@ export default function PracticePage() {
           </div>
           <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-cta)', marginTop: '8px', fontWeight: 600 }}>
             Recording started automatically!
+          </p>
+        </div>
+      )}
+
+      {/* Scoring */}
+      {step === 'scoring' && (
+        <div style={{
+          textAlign: 'center',
+          padding: '60px 24px',
+          background: 'white',
+          borderRadius: 'var(--radius-clay)',
+          border: '3px solid rgba(79,70,229,0.15)',
+          boxShadow: 'var(--shadow-clay-md)',
+        }}>
+          <Loader2 size={48} color='var(--color-primary)' style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontFamily: 'var(--font-baloo)', fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>
+            Scoring your response...
+          </p>
+          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+            Analyzing delivery, language use, and topic development
           </p>
         </div>
       )}
