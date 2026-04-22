@@ -168,6 +168,7 @@ export default function PracticePage() {
         };
         setSimulationResults(previous => [...previous, scoredResult]);
       } catch (err) {
+        if (!isActiveRun(runId)) return;
         const failedResult: SimulationScoreResult = {
           itemNumber,
           task: recording.task,
@@ -183,6 +184,8 @@ export default function PracticePage() {
 
   const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
     if (!activeTask) return;
+    const runId = practiceRunIdRef.current;
+    if (!isActiveRun(runId)) return;
 
     if (!base64) {
       setRecordingError('No audio was recorded. Please try again.');
@@ -209,13 +212,16 @@ export default function PracticePage() {
       return;
     }
 
+    if (!isActiveRun(runId)) return;
     setStep('scoring');
 
     try {
       const data = await submitScore(activeTask, base64, mimeType, 'guided');
+      if (!isActiveRun(runId)) return;
       setResult(data);
       setStep('score');
     } catch (err) {
+      if (!isActiveRun(runId)) return;
       setError(err instanceof Error ? err.message : 'Scoring failed. Please try again.');
       setStep('record');
     }

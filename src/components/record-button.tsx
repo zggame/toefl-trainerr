@@ -18,6 +18,7 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const disposedRef = useRef(false);
+  const autoStartConsumedRef = useRef(false);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'recording') {
@@ -70,7 +71,13 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
   }, [maxSeconds, onRecordingComplete, stopRecording]);
 
   useEffect(() => {
-    if (autoStart && !recording && !disabled) {
+    if (!autoStart) {
+      autoStartConsumedRef.current = false;
+      return;
+    }
+
+    if (!recording && !disabled && !autoStartConsumedRef.current) {
+      autoStartConsumedRef.current = true;
       void Promise.resolve().then(startRecording);
     }
   }, [autoStart, disabled, recording, startRecording]);
