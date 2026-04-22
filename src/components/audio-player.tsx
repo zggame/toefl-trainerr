@@ -36,12 +36,26 @@ export function AudioPlayer({
   const [endedSourceKey, setEndedSourceKey] = useState<string | null>(null);
   const [startedSourceKey, setStartedSourceKey] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const onEndedRef = useRef(onEnded);
+  const ttsFallbackTimerRef = useRef<number | null>(null);
   const useTts = isPlaceholderUrl(audioUrl);
   const sourceKey = playbackKey ?? `${audioUrl}::${transcript ?? ''}`;
   const playing = playingSourceKey === sourceKey;
   const hasStartedOnce = startedSourceKey === sourceKey;
 
+  const clearTtsFallback = useCallback(() => {
+    if (ttsFallbackTimerRef.current !== null) {
+      window.clearTimeout(ttsFallbackTimerRef.current);
+      ttsFallbackTimerRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
+    onEndedRef.current = onEnded;
+  }, [onEnded]);
+
+  useEffect(() => {
+    clearTtsFallback();
     window.speechSynthesis.cancel();
     const audio = audioRef.current;
     if (audio) {
@@ -52,24 +66,32 @@ export function AudioPlayer({
         // Ignore browsers that reject resetting before metadata is ready.
       }
     }
-  }, [sourceKey]);
+  }, [clearTtsFallback, sourceKey]);
+
+  useEffect(() => () => clearTtsFallback(), [clearTtsFallback]);
 
   const startTts = useCallback(() => {
     if (!transcript) return;
+    clearTtsFallback();
     setStartedSourceKey(sourceKey);
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(transcript);
+    let finished = false;
+    const finishPlayback = () => {
+      if (finished) return;
+      finished = true;
+      clearTtsFallback();
+      setPlayingSourceKey(null);
+      setEndedSourceKey(sourceKey);
+      onEndedRef.current?.();
+    };
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.onstart = () => {
       setPlayingSourceKey(sourceKey);
       setEndedSourceKey(null);
     };
-    utterance.onend = () => {
-      setPlayingSourceKey(null);
-      setEndedSourceKey(sourceKey);
-      onEnded?.();
-    };
+    utterance.onend = finishPlayback;
     utterance.onpause = () => setPlayingSourceKey(null);
     utterance.onresume = () => {
       setPlayingSourceKey(sourceKey);
@@ -77,12 +99,15 @@ export function AudioPlayer({
     };
     utterance.onerror = () => setPlayingSourceKey(null);
     window.speechSynthesis.speak(utterance);
-  }, [onEnded, sourceKey, transcript]);
+    const estimatedDurationMs = Math.max(3000, Math.ceil(((transcript.split(/\s+/).filter(Boolean).length / 2.4) + 1) * 1000));
+    ttsFallbackTimerRef.current = window.setTimeout(finishPlayback, estimatedDurationMs);
+  }, [clearTtsFallback, sourceKey, transcript]);
 
   const stopSpeaking = useCallback(() => {
+    clearTtsFallback();
     window.speechSynthesis.cancel();
     setPlayingSourceKey(null);
-  }, []);
+  }, [clearTtsFallback]);
 
   const startNativeAudio = useCallback(() => {
     const audio = audioRef.current;
