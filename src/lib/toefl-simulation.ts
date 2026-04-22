@@ -48,7 +48,10 @@ function compareSimulationTaskDifficulty(a: SimulationSourceTask, b: SimulationS
 }
 
 function normalizedPromptText(task: SimulationSourceTask): string {
-  return (task.transcript ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+  return (task.transcript ?? '')
+    .toLowerCase()
+    .replace(/\bo\s+clock\b/g, 'oclock')
+    .replace(/[^a-z0-9]+/g, '');
 }
 
 function uniquePromptTasks<T extends SimulationSourceTask>(tasks: T[]): T[] {

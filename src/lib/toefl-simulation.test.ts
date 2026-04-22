@@ -86,6 +86,19 @@ describe('toefl simulation utilities', () => {
   test('does not repeat duplicate prompt text within the same category', () => {
     const duplicateListenPrompt = 'All students should submit their assignments by Friday.';
     const duplicateInterviewPrompt = 'What is your favorite way to spend a weekend?';
+    const uniqueListenTasks = [
+      'Please remember to bring your student ID card to the examination hall.',
+      'The university bookstore is having a sale on textbooks this week.',
+      'The biology lab will be closed for maintenance on Tuesday afternoon.',
+      'The dining hall now offers vegan and gluten-free meal options every day.',
+      'Student parking permits must be renewed before the end of the month.',
+      'International students are encouraged to attend the orientation session on Friday morning.',
+    ].map((transcript, index) => ({
+      ...listenRepeatTasks[0],
+      id: `listen-unique-${index}`,
+      difficulty: 'easy',
+      transcript,
+    }));
     const plan = buildSimulationTaskPlan([
       {
         ...listenRepeatTasks[0],
@@ -99,10 +112,19 @@ describe('toefl simulation utilities', () => {
         difficulty: 'easy',
         transcript: duplicateListenPrompt,
       },
-      ...listenRepeatTasks.slice(2).map((task, index) => ({
-        ...task,
-        difficulty: index === 5 ? 'medium' : 'easy',
-      })),
+      {
+        ...listenRepeatTasks[2],
+        id: 'listen-spacing-a',
+        difficulty: 'easy',
+        transcript: 'The library will be open until eight oclock tonight.',
+      },
+      {
+        ...listenRepeatTasks[3],
+        id: 'listen-spacing-b',
+        difficulty: 'easy',
+        transcript: 'The library will be open until eight o clock tonight.',
+      },
+      ...uniqueListenTasks,
       {
         ...interviewTasks[0],
         id: 'interview-duplicate-a',
@@ -132,6 +154,7 @@ describe('toefl simulation utilities', () => {
     expect(new Set(interviewPrompts).size).toBe(interviewPrompts.length);
     expect(listenPrompts.filter(prompt => prompt === duplicateListenPrompt)).toHaveLength(1);
     expect(interviewPrompts.filter(prompt => prompt === duplicateInterviewPrompt)).toHaveLength(1);
+    expect(listenPrompts.filter(prompt => prompt.includes('eight o')).length).toBeLessThanOrEqual(1);
   });
 
   test('throws when the prompt bank lacks enough listen-repeat tasks', () => {
