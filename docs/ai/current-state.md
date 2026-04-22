@@ -130,10 +130,49 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 ---
 
+## Active Work: UI Revamp v2.0
+
+**Branch:** `feat/ui-revamp`  
+**Worktree:** `.worktrees/ui-revamp`  
+**Status:** In Progress
+
+### Design Decisions (Approved)
+- **Vibe:** Energetic & Motivational (reduces anxiety)
+- **Target:** High school & college students
+- **Mobile:** Yes, PWA-first
+- **Tech:** Tailwind CSS v4 + Dark Mode
+- **Landing Page:** The "wow" moment with video/demo
+- **Animations:** Playful (Duolingo-style bouncing)
+- **Dark Mode:** Follow system preference with manual toggle
+- **Bottom Nav:** Elevated center button for Practice (FAB style)
+
+### Completed
+- [x] Design System v2.0 (`design-system/MASTER.md`)
+- [x] Tailwind v4 CSS variables for light/dark themes
+- [x] Theme Provider with system preference + manual toggle
+- [x] Bottom Navigation with elevated Practice button
+- [x] Core UI components: Button, Card, ScoreDisplay
+- [x] Landing page with hero, features, how-it-works, CTA
+- [x] Dashboard with motivational stats, recent attempts
+- [x] Practice page (anxiety-reducing, minimal interface)
+- [x] Attempt review page with itemized breakdown
+- [x] PWA manifest.json
+
+### Remaining
+- [ ] History page
+- [ ] Profile page
+- [ ] PWA icons and service worker
+- [ ] Playful animations (score bounce, button bounce)
+- [ ] History and Profile pages
+- [ ] Final polish and accessibility audit
+
+---
+
 ## Follow-ups
 
 - [ ] Deploy to Vercel + new Supabase Cloud project
 - [x] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
+- [ ] **UI Revamp v2.0** — Complete remaining pages (history, profile) + animations + PWA polish
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
