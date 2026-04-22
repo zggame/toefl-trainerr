@@ -185,8 +185,52 @@ Score Badge:
 
 ## Layout Patterns
 
-### Mobile Navigation (Bottom Tab Bar)
+### Mobile Navigation (Bottom Tab Bar with FAB)
 
+```
+Fixed bottom, 80px height (taller for FAB)
+Background: bg with backdrop-blur
+Border-top: 1px solid border
+Safe area padding for notched devices
+```
+
+**Tab Layout:**
+```
+┌────────┬────────┬────────┬────────┐
+│  🏠    │   🎙️   │   ⏱️   │   👤   │
+│  Home  │Practice│History │Profile │
+└────────┴────────┴────────┴────────┘
+         ↑
+    Center tab is PROMINENT:
+    - Larger icon (28px vs 24px)
+    - Primary color background
+    - Slightly elevated (-8px translateY)
+    - "Practice" is the main action
+```
+
+**Center Tab (Practice) — Elevated:**
+- Background: primary color circle
+- Icon: white, 28px
+- Position: slightly above the bar (translateY: -8px)
+- Shadow: 0 4px 12px rgba(79, 70, 229, 0.4)
+- Tap: scale(0.95) bounce back
+
+**Other Tabs:**
+- Icons: 24px, Lucide
+- Active: primary color + small indicator dot
+- Inactive: text-muted
+- Tap: gentle bounce animation
+
+**Bouncy Animation on Tap:**
+```css
+@keyframes bounce-tap {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.85); }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+/* Duration: 400ms, ease-out */
 ```
 Fixed bottom, 64px height
 Background: bg with backdrop-blur
