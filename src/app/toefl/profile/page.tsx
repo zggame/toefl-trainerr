@@ -73,7 +73,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-5 px-1">
+    <div className="space-y-5">
       {/* Profile Header */}
       <Card padding="lg" className="text-center">
         <div
