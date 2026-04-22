@@ -13,7 +13,7 @@ interface RecordButtonProps {
 
 export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, autoStart }: RecordButtonProps) {
   const [recording, setRecording] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+  const [remaining, setRemaining] = useState(maxSeconds);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -44,15 +44,15 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
     setRecording(true);
-    setSeconds(0);
+    setRemaining(maxSeconds);
 
     timerRef.current = setInterval(() => {
-      setSeconds(prev => {
-        if (prev >= maxSeconds) {
+      setRemaining(prev => {
+        if (prev <= 1) {
           stopRecording();
-          return maxSeconds;
+          return 0;
         }
-        return prev + 1;
+        return prev - 1;
       });
     }, 1000);
   };
@@ -66,14 +66,21 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
   };
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  const isUrgent = remaining <= 5;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {recording && (
-          <span style={{ fontFamily: 'var(--font-baloo)', fontSize: '20px', color: 'var(--color-cta)', fontWeight: 600 }}>
-            {formatTime(seconds)}
-          </span>
+          <div style={{
+            fontFamily: 'var(--font-baloo)',
+            fontSize: '28px',
+            fontWeight: 700,
+            color: isUrgent ? '#EF4444' : 'var(--color-cta)',
+            transition: 'color 200ms',
+          }}>
+            {formatTime(remaining)}
+          </div>
         )}
         <button
           onClick={recording ? stopRecording : startRecording}
@@ -97,12 +104,12 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
       </div>
       <Waveform analyzing={recording} />
       {recording ? (
-        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-cta)', fontSize: '14px' }}>
-          Recording... Tap to stop
+        <p style={{ fontFamily: 'var(--font-comic)', color: isUrgent ? '#EF4444' : 'var(--color-cta)', fontSize: '14px', fontWeight: isUrgent ? 700 : 400 }}>
+          {isUrgent ? 'Time is almost up!' : 'Recording... Tap to stop early'}
         </p>
       ) : (
         <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-          Tap to start recording
+          Time limit: {maxSeconds} seconds
         </p>
       )}
     </div>
