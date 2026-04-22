@@ -15,11 +15,10 @@ export async function GET(request: NextRequest) {
   if (category) query = query.eq('category', category);
   if (difficulty) query = query.eq('difficulty', difficulty);
 
-  const { data: task, error } = await query.order('created_at', { ascending: true }).limit(1).single();
-
-  if (error || !task) {
+  const { data: rows, error } = await query;
+  if (error || !rows || rows.length === 0) {
     return NextResponse.json({ error: 'No task found' }, { status: 404 });
   }
-
+  const task = rows[Math.floor(Math.random() * rows.length)];
   return NextResponse.json(task);
 }
