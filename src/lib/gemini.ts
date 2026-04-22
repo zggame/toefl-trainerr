@@ -71,7 +71,7 @@ Only respond with the JSON object, no additional text.`;
   };
 
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     contents: [{ role: 'user', parts: [{ text: prompt }, audioPart] }],
     config: { responseMimeType: 'application/json' },
   });
@@ -89,7 +89,7 @@ export async function transcribeAudio(
   const ai = getGemini();
 
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     contents: [{
       role: 'user',
       parts: [
