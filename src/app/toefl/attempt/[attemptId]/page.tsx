@@ -59,7 +59,7 @@ export default function AttemptReviewPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3" style={{ marginBottom: '12px', marginLeft: '4px', marginRight: '4px' }}>
+      <div className="flex items-center gap-3" style={{ marginBottom: '12px' }}>
         <button
           onClick={() => router.push('/toefl/history')}
           className="touch-target p-2 rounded-lg"
@@ -79,7 +79,7 @@ export default function AttemptReviewPage() {
       </div>
 
       {/* Meta Info */}
-      <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: '12px', marginLeft: '4px', marginRight: '4px' }}>
+      <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: '12px' }}>
         <div 
           className="flex items-center gap-1 text-sm"
           style={{ color: 'var(--color-text-muted)' }}
@@ -227,7 +227,7 @@ export default function AttemptReviewPage() {
 
       {/* Errors */}
       {attempt.errors?.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginLeft: '4px', marginRight: '4px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {attempt.errors.map((e: string) => (
             <span 
               key={e}
@@ -295,7 +295,7 @@ export default function AttemptReviewPage() {
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '12px', marginTop: '4px', marginLeft: '4px', marginRight: '4px' }}>
+      <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
         <Button 
           variant="secondary" 
           className="flex-1"

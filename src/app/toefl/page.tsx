@@ -87,7 +87,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div style={{ marginLeft: '4px', marginRight: '4px' }}>
+      <div>
         <h1 
           className="text-2xl font-bold mb-1"
           style={{ fontFamily: 'var(--font-heading)' }}
@@ -230,7 +230,7 @@ export default function DashboardPage() {
 
       {/* Recent Attempts */}
       {hasAttempts && stats.recentAttempts.length > 0 && (
-        <div style={{ marginLeft: '4px', marginRight: '4px' }}>
+        <div>
           <div className="flex items-center justify-between mb-3">
             <h2 
               className="text-lg font-semibold"
