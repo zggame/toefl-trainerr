@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AudioPlayer } from '@/components/audio-player';
 import { RecordButton } from '@/components/record-button';
 import { ScoreCard } from '@/components/score-card';
+import { SimulationResultList, type SimulationScoreResult } from '@/components/simulation-result-list';
 import { ScoringResult } from '@/lib/gemini';
 import { getPracticeMode, SIMULATION_TOTAL_ITEMS, type PracticeMode, type SimulationTask } from '@/lib/toefl-simulation';
 import { Loader2 } from 'lucide-react';
@@ -27,14 +28,6 @@ type Attempt = {
 type Step = 'loading' | 'playing' | 'record' | 'scoring' | 'score';
 
 type RecordedSimulationAnswer = { task: SimulationTask; base64: string; mimeType: string };
-
-type SimulationScoreResult = {
-  itemNumber: number;
-  task: SimulationTask;
-  attemptId?: string;
-  overallScore?: number;
-  error?: string;
-};
 
 type ScoreResponse = {
   attempt: Attempt;
@@ -416,31 +409,7 @@ export default function PracticePage() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-            {simulationResults.map(item => (
-              <div
-                key={item.itemNumber}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  padding: '12px',
-                  background: 'var(--color-background)',
-                  borderRadius: '12px',
-                  border: '2px solid rgba(79,70,229,0.1)',
-                  fontFamily: 'var(--font-comic)',
-                }}
-              >
-                <span style={{ color: 'var(--color-text)' }}>
-                  Item {item.itemNumber} · {item.task.category === 'listen_repeat' ? 'Listen and Repeat' : 'Interview'}
-                </span>
-                <span style={{ fontFamily: 'var(--font-baloo)', color: item.error ? '#EF4444' : 'var(--color-primary)', fontWeight: 700 }}>
-                  {item.error ? 'Failed' : `${item.overallScore?.toFixed(1)} / 4`}
-                </span>
-              </div>
-            ))}
-          </div>
+          <SimulationResultList results={simulationResults} />
 
           <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
             <button
