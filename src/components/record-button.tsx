@@ -15,7 +15,9 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
   const [recording, setRecording] = useState(false);
   const [remaining, setRemaining] = useState(maxSeconds);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const disposedRef = useRef(false);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'recording') {
@@ -27,22 +29,31 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
 
   const startRecording = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (disposedRef.current) {
+      stream.getTracks().forEach(t => t.stop());
+      return;
+    }
+
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
     const chunks: Blob[] = [];
 
     mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunks, { type: 'audio/webm' });
+      stream.getTracks().forEach(t => t.stop());
+      if (disposedRef.current) return;
+
       const reader = new FileReader();
       reader.onloadend = () => {
+        if (disposedRef.current) return;
         const base64 = (reader.result as string).split(',')[1];
         onRecordingComplete(blob, base64);
       };
       reader.readAsDataURL(blob);
-      stream.getTracks().forEach(t => t.stop());
     };
 
     mediaRecorderRef.current = mediaRecorder;
+    streamRef.current = stream;
     mediaRecorder.start();
     setRecording(true);
     setRemaining(maxSeconds);
@@ -63,6 +74,17 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
       void Promise.resolve().then(startRecording);
     }
   }, [autoStart, disabled, recording, startRecording]);
+
+  useEffect(() => {
+    return () => {
+      disposedRef.current = true;
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      streamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, []);
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   const isUrgent = remaining <= 5;

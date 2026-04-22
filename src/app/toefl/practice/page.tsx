@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AudioPlayer } from '@/components/audio-player';
 import { RecordButton } from '@/components/record-button';
@@ -46,6 +46,7 @@ export default function PracticePage() {
   const searchParams = useSearchParams();
   const mode = getPracticeMode(searchParams.get('mode'));
   const isSimulation = mode === 'simulation';
+  const practiceRunIdRef = useRef(0);
   const [task, setTask] = useState<Task | null>(null);
   const [simulationTasks, setSimulationTasks] = useState<SimulationTask[]>([]);
   const [simulationIndex, setSimulationIndex] = useState(0);
@@ -58,14 +59,16 @@ export default function PracticePage() {
   const [recordingError, setRecordingError] = useState<string | null>(null);
 
   const activeTask = isSimulation ? simulationTasks[simulationIndex] : task;
+  const isActiveRun = (runId: number) => practiceRunIdRef.current === runId;
 
   // Load task set when mode changes.
   useEffect(() => {
     let cancelled = false;
+    const runId = ++practiceRunIdRef.current;
 
     const loadTasks = async () => {
       await Promise.resolve();
-      if (cancelled) return;
+      if (cancelled || !isActiveRun(runId)) return;
 
       setTask(null);
       setSimulationTasks([]);
@@ -83,6 +86,7 @@ export default function PracticePage() {
         const data = await res.json().catch(() => ({ error: 'Failed to load task' }));
 
         if (cancelled) return;
+        if (!isActiveRun(runId)) return;
 
         if (!res.ok || data.error) {
           setError(data.error || 'Failed to load task');
@@ -98,7 +102,7 @@ export default function PracticePage() {
         }
         setStep('playing');
       } catch {
-        if (!cancelled) setError('Failed to load task');
+        if (!cancelled && isActiveRun(runId)) setError('Failed to load task');
       }
     };
 
@@ -142,13 +146,20 @@ export default function PracticePage() {
   };
 
   const scoreSimulationRecordings = async (recordings: RecordedSimulationAnswer[]) => {
+    const runId = practiceRunIdRef.current;
+    if (!isActiveRun(runId)) return;
+
     setStep('scoring');
     setSimulationResults([]);
 
     for (const recording of recordings) {
+      if (!isActiveRun(runId)) return;
+
       const itemNumber = recording.task.simulationItemNumber;
       try {
         const data = await submitScore(recording.task, recording.base64, recording.mimeType, 'simulation');
+        if (!isActiveRun(runId)) return;
+
         const scoredResult: SimulationScoreResult = {
           itemNumber,
           task: recording.task,
@@ -166,6 +177,7 @@ export default function PracticePage() {
       }
     }
 
+    if (!isActiveRun(runId)) return;
     setStep('score');
   };
 
