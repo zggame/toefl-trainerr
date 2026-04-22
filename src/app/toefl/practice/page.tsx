@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScoreDisplay } from '@/components/ui/score-display';
 import { AudioPlayer } from '@/components/audio-player';
 import { RecordButton } from '@/components/record-button';
 import { ScoreCard } from '@/components/score-card';
 import { ScoringResult } from '@/lib/gemini';
-import { Loader2 } from 'lucide-react';
+import { Mic, Headphones, Sparkles, RotateCcw, Home } from 'lucide-react';
 
 type Task = {
   id: string;
@@ -33,7 +36,6 @@ export default function PracticePage() {
   const [result, setResult] = useState<{ attempt: Attempt; scoring: ScoringResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Load task on mount
   useEffect(() => {
     fetch('/api/toefl/tasks')
       .then(r => r.ok ? r.json() : Promise.reject(r))
@@ -79,94 +81,184 @@ export default function PracticePage() {
   };
 
   if (error) return (
-    <div style={{ textAlign: 'center', padding: '40px' }}>
-      <p style={{ color: '#EF4444', fontFamily: 'var(--font-comic)', marginBottom: '16px' }}>{error}</p>
-      <button onClick={() => router.push('/toefl')} style={{
-        background: 'var(--color-primary)', color: 'white', border: 'none',
-        borderRadius: 'var(--radius-pill)', padding: '10px 20px',
-        fontFamily: 'var(--font-baloo)', cursor: 'pointer',
-      }}>Back to Home</button>
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div 
+        className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+        style={{ background: 'rgba(239, 68, 68, 0.1)' }}
+      >
+        <Sparkles size={32} style={{ color: 'var(--color-accent-red)' }} />
+      </div>
+      <p className="mb-6" style={{ color: 'var(--color-accent-red)' }}>{error}</p>
+      <Button onClick={() => router.push('/toefl')}>
+        Back to Home
+      </Button>
     </div>
   );
 
   if (!task && step === 'loading') return (
-    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>
-      Loading task...
-    </p>
+    <div className="flex items-center justify-center py-24">
+      <div 
+        className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+        style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
+      />
+    </div>
   );
 
   return (
-    <div>
-      <h1 style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, marginBottom: '20px' }}>
-        {task?.category === 'listen_repeat' ? 'Listen and Repeat' : 'Interview Question'}
-      </h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <span 
+          className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-3"
+          style={{ 
+            background: 'rgba(79, 70, 229, 0.1)',
+            color: 'var(--color-primary)',
+          }}
+        >
+          {task?.category === 'listen_repeat' ? 'Listen & Repeat' : 'Interview Question'}
+        </span>
+        <h1 
+          className="text-xl font-semibold"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
+          {step === 'playing' && 'Listen Carefully'}
+          {step === 'record' && 'Your Turn to Speak'}
+          {step === 'scoring' && 'Analyzing Your Response'}
+          {step === 'score' && 'Great Job!'}
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+          {step === 'playing' && 'The prompt will play automatically'}
+          {step === 'record' && 'Speak naturally and clearly'}
+          {step === 'scoring' && 'Our AI is reviewing your speaking'}
+          {step === 'score' && 'Here is your detailed feedback'}
+        </p>
+      </div>
 
-      {/* Playing: audio prompt */}
+      {/* Playing State */}
       {step === 'playing' && (
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{
-            background: 'var(--color-primary)',
-            color: 'white',
-            borderRadius: '50%',
-            width: '80px', height: '80px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-baloo)',
-            fontSize: '32px', fontWeight: 700,
-            boxShadow: 'var(--shadow-clay-md)',
-            margin: '0 auto',
-          }}>
-            <span style={{ animation: 'pulse 1.5s infinite' }}>▶</span>
+        <div className="flex flex-col items-center py-8">
+          <div 
+            className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
+            style={{ 
+              background: 'var(--color-primary)',
+              boxShadow: 'var(--shadow-button)',
+            }}
+          >
+            <Headphones size={40} color="white" />
           </div>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '12px' }}>
-            Listen to the prompt...
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            Playing prompt...
           </p>
         </div>
       )}
 
-      {/* Recording */}
+      {/* Recording State */}
       {step === 'record' && (
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{
-            background: 'var(--color-cta)',
-            color: 'white',
-            borderRadius: '50%',
-            width: '80px', height: '80px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-baloo)',
-            fontSize: '20px', fontWeight: 700,
-            boxShadow: 'var(--shadow-clay-md)',
-            margin: '0 auto',
-          }}>
-            REC
+        <div className="flex flex-col items-center py-8">
+          <div 
+            className="w-24 h-24 rounded-full flex items-center justify-center mb-4 relative"
+            style={{ background: 'var(--color-accent-red)' }}
+          >
+            {/* Pulse animation */}
+            <div 
+              className="absolute inset-0 rounded-full animate-ping opacity-30"
+              style={{ background: 'var(--color-accent-red)' }}
+            />
+            <Mic size={40} color="white" />
           </div>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-cta)', marginTop: '8px', fontWeight: 600 }}>
-            Recording started automatically!
+          <p className="text-sm font-medium" style={{ color: 'var(--color-accent-red)' }}>
+            Recording...
           </p>
         </div>
       )}
 
-      {/* Scoring */}
+      {/* Scoring State */}
       {step === 'scoring' && (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 24px',
-          background: 'white',
-          borderRadius: 'var(--radius-clay)',
-          border: '3px solid rgba(79,70,229,0.15)',
-          boxShadow: 'var(--shadow-clay-md)',
-        }}>
-          <Loader2 size={48} color='var(--color-primary)' style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
-          <p style={{ fontFamily: 'var(--font-baloo)', fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>
-            Scoring your response...
-          </p>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+        <Card padding="lg" className="text-center py-12">
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'rgba(79, 70, 229, 0.1)' }}
+          >
+            <Sparkles size={32} style={{ color: 'var(--color-primary)' }} />
+          </div>
+          <h2 
+            className="text-lg font-semibold mb-2"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Scoring Your Response
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             Analyzing delivery, language use, and topic development
           </p>
+          <div className="mt-6 flex justify-center">
+            <div 
+              className="w-32 h-2 rounded-full overflow-hidden"
+              style={{ background: 'var(--color-bg-overlay)' }}
+            >
+              <div 
+                className="h-full rounded-full animate-pulse"
+                style={{ 
+                  background: 'var(--color-primary)',
+                  width: '60%',
+                }}
+              />
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Score State */}
+      {step === 'score' && result && (
+        <div className="space-y-6">
+          <Card padding="lg" className="text-center">
+            <ScoreDisplay 
+              score={result.scoring.overallScore} 
+              size="lg" 
+            />
+            <div className="flex justify-center gap-6 mt-4">
+              {[
+                { label: 'Delivery', score: result.scoring.delivery.score },
+                { label: 'Language', score: result.scoring.languageUse.score },
+                { label: 'Topic Dev', score: result.scoring.topicDev.score },
+              ].map(d => (
+                <div key={d.label} className="text-center">
+                  <div 
+                    className="text-lg font-bold"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    {d.score.toFixed(1)}
+                  </div>
+                  <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                    {d.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <div className="flex gap-3">
+            <Button 
+              variant="secondary" 
+              className="flex-1"
+              onClick={() => window.location.reload()}
+              icon={<RotateCcw size={18} />}
+            >
+              Try Again
+            </Button>
+            <Button 
+              className="flex-1"
+              onClick={() => router.push('/toefl')}
+              icon={<Home size={18} />}
+            >
+              Dashboard
+            </Button>
+          </div>
         </div>
       )}
 
-      {task && (
-        <div style={{ marginBottom: '24px' }}>
+      {/* Audio Player */}
+      {task && step !== 'score' && (
+        <div className="mt-4">
           <AudioPlayer
             audioUrl={task.audio_url}
             transcript={task.transcript}
@@ -178,8 +270,9 @@ export default function PracticePage() {
         </div>
       )}
 
+      {/* Record Button */}
       {(step === 'playing' || step === 'record') && task && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div className="flex flex-col items-center gap-4">
           <RecordButton
             onRecordingComplete={handleRecordingComplete}
             disabled={step !== 'record'}
@@ -187,22 +280,11 @@ export default function PracticePage() {
             autoStart={step === 'record'}
           />
           {step === 'playing' && (
-            <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
+            <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>
               Recording will start automatically when the prompt finishes
             </p>
           )}
         </div>
-      )}
-
-      {step === 'score' && result && (
-        <ScoreCard
-          overallScore={result.scoring.overallScore}
-          scoring={result.scoring}
-          attemptId={result.attempt.id}
-          onFullRetake={() => window.location.reload()}
-          onTargetedRetry={() => router.push(`/toefl/attempt/${result.attempt.id}?retry=targeted`)}
-          onDone={() => router.push('/toefl')}
-        />
       )}
     </div>
   );

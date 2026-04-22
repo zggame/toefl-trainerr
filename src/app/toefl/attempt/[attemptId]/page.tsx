@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, RotateCcw, ChevronDown, ChevronUp, Clock, Mic, Type, Calendar, Tag } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScoreDisplay } from '@/components/ui/score-display';
+import { ArrowLeft, Mic, Type, Calendar, Tag, RotateCcw, Home } from 'lucide-react';
 
 export default function AttemptReviewPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [attempt, setAttempt] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showTranscript, setShowTranscript] = useState(false);
-  const [showTaskInfo, setShowTaskInfo] = useState(false);
 
   useEffect(() => {
     const id = params.attemptId;
@@ -22,147 +22,234 @@ export default function AttemptReviewPage() {
   }, [params.attemptId]);
 
   if (loading) return (
-    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>
-      Loading...
-    </p>
-  );
-
-  if (!attempt || attempt.error) return (
-    <div style={{ textAlign: 'center', padding: '40px' }}>
-      <p style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>Attempt not found</p>
-      <button onClick={() => router.push('/toefl/history')} style={{
-        marginTop: '12px', background: 'var(--color-primary)', color: 'white', border: 'none',
-        borderRadius: 'var(--radius-pill)', padding: '10px 20px',
-        fontFamily: 'var(--font-baloo)', cursor: 'pointer',
-      }}>Back to History</button>
+    <div className="flex items-center justify-center py-24">
+      <div 
+        className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+        style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
+      />
     </div>
   );
 
-  const retryMode = searchParams.get('retry');
+  if (!attempt || attempt.error) return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <p style={{ color: 'var(--color-text-muted)' }}>Attempt not found</p>
+      <Button 
+        className="mt-4"
+        onClick={() => router.push('/toefl/history')}
+      >
+        Back to History
+      </Button>
+    </div>
+  );
+
   const task = attempt.toefl_tasks;
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
   return (
-    <div style={{ paddingBottom: '80px' }}>
-      <button
-        onClick={() => router.push('/toefl/history')}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '6px',
-          background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'var(--font-baloo)', color: 'var(--color-primary)',
-          marginBottom: '16px', padding: '0',
-        }}
-      >
-        <ArrowLeft size={18} /> Back to History
-      </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push('/toefl/history')}
+          className="touch-target p-2 rounded-lg"
+          style={{ 
+            color: 'var(--color-primary)',
+            background: 'rgba(79, 70, 229, 0.1)',
+          }}
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <h1 
+          className="text-xl font-semibold"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
+          Attempt Review
+        </h1>
+      </div>
 
-      <h1 style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, marginBottom: '20px' }}>
-        Attempt Review
-      </h1>
-
-      {/* Date + Mode */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '12px',
-        marginBottom: '16px', flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-comic)', fontSize: '13px', color: 'var(--color-text-muted)' }}>
+      {/* Meta Info */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div 
+          className="flex items-center gap-1 text-sm"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
           <Calendar size={14} />
           {formatDate(attempt.created_at)}
         </div>
-        <span style={{
-          background: attempt.mode === 'simulation' ? 'rgba(236,72,153,0.12)' : 'rgba(79,70,229,0.12)',
-          color: attempt.mode === 'simulation' ? '#DB2777' : 'var(--color-primary)',
-          borderRadius: 'var(--radius-pill)', padding: '2px 10px',
-          fontSize: '12px', fontFamily: 'var(--font-baloo)', fontWeight: 600,
-        }}>
+        <span 
+          className="px-2 py-0.5 rounded-full text-xs font-medium"
+          style={{
+            background: attempt.mode === 'simulation' 
+              ? 'rgba(249, 115, 22, 0.1)' 
+              : 'rgba(79, 70, 229, 0.1)',
+            color: attempt.mode === 'simulation' 
+              ? 'var(--color-accent)' 
+              : 'var(--color-primary)',
+          }}
+        >
           {attempt.mode === 'simulation' ? 'Simulation' : 'Guided'}
         </span>
       </div>
 
-      {/* Task Info - Collapsible */}
+      {/* Task Info */}
       {task && (
-        <div style={{
-          background: 'white', borderRadius: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          marginBottom: '16px', overflow: 'hidden',
-        }}>
-          <button
-            onClick={() => setShowTaskInfo(!showTaskInfo)}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: 'var(--font-baloo)', fontWeight: 600, color: 'var(--color-text)',
-            }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Tag size={16} color='var(--color-primary)' />
-              Task Info
+        <Card padding="md">
+          <div className="flex items-center gap-2 mb-2">
+            <Tag size={16} style={{ color: 'var(--color-primary)' }} />
+            <span className="text-sm font-medium">Task Info</span>
+          </div>
+          <div className="flex gap-2 mb-2">
+            <span 
+              className="px-2 py-1 rounded-md text-xs"
+              style={{ 
+                background: 'var(--color-bg-overlay)',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              {task.category === 'listen_repeat' ? 'Listen & Repeat' : 'Interview'}
             </span>
-            {showTaskInfo ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          </button>
-          {showTaskInfo && (
-            <div style={{ padding: '0 16px 16px' }}>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
-                <span style={{
-                  background: 'var(--color-background)', borderRadius: '8px', padding: '4px 10px',
-                  fontSize: '12px', fontFamily: 'var(--font-comic)', color: 'var(--color-text)',
-                }}>
-                  {task.category === 'listen_repeat' ? 'Listen & Repeat' : 'Interview'}
-                </span>
-                <span style={{
-                  background: 'var(--color-background)', borderRadius: '8px', padding: '4px 10px',
-                  fontSize: '12px', fontFamily: 'var(--font-comic)', color: 'var(--color-text)',
-                }}>
-                  Difficulty: {task.difficulty}
-                </span>
-              </div>
-              {task.transcript && (
-                <p style={{ fontFamily: 'var(--font-comic)', fontSize: '14px', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-                  <strong style={{ color: 'var(--color-text)' }}>Prompt:</strong> {task.transcript}
-                </p>
-              )}
-            </div>
+            <span 
+              className="px-2 py-1 rounded-md text-xs"
+              style={{ 
+                background: 'var(--color-bg-overlay)',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              {task.difficulty}
+            </span>
+          </div>
+          {task.transcript && (
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              <strong style={{ color: 'var(--color-text-primary)' }}>Prompt:</strong> {task.transcript}
+            </p>
           )}
-        </div>
+        </Card>
       )}
 
-      {/* Score Card */}
-      <div style={{
-        background: 'white', borderRadius: '16px', padding: '20px',
-        border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-md)',
-        marginBottom: '16px',
-      }}>
-        <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '48px', fontWeight: 700, color: 'var(--color-primary)', textAlign: 'center' }}>
-          {Number(attempt.overall_score).toFixed(1)}
-          <span style={{ fontSize: '20px', color: 'var(--color-text-muted)' }}> / 4</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '16px' }}>
+      {/* Score */}
+      <Card padding="lg" className="text-center">
+        <ScoreDisplay score={attempt.overall_score} size="lg" />
+        <div className="flex justify-around mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
           {[
             { label: 'Delivery', score: attempt.delivery_score },
             { label: 'Language', score: attempt.language_use_score },
             { label: 'Topic Dev', score: attempt.topic_dev_score },
           ].map(d => (
-            <div key={d.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '20px', fontWeight: 700 }}>{Number(d.score).toFixed(1)}</div>
-              <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>{d.label}</div>
+            <div key={d.label} className="text-center">
+              <div 
+                className="text-xl font-bold"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                {Number(d.score).toFixed(1)}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                {d.label}
+              </div>
             </div>
           ))}
         </div>
+      </Card>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        {attempt.wpm != null && (
+          <Card padding="md" className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Type size={16} style={{ color: 'var(--color-primary)' }} />
+              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>WPM</span>
+            </div>
+            <div 
+              className="text-2xl font-bold"
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}
+            >
+              {Math.round(attempt.wpm)}
+            </div>
+          </Card>
+        )}
+        {attempt.filler_count != null && (
+          <Card padding="md" className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Mic size={16} style={{ color: 'var(--color-accent)' }} />
+              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Fillers</span>
+            </div>
+            <div 
+              className="text-2xl font-bold"
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}
+            >
+              {attempt.filler_count}
+            </div>
+          </Card>
+        )}
       </div>
 
-      {/* Itemized Scoring Details */}
+      {/* Transcript */}
+      {attempt.transcript && (
+        <Card padding="md">
+          <div className="flex items-center gap-2 mb-3">
+            <Type size={16} style={{ color: 'var(--color-primary)' }} />
+            <span className="text-sm font-medium">Your Transcript</span>
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            {attempt.transcript}
+          </p>
+        </Card>
+      )}
+
+      {/* Audio */}
+      {attempt.audio_url && (
+        <Card padding="md">
+          <p className="text-sm mb-2" style={{ color: 'var(--color-text-muted)' }}>
+            Your Recording
+          </p>
+          <audio src={attempt.audio_url} controls className="w-full" />
+        </Card>
+      )}
+
+      {/* Suggestion */}
+      {attempt.suggestion && (
+        <Card padding="md">
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
+            {attempt.suggestion}
+          </p>
+        </Card>
+      )}
+
+      {/* Errors */}
+      {attempt.errors?.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {attempt.errors.map((e: string) => (
+            <span 
+              key={e}
+              className="px-3 py-1 rounded-full text-xs font-medium"
+              style={{
+                background: 'rgba(245, 158, 11, 0.15)',
+                color: '#D97706',
+              }}
+            >
+              {e}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Scoring Details */}
       {attempt.scoring_details && (
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '20px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          marginBottom: '16px',
-        }}>
-          <h2 style={{ fontFamily: 'var(--font-baloo)', fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: 'var(--color-text)' }}>
+        <Card padding="lg">
+          <h2 
+            className="text-lg font-semibold mb-4"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
             Detailed Feedback
           </h2>
           {[
@@ -174,162 +261,56 @@ export default function AttemptReviewPage() {
             if (!detail) return null;
             const score = detail.score ?? 0;
             const pct = (score / 4) * 100;
-            const color = score >= 3.5 ? '#10B981' : score >= 2.5 ? 'var(--color-primary)' : '#F59E0B';
+            const color = score >= 3.5 ? 'var(--color-score-excellent)' : score >= 2.5 ? 'var(--color-score-good)' : 'var(--color-score-needs-work)';
+            
             return (
-              <div key={dim.key} style={{ marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 600, color: 'var(--color-text)' }}>{dim.label}</span>
-                  <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 700, fontSize: '16px', color }}>{score}</span>
+              <div key={dim.key} className="mb-4 last:mb-0">
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium text-sm">{dim.label}</span>
+                  <span className="font-bold text-sm" style={{ color }}>{score}</span>
                 </div>
-                <div style={{ height: '6px', background: 'rgba(0,0,0,0.08)', borderRadius: '3px', overflow: 'hidden', marginBottom: '8px' }}>
-                  <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '3px', transition: 'width 600ms ease' }} />
+                <div 
+                  className="h-1.5 rounded-full overflow-hidden mb-2"
+                  style={{ background: 'var(--color-bg-overlay)' }}
+                >
+                  <div 
+                    className="h-full rounded-full transition-all duration-600"
+                    style={{ width: `${pct}%`, background: color }}
+                  />
                 </div>
                 {detail.evidence && (
-                  <p style={{ fontSize: '13px', color: 'var(--color-text)', marginBottom: '4px', fontFamily: 'var(--font-comic)' }}>
+                  <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                     <strong>Evidence:</strong> {detail.evidence}
                   </p>
                 )}
                 {detail.tip && (
-                  <p style={{ fontSize: '13px', color: 'var(--color-primary)', fontFamily: 'var(--font-comic)', fontStyle: 'italic' }}>
+                  <p className="text-sm italic" style={{ color: 'var(--color-primary)' }}>
                     {detail.tip}
                   </p>
                 )}
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Stats: WPM + Filler Count */}
-      <div style={{
-        display: 'flex', gap: '12px', marginBottom: '16px',
-      }}>
-        {attempt.wpm != null && (
-          <div style={{
-            flex: 1, background: 'white', borderRadius: '12px', padding: '14px',
-            border: '3px solid rgba(79,70,229,0.1)', boxShadow: 'var(--shadow-clay-sm)',
-            textAlign: 'center',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
-              <Type size={16} color='var(--color-primary)' />
-              <span style={{ fontFamily: 'var(--font-comic)', fontSize: '12px', color: 'var(--color-text-muted)' }}>WPM</span>
-            </div>
-            <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-primary)' }}>
-              {Math.round(attempt.wpm)}
-            </div>
-          </div>
-        )}
-        {attempt.filler_count != null && (
-          <div style={{
-            flex: 1, background: 'white', borderRadius: '12px', padding: '14px',
-            border: '3px solid rgba(245,158,11,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-            textAlign: 'center',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '4px' }}>
-              <Mic size={16} color='#D97706' />
-              <span style={{ fontFamily: 'var(--font-comic)', fontSize: '12px', color: 'var(--color-text-muted)' }}>Fillers</span>
-            </div>
-            <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: '#D97706' }}>
-              {attempt.filler_count}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Transcript - Collapsible */}
-      {attempt.transcript && (
-        <div style={{
-          background: 'white', borderRadius: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          marginBottom: '16px', overflow: 'hidden',
-        }}>
-          <button
-            onClick={() => setShowTranscript(!showTranscript)}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: 'var(--font-baloo)', fontWeight: 600, color: 'var(--color-text)',
-            }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Type size={16} color='var(--color-primary)' />
-              Transcript
-            </span>
-            {showTranscript ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          </button>
-          {showTranscript && (
-            <div style={{ padding: '0 16px 16px' }}>
-              <p style={{ fontFamily: 'var(--font-comic)', fontSize: '14px', color: 'var(--color-text)', lineHeight: 1.6 }}>
-                {attempt.transcript}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Audio Player */}
-      {attempt.audio_url && (
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          marginBottom: '16px',
-        }}>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px', marginBottom: '8px' }}>
-            Your recording
-          </p>
-          <audio src={attempt.audio_url} controls style={{ width: '100%' }} />
-        </div>
-      )}
-
-      {/* Suggestion */}
-      {attempt.suggestion && (
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          marginBottom: '16px',
-        }}>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text)', fontSize: '14px' }}>
-            {attempt.suggestion}
-          </p>
-        </div>
-      )}
-
-      {/* Errors */}
-      {attempt.errors?.length > 0 && (
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-          {attempt.errors.map((e: string) => (
-            <span key={e} style={{
-              background: 'rgba(245,158,11,0.15)', color: '#D97706',
-              border: '2px solid rgba(245,158,11,0.3)',
-              borderRadius: 'var(--radius-pill)', padding: '4px 12px',
-              fontSize: '12px', fontFamily: 'var(--font-baloo)',
-            }}>{e}</span>
-          ))}
-        </div>
+        </Card>
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <button
+      <div className="flex gap-3">
+        <Button 
+          variant="secondary" 
+          className="flex-1"
           onClick={() => router.push('/toefl/practice')}
-          style={{
-            background: 'var(--color-primary)', color: 'white', border: 'none',
-            borderRadius: 'var(--radius-pill)', padding: '14px',
-            fontFamily: 'var(--font-baloo)', fontWeight: 600, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center',
-            boxShadow: 'var(--shadow-clay-sm)',
-          }}
+          icon={<RotateCcw size={18} />}
         >
-          <RotateCcw size={18} /> Try Another Task
-        </button>
-        <button
+          Practice Again
+        </Button>
+        <Button 
+          className="flex-1"
           onClick={() => router.push('/toefl')}
-          style={{
-            background: 'white', color: 'var(--color-primary)', border: '3px solid var(--color-primary)',
-            borderRadius: 'var(--radius-pill)', padding: '14px',
-            fontFamily: 'var(--font-baloo)', fontWeight: 600, cursor: 'pointer',
-          }}
-        >Back to Home</button>
+          icon={<Home size={18} />}
+        >
+          Dashboard
+        </Button>
       </div>
     </div>
   );
