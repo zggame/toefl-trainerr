@@ -5,42 +5,40 @@ export const SIMULATION_TOTAL_ITEMS = SIMULATION_LISTEN_REPEAT_COUNT + SIMULATIO
 export type PracticeMode = 'guided' | 'simulation';
 export type ToeflTaskCategory = 'listen_repeat' | 'interview';
 
-export interface SimulationSourceTask {
+export type SimulationSourceTask = {
   id: string;
-  category: ToeflTaskCategory;
+  category: string;
   audio_url: string;
-  transcript: string;
-  difficulty: string;
-  prep_time_seconds: number;
-  record_time_seconds: number;
-  [key: string]: unknown;
-}
+  transcript: string | null;
+  difficulty: string | null;
+  prep_time_seconds: number | null;
+  record_time_seconds: number | null;
+};
 
-export interface SimulationTask extends SimulationSourceTask {
+export type SimulationTask = SimulationSourceTask & {
   category: ToeflTaskCategory;
   simulationItemNumber: number;
-}
+};
+
+export const INSUFFICIENT_SIMULATION_TASKS_MESSAGE =
+  'Need at least 7 listen-repeat tasks and 4 interview tasks for simulation';
 
 export function getPracticeMode(value: string | null | undefined): PracticeMode {
   return value === 'simulation' ? 'simulation' : 'guided';
 }
 
-/**
- * Builds the simulation plan from the caller-provided task order.
- *
- * The route layer owns any randomization or ranking. This helper intentionally
- * selects the first matching tasks in the order it receives so the route can
- * control which prompts are surfaced.
- */
-export function buildSimulationTaskPlan(tasks: readonly SimulationSourceTask[]): SimulationTask[] {
-  const listenRepeatTasks = tasks.filter(task => task.category === 'listen_repeat').slice(0, SIMULATION_LISTEN_REPEAT_COUNT);
-  const interviewTasks = tasks.filter(task => task.category === 'interview').slice(0, SIMULATION_INTERVIEW_COUNT);
+export function buildSimulationTaskPlan(tasks: SimulationSourceTask[]): SimulationTask[] {
+  const listenRepeat = tasks.filter((task): task is SimulationTask => task.category === 'listen_repeat');
+  const interview = tasks.filter((task): task is SimulationTask => task.category === 'interview');
 
-  if (listenRepeatTasks.length < SIMULATION_LISTEN_REPEAT_COUNT || interviewTasks.length < SIMULATION_INTERVIEW_COUNT) {
-    throw new Error('Need at least 7 listen-repeat tasks and 4 interview tasks for simulation');
+  if (listenRepeat.length < SIMULATION_LISTEN_REPEAT_COUNT || interview.length < SIMULATION_INTERVIEW_COUNT) {
+    throw new Error(INSUFFICIENT_SIMULATION_TASKS_MESSAGE);
   }
 
-  return [...listenRepeatTasks, ...interviewTasks].map((task, index) => ({
+  return [
+    ...listenRepeat.slice(0, SIMULATION_LISTEN_REPEAT_COUNT),
+    ...interview.slice(0, SIMULATION_INTERVIEW_COUNT),
+  ].map((task, index) => ({
     ...task,
     simulationItemNumber: index + 1,
   }));
