@@ -123,6 +123,11 @@ export async function POST(request: NextRequest) {
       filler_count: result.fillerCount,
       previous_attempt_id: previousAttemptId || null,
       audio_url: storagePath,
+      scoring_details: {
+        delivery: result.delivery,
+        languageUse: result.languageUse,
+        topicDev: result.topicDev,
+      },
     })
     .select()
     .single();

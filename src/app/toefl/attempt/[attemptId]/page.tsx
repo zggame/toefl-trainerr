@@ -155,6 +155,51 @@ export default function AttemptReviewPage() {
         </div>
       </div>
 
+      {/* Itemized Scoring Details */}
+      {attempt.scoring_details && (
+        <div style={{
+          background: 'white', borderRadius: '16px', padding: '20px',
+          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
+          marginBottom: '16px',
+        }}>
+          <h2 style={{ fontFamily: 'var(--font-baloo)', fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: 'var(--color-text)' }}>
+            Detailed Feedback
+          </h2>
+          {[
+            { key: 'delivery', label: 'Delivery' },
+            { key: 'languageUse', label: 'Language Use' },
+            { key: 'topicDev', label: 'Topic Development' },
+          ].map(dim => {
+            const detail = attempt.scoring_details[dim.key];
+            if (!detail) return null;
+            const score = detail.score ?? 0;
+            const pct = (score / 4) * 100;
+            const color = score >= 3.5 ? '#10B981' : score >= 2.5 ? 'var(--color-primary)' : '#F59E0B';
+            return (
+              <div key={dim.key} style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 600, color: 'var(--color-text)' }}>{dim.label}</span>
+                  <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 700, fontSize: '16px', color }}>{score}</span>
+                </div>
+                <div style={{ height: '6px', background: 'rgba(0,0,0,0.08)', borderRadius: '3px', overflow: 'hidden', marginBottom: '8px' }}>
+                  <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '3px', transition: 'width 600ms ease' }} />
+                </div>
+                {detail.evidence && (
+                  <p style={{ fontSize: '13px', color: 'var(--color-text)', marginBottom: '4px', fontFamily: 'var(--font-comic)' }}>
+                    <strong>Evidence:</strong> {detail.evidence}
+                  </p>
+                )}
+                {detail.tip && (
+                  <p style={{ fontSize: '13px', color: 'var(--color-primary)', fontFamily: 'var(--font-comic)', fontStyle: 'italic' }}>
+                    {detail.tip}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Stats: WPM + Filler Count */}
       <div style={{
         display: 'flex', gap: '12px', marginBottom: '16px',
