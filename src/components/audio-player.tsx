@@ -30,9 +30,13 @@ export function AudioPlayer({
   autoPlay,
   onEnded,
 }: AudioPlayerProps) {
-  const [playing, setPlaying] = useState(false);
+  const [playingSourceKey, setPlayingSourceKey] = useState<string | null>(null);
+  const [endedSourceKey, setEndedSourceKey] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const useTts = isPlaceholderUrl(audioUrl);
+  const sourceKey = `${audioUrl}::${transcript ?? ''}`;
+  const playing = playingSourceKey === sourceKey;
+  const hasEnded = endedSourceKey === sourceKey;
 
   const speak = useCallback(() => {
     if (!transcript) return;
@@ -40,15 +44,22 @@ export function AudioPlayer({
     const utterance = new SpeechSynthesisUtterance(transcript);
     utterance.rate = 0.9;
     utterance.pitch = 1;
-    utterance.onstart = () => setPlaying(true);
-    utterance.onend = () => { setPlaying(false); onEnded?.(); };
-    utterance.onerror = () => setPlaying(false);
+    utterance.onstart = () => {
+      setPlayingSourceKey(sourceKey);
+      setEndedSourceKey(null);
+    };
+    utterance.onend = () => {
+      setPlayingSourceKey(null);
+      setEndedSourceKey(sourceKey);
+      onEnded?.();
+    };
+    utterance.onerror = () => setPlayingSourceKey(null);
     window.speechSynthesis.speak(utterance);
-  }, [onEnded, transcript]);
+  }, [onEnded, sourceKey, transcript]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis.cancel();
-    setPlaying(false);
+    setPlayingSourceKey(null);
   }, []);
 
   useEffect(() => {
@@ -56,12 +67,16 @@ export function AudioPlayer({
       if (useTts) {
         speak();
       } else if (audioRef.current) {
-        audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
+        audioRef.current.play().then(() => {
+          setPlayingSourceKey(sourceKey);
+          setEndedSourceKey(null);
+        }).catch(() => {});
       }
     }
-  }, [autoPlay, useTts, speak]);
+  }, [autoPlay, sourceKey, speak, useTts]);
 
   const toggle = () => {
+    if (!allowReplay && hasEnded) return;
     if (useTts) {
       if (playing) stopSpeaking();
       else speak();
@@ -71,9 +86,11 @@ export function AudioPlayer({
     if (playing) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      audioRef.current.play().then(() => {
+        setPlayingSourceKey(sourceKey);
+        setEndedSourceKey(null);
+      }).catch(() => {});
     }
-    setPlaying(!playing);
   };
 
   return (
@@ -84,9 +101,20 @@ export function AudioPlayer({
       border: '3px solid rgba(79,70,229,0.15)',
       boxShadow: 'var(--shadow-clay-sm)',
     }}>
-      {!useTts && <audio ref={audioRef} src={audioUrl} onEnded={() => { setPlaying(false); onEnded?.(); }} />}
+      {!useTts && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onEnded={() => {
+            setPlayingSourceKey(null);
+            setEndedSourceKey(sourceKey);
+            onEnded?.();
+          }}
+        />
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
+          disabled={!allowReplay && hasEnded}
           onClick={toggle}
           style={{
             width: '48px', height: '48px',
@@ -94,7 +122,8 @@ export function AudioPlayer({
             borderRadius: '50%',
             border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
+            cursor: !allowReplay && hasEnded ? 'not-allowed' : 'pointer',
+            opacity: !allowReplay && hasEnded ? 0.6 : 1,
             boxShadow: 'var(--shadow-clay-sm)',
             transition: 'all 200ms ease',
           }}
@@ -113,7 +142,13 @@ export function AudioPlayer({
           <button
             onClick={() => {
               if (useTts) { stopSpeaking(); speak(); }
-              else if (audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPlaying(true); }
+              else if (audioRef.current) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().then(() => {
+                  setPlayingSourceKey(sourceKey);
+                  setEndedSourceKey(null);
+                }).catch(() => {});
+              }
             }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
             title='Replay'
