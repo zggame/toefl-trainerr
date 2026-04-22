@@ -47,6 +47,7 @@ export default function PracticePage() {
   const mode = getPracticeMode(searchParams.get('mode'));
   const isSimulation = mode === 'simulation';
   const practiceRunIdRef = useRef(0);
+  const [practiceRunId, setPracticeRunId] = useState(0);
   const [task, setTask] = useState<Task | null>(null);
   const [simulationTasks, setSimulationTasks] = useState<SimulationTask[]>([]);
   const [simulationIndex, setSimulationIndex] = useState(0);
@@ -60,11 +61,21 @@ export default function PracticePage() {
 
   const activeTask = isSimulation ? simulationTasks[simulationIndex] : task;
   const isActiveRun = (runId: number) => practiceRunIdRef.current === runId;
+  const activePromptKey = activeTask
+    ? `${practiceRunId}:${mode}:${activeTask.id}:${simulationIndex}`
+    : null;
+  const activePromptKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    activePromptKeyRef.current = activePromptKey;
+  }, [activePromptKey]);
 
   // Load task set when mode changes.
   useEffect(() => {
     let cancelled = false;
     const runId = ++practiceRunIdRef.current;
+    setPracticeRunId(runId);
+    activePromptKeyRef.current = null;
 
     const loadTasks = async () => {
       await Promise.resolve();
@@ -113,8 +124,14 @@ export default function PracticePage() {
     };
   }, [isSimulation]);
 
-  const handleAudioEnded = () => {
+  const handleAudioEnded = (promptKey: string | null) => {
+    if (!promptKey || promptKey !== activePromptKeyRef.current) return;
     setRecordingError(null);
+    setStep('record');
+  };
+
+  const handleRecordingError = (err: Error) => {
+    setRecordingError(err.message || 'Could not start recording. Please check microphone access and try again.');
     setStep('record');
   };
 
@@ -337,7 +354,7 @@ export default function PracticePage() {
             allowReplay={!isSimulation}
             allowTranscript={!isSimulation}
             autoPlay={step === 'playing'}
-            onEnded={handleAudioEnded}
+            onEnded={() => handleAudioEnded(activePromptKey)}
           />
         </div>
       )}
@@ -346,6 +363,7 @@ export default function PracticePage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <RecordButton
             onRecordingComplete={handleRecordingComplete}
+            onError={handleRecordingError}
             disabled={step !== 'record'}
             maxSeconds={activeTask.record_time_seconds || 30}
             autoStart={step === 'record'}
