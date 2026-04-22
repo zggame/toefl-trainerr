@@ -47,13 +47,31 @@ function compareSimulationTaskDifficulty(a: SimulationSourceTask, b: SimulationS
   return a.id.localeCompare(b.id);
 }
 
+function normalizedPromptText(task: SimulationSourceTask): string {
+  return (task.transcript ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function uniquePromptTasks<T extends SimulationSourceTask>(tasks: T[]): T[] {
+  const seen = new Set<string>();
+  return tasks.filter(task => {
+    const key = normalizedPromptText(task) || task.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function buildSimulationTaskPlan(tasks: SimulationSourceTask[]): SimulationTask[] {
-  const listenRepeat = tasks
-    .filter((task): task is SimulationTask => task.category === 'listen_repeat')
-    .sort(compareSimulationTaskDifficulty);
-  const interview = tasks
-    .filter((task): task is SimulationTask => task.category === 'interview')
-    .sort(compareSimulationTaskDifficulty);
+  const listenRepeat = uniquePromptTasks(
+    tasks
+      .filter((task): task is SimulationTask => task.category === 'listen_repeat')
+      .sort(compareSimulationTaskDifficulty)
+  );
+  const interview = uniquePromptTasks(
+    tasks
+      .filter((task): task is SimulationTask => task.category === 'interview')
+      .sort(compareSimulationTaskDifficulty)
+  );
 
   if (listenRepeat.length < SIMULATION_LISTEN_REPEAT_COUNT || interview.length < SIMULATION_INTERVIEW_COUNT) {
     throw new Error(INSUFFICIENT_SIMULATION_TASKS_MESSAGE);

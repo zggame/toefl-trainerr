@@ -83,6 +83,57 @@ describe('toefl simulation utilities', () => {
     expect(plan.slice(0, 7).some(task => task.id === 'hard-long')).toBe(false);
   });
 
+  test('does not repeat duplicate prompt text within the same category', () => {
+    const duplicateListenPrompt = 'All students should submit their assignments by Friday.';
+    const duplicateInterviewPrompt = 'What is your favorite way to spend a weekend?';
+    const plan = buildSimulationTaskPlan([
+      {
+        ...listenRepeatTasks[0],
+        id: 'listen-duplicate-a',
+        difficulty: 'easy',
+        transcript: duplicateListenPrompt,
+      },
+      {
+        ...listenRepeatTasks[1],
+        id: 'listen-duplicate-b',
+        difficulty: 'easy',
+        transcript: duplicateListenPrompt,
+      },
+      ...listenRepeatTasks.slice(2).map((task, index) => ({
+        ...task,
+        difficulty: index === 5 ? 'medium' : 'easy',
+      })),
+      {
+        ...interviewTasks[0],
+        id: 'interview-duplicate-a',
+        difficulty: 'easy',
+        transcript: duplicateInterviewPrompt,
+      },
+      {
+        ...interviewTasks[1],
+        id: 'interview-duplicate-b',
+        difficulty: 'easy',
+        transcript: duplicateInterviewPrompt,
+      },
+      ...interviewTasks.slice(2).map(task => ({
+        ...task,
+        difficulty: 'easy',
+      })),
+    ]);
+
+    const listenPrompts = plan
+      .filter(task => task.category === 'listen_repeat')
+      .map(task => task.transcript);
+    const interviewPrompts = plan
+      .filter(task => task.category === 'interview')
+      .map(task => task.transcript);
+
+    expect(new Set(listenPrompts).size).toBe(listenPrompts.length);
+    expect(new Set(interviewPrompts).size).toBe(interviewPrompts.length);
+    expect(listenPrompts.filter(prompt => prompt === duplicateListenPrompt)).toHaveLength(1);
+    expect(interviewPrompts.filter(prompt => prompt === duplicateInterviewPrompt)).toHaveLength(1);
+  });
+
   test('throws when the prompt bank lacks enough listen-repeat tasks', () => {
     expect(() => buildSimulationTaskPlan([...listenRepeatTasks.slice(0, 6), ...interviewTasks]))
       .toThrow('Need at least 7 listen-repeat tasks and 4 interview tasks for simulation');
