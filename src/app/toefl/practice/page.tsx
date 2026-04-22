@@ -360,20 +360,22 @@ export default function PracticePage() {
         </div>
       )}
 
-      {(step === 'playing' || step === 'record') && activeTask && (
+      {step === 'playing' && activeTask && !isSimulation && (
+        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px', textAlign: 'center' }}>
+          Recording will start automatically when the prompt finishes
+        </p>
+      )}
+
+      {step === 'record' && activeTask && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <RecordButton
+            key={activePromptKey ?? activeTask.id}
             onRecordingComplete={handleRecordingComplete}
             onError={handleRecordingError}
-            disabled={step !== 'record'}
+            disabled={false}
             maxSeconds={activeTask.record_time_seconds || 30}
-            autoStart={step === 'record'}
+            autoStart
           />
-          {step === 'playing' && !isSimulation && (
-            <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-              Recording will start automatically when the prompt finishes
-            </p>
-          )}
           {recordingError && (
             <p style={{ fontFamily: 'var(--font-comic)', color: '#EF4444', fontSize: '14px', fontWeight: 600 }}>
               {recordingError}

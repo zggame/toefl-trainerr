@@ -122,4 +122,25 @@ describe('RecordButton', () => {
     await waitFor(() => expect(onRecordingComplete).toHaveBeenCalledWith(expect.any(Blob), 'YXVkaW8='));
     await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled());
   });
+
+  test('auto-starts when prompt playback changes from disabled to record mode', async () => {
+    const onRecordingComplete = vi.fn();
+    const { rerender } = render(
+      <RecordButton onRecordingComplete={onRecordingComplete} disabled autoStart={false} />
+    );
+
+    expect(TestMediaRecorder.instances).toHaveLength(0);
+
+    rerender(<RecordButton onRecordingComplete={onRecordingComplete} disabled={false} autoStart />);
+
+    await waitFor(() => expect(TestMediaRecorder.instances).toHaveLength(1));
+    expect(TestMediaRecorder.instances[0].state).toBe('recording');
+  });
+
+  test('auto-starts immediately when mounted in record mode', async () => {
+    render(<RecordButton onRecordingComplete={vi.fn()} disabled={false} autoStart />);
+
+    await waitFor(() => expect(TestMediaRecorder.instances).toHaveLength(1));
+    expect(TestMediaRecorder.instances[0].state).toBe('recording');
+  });
 });
