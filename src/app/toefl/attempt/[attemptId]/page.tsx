@@ -162,7 +162,7 @@ export default function AttemptReviewPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 mb-6">
         {attempt.wpm != null && (
           <Card padding="md" className="text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
@@ -195,7 +195,7 @@ export default function AttemptReviewPage() {
 
       {/* Transcript */}
       {attempt.transcript && (
-        <Card padding="md">
+        <Card padding="md" className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Type size={16} style={{ color: 'var(--color-primary)' }} />
             <span className="text-sm font-medium">Your Transcript</span>
@@ -208,7 +208,7 @@ export default function AttemptReviewPage() {
 
       {/* Audio */}
       {attempt.audio_url && (
-        <Card padding="md">
+        <Card padding="md" className="mb-6">
           <p className="text-sm mb-2" style={{ color: 'var(--color-text-muted)' }}>
             Your Recording
           </p>
@@ -218,7 +218,7 @@ export default function AttemptReviewPage() {
 
       {/* Suggestion */}
       {attempt.suggestion && (
-        <Card padding="md">
+        <Card padding="md" className="mb-6">
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
             {attempt.suggestion}
           </p>
@@ -227,7 +227,7 @@ export default function AttemptReviewPage() {
 
       {/* Errors */}
       {attempt.errors?.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-6">
           {attempt.errors.map((e: string) => (
             <span 
               key={e}
@@ -245,7 +245,7 @@ export default function AttemptReviewPage() {
 
       {/* Scoring Details */}
       {attempt.scoring_details && (
-        <Card padding="lg">
+        <Card padding="lg" className="mb-6">
           <h2 
             className="text-lg font-semibold mb-4"
             style={{ fontFamily: 'var(--font-heading)' }}
