@@ -1,28 +1,45 @@
 import { ScoringResult } from '@/lib/gemini';
 
+function getScoreColor(score: number): string {
+  if (score >= 3.5) return 'var(--color-score-excellent)';
+  if (score >= 2.5) return 'var(--color-score-good)';
+  if (score >= 1.5) return 'var(--color-score-needs-work)';
+  return 'var(--color-score-practice)';
+}
+
 interface ScoreBreakdownProps {
   scoring: ScoringResult;
 }
 
 function ScoreBar({ score, label, evidence, tip }: { score: number; label: string; evidence: string; tip: string }) {
   const pct = (score / 4) * 100;
-  const color = score >= 3.5 ? 'var(--color-cta)' : score >= 2.5 ? 'var(--color-primary)' : '#F59E0B';
+  const color = getScoreColor(score);
 
   return (
-    <div style={{ marginBottom: '16px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-        <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 600, color: 'var(--color-text)' }}>{label}</span>
-        <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 700, fontSize: '18px', color }}>{score}</span>
+    <div className="mb-4 last:mb-0">
+      <div className="flex justify-between mb-1">
+        <span className="font-medium text-sm">{label}</span>
+        <span className="font-bold text-sm" style={{ color }}>{score.toFixed(1)}</span>
       </div>
-      <div style={{ height: '8px', background: 'rgba(0,0,0,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '4px', transition: 'width 600ms ease' }} />
+      <div
+        className="h-2 rounded-full overflow-hidden"
+        style={{ background: 'var(--color-bg-overlay)' }}
+      >
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${pct}%`, background: color, transition: 'width 600ms ease' }}
+        />
       </div>
-      <p style={{ fontSize: '13px', color: 'var(--color-text)', marginTop: '6px', fontFamily: 'var(--font-comic)' }}>
-        <strong>Evidence:</strong> {evidence}
-      </p>
-      <p style={{ fontSize: '13px', color: 'var(--color-primary)', marginTop: '4px', fontFamily: 'var(--font-comic)', fontStyle: 'italic' }}>
-        {tip}
-      </p>
+      {evidence && (
+        <p className="text-sm mt-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <strong>Evidence:</strong> {evidence}
+        </p>
+      )}
+      {tip && (
+        <p className="text-sm italic" style={{ color: 'var(--color-primary)' }}>
+          {tip}
+        </p>
+      )}
     </div>
   );
 }
@@ -30,9 +47,9 @@ function ScoreBar({ score, label, evidence, tip }: { score: number; label: strin
 export function ScoreBreakdown({ scoring }: ScoreBreakdownProps) {
   return (
     <div>
-      <ScoreBar score={scoring.delivery.score} label='Delivery' evidence={scoring.delivery.evidence} tip={scoring.delivery.tip} />
-      <ScoreBar score={scoring.languageUse.score} label='Language Use' evidence={scoring.languageUse.evidence} tip={scoring.languageUse.tip} />
-      <ScoreBar score={scoring.topicDev.score} label='Topic Development' evidence={scoring.topicDev.evidence} tip={scoring.topicDev.tip} />
+      <ScoreBar score={scoring.delivery.score} label="Delivery" evidence={scoring.delivery.evidence} tip={scoring.delivery.tip} />
+      <ScoreBar score={scoring.languageUse.score} label="Language Use" evidence={scoring.languageUse.evidence} tip={scoring.languageUse.tip} />
+      <ScoreBar score={scoring.topicDev.score} label="Topic Development" evidence={scoring.topicDev.evidence} tip={scoring.topicDev.tip} />
     </div>
   );
 }

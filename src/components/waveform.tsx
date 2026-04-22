@@ -29,7 +29,7 @@ export function Waveform({ audioUrl, analyzing }: WaveformProps) {
         const height = data[i] || 10;
         const x = i * totalWidth;
         const y = (canvas.height - height) / 2;
-        ctx.fillStyle = analyzing ? 'var(--color-cta)' : 'var(--color-primary)';
+        ctx.fillStyle = analyzing ? '#F97316' : '#4F46E5';
         ctx.beginPath();
         ctx.roundRect(x, y, barWidth, height, 2);
         ctx.fill();
@@ -48,12 +48,10 @@ export function Waveform({ audioUrl, analyzing }: WaveformProps) {
   }, [analyzing]);
 
   return (
-    <div style={{
-      background: 'var(--color-background)',
-      borderRadius: '12px',
-      padding: '12px',
-      overflow: 'hidden',
-    }}>
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{ background: 'var(--color-bg-overlay)', padding: '8px' }}
+    >
       <canvas
         ref={canvasRef}
         width={500}

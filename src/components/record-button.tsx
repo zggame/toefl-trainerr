@@ -68,47 +68,53 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
   const isUrgent = remaining <= 5;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center gap-4">
         {recording && (
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '28px',
-            fontWeight: 700,
-            color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-primary)',
-            transition: 'color 200ms',
-          }}>
+          <div
+            className="font-bold tabular-nums"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '28px',
+              color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-primary)',
+              transition: 'color 200ms',
+            }}
+          >
             {formatTime(remaining)}
           </div>
         )}
         <button
           onClick={recording ? stopRecording : startRecording}
           disabled={disabled}
+          className="touch-target flex items-center justify-center shrink-0 rounded-full active:scale-95"
           style={{
             width: '56px',
             height: '56px',
-            borderRadius: '50%',
             border: recording ? '3px solid var(--color-accent-red)' : '3px solid var(--color-primary)',
             background: recording ? 'var(--color-accent-red)' : 'var(--color-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: disabled ? 'not-allowed' : 'pointer',
             boxShadow: recording ? '0 0 0 6px rgba(239,68,68,0.15)' : 'var(--shadow-button)',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.5 : 1,
             transition: 'all 200ms ease',
-            flexShrink: 0,
           }}
         >
-          {recording ? <Square size={22} color='white' /> : <Mic size={22} color='white' />}
+          {recording ? <Square size={22} color="white" /> : <Mic size={22} color="white" />}
         </button>
       </div>
       <Waveform analyzing={recording} />
       {recording ? (
-        <p style={{ fontFamily: 'var(--font-body)', color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-secondary)', fontSize: '14px', fontWeight: isUrgent ? 600 : 400 }}>
+        <p
+          className="text-sm"
+          style={{
+            color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-secondary)',
+            fontWeight: isUrgent ? 600 : 400,
+            fontFamily: 'var(--font-body)',
+          }}
+        >
           {isUrgent ? 'Time is almost up!' : 'Recording... Tap to stop'}
         </p>
       ) : (
-        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
+        <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}>
           Time limit: {maxSeconds} seconds
         </p>
       )}
