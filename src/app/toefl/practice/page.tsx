@@ -136,15 +136,15 @@ export default function PracticePage() {
 
       {/* Playing State */}
       {step === 'playing' && (
-        <div className="flex flex-col items-center py-8">
+        <div className="flex flex-col items-center py-6">
           <div 
-            className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
+            className="w-20 h-20 rounded-full flex items-center justify-center mb-3"
             style={{ 
               background: 'var(--color-primary)',
               boxShadow: 'var(--shadow-button)',
             }}
           >
-            <Headphones size={40} color="white" />
+            <Headphones size={32} color="white" />
           </div>
           <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
             Playing prompt...
@@ -154,9 +154,9 @@ export default function PracticePage() {
 
       {/* Recording State */}
       {step === 'record' && (
-        <div className="flex flex-col items-center py-8">
+        <div className="flex flex-col items-center py-6">
           <div 
-            className="w-24 h-24 rounded-full flex items-center justify-center mb-4 relative"
+            className="w-20 h-20 rounded-full flex items-center justify-center mb-3 relative"
             style={{ background: 'var(--color-accent-red)' }}
           >
             {/* Pulse animation */}
@@ -164,7 +164,7 @@ export default function PracticePage() {
               className="absolute inset-0 rounded-full animate-ping opacity-30"
               style={{ background: 'var(--color-accent-red)' }}
             />
-            <Mic size={40} color="white" />
+            <Mic size={32} color="white" />
           </div>
           <p className="text-sm font-medium" style={{ color: 'var(--color-accent-red)' }}>
             Recording...
@@ -210,7 +210,7 @@ export default function PracticePage() {
       {/* Score State */}
       {step === 'score' && result && (
         <div className="space-y-6">
-          <Card padding="lg" className="text-center">
+          <Card padding="lg" className="text-center mb-6">
             <ScoreDisplay 
               score={result.scoring.overallScore} 
               size="lg" 
@@ -236,7 +236,7 @@ export default function PracticePage() {
             </div>
           </Card>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-2">
             <Button 
               variant="secondary" 
               className="flex-1"

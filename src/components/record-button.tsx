@@ -85,20 +85,21 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
           onClick={recording ? stopRecording : startRecording}
           disabled={disabled}
           style={{
-            width: '72px',
-            height: '72px',
+            width: '56px',
+            height: '56px',
             borderRadius: '50%',
-            border: recording ? '4px solid var(--color-accent-red)' : '4px solid var(--color-primary)',
+            border: recording ? '3px solid var(--color-accent-red)' : '3px solid var(--color-primary)',
             background: recording ? 'var(--color-accent-red)' : 'var(--color-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: disabled ? 'not-allowed' : 'pointer',
-            boxShadow: recording ? '0 0 0 8px rgba(239,68,68,0.2)' : 'var(--shadow-button)',
+            boxShadow: recording ? '0 0 0 6px rgba(239,68,68,0.15)' : 'var(--shadow-button)',
             transition: 'all 200ms ease',
+            flexShrink: 0,
           }}
         >
-          {recording ? <Square size={28} color='white' /> : <Mic size={28} color='white' />}
+          {recording ? <Square size={22} color='white' /> : <Mic size={22} color='white' />}
         </button>
       </div>
       <Waveform analyzing={recording} />
