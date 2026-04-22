@@ -27,6 +27,12 @@
 
 ---
 
+## Decision: Separate Supabase Project for toefl-trainerr
+
+**Rationale:** smart-interview and toefl-trainerr are distinct products. Separate projects prevent schema pollution, RLS conflicts, and shared-resource contention. Supabase free tier allows 2 projects at no cost.
+
+---
+
 ## Option A: Vercel + Supabase Cloud (Recommended for MVP)
 
 **Best for:** Fastest deployment, automatic CI/CD, free tier covers MVP.
@@ -37,6 +43,7 @@
 - Edge functions close to users
 - Supabase free tier: 500MB DB, 2GB bandwidth
 - Vercel free tier: 100GB bandwidth, serverless functions
+- Separate project = clean isolation from smart-interview
 
 ### Cons
 - Cold starts on serverless (mitigated by keeping functions warm)
@@ -45,20 +52,25 @@
 
 ### Prerequisites
 1. [Vercel account](https://vercel.com) (free)
-2. [Supabase account](https://supabase.com) (free)
+2. [Supabase account](https://supabase.com) (free) — **create a NEW project**
 3. [Google AI Studio](https://aistudio.google.com) API key
 4. GitHub repo already created: `zggame/toefl-trainerr`
 
 ### Step-by-Step
 
-#### 1. Create Supabase Cloud Project
+#### 1. Create New Supabase Cloud Project (Separate from smart-interview)
 ```bash
 # Install Supabase CLI if not already
 npm install -g supabase
 
-# Link your local project to cloud
+# Login to Supabase
 supabase login
-supabase link --project-ref <your-project-ref>
+
+# Create a NEW project (do not link to smart-interview)
+supabase projects create toefl-trainerr --org-id <your-org-id> --region <closest-region>
+
+# After creation, link this project
+supabase link --project-ref <new-toefl-project-ref>
 
 # Push schema and seed data
 supabase db push
@@ -67,11 +79,15 @@ supabase db push
 #   - scripts/seed-more-tasks.sql
 ```
 
-#### 2. Configure Auth (Google OAuth)
+**Note:** Do NOT reuse the smart-interview Supabase project. Create a fresh one.
+
+#### 2. Configure Auth (Google OAuth) — Separate from smart-interview
 In Supabase Dashboard -> Authentication -> Providers -> Google:
 - Enable Google provider
-- Add Client ID + Secret from [Google Cloud Console](https://console.cloud.google.com)
-- Set callback URL: `https://your-vercel-app.vercel.app/auth/callback`
+- **Use a separate Google OAuth client** or add `https://your-toefl-app.vercel.app/auth/callback` to the existing client's authorized redirect URIs
+- Set callback URL: `https://your-toefl-app.vercel.app/auth/callback`
+
+**Important:** Even if you reuse the same Google OAuth app, the redirect URI must match the new Vercel deployment.
 
 #### 3. Create Storage Bucket
 In Supabase Dashboard -> Storage:
