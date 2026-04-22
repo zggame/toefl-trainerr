@@ -1,228 +1,255 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Mic, BarChart3, Target, Repeat } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Mic, Brain, TrendingUp, Smartphone, ChevronRight, Star, Users, Award } from 'lucide-react';
 
-const features = [
-  {
-    icon: Mic,
-    title: 'Timed Practice',
-    description: 'Simulate real TOEFL speaking tasks with countdown timers and test-day pressure.',
-  },
-  {
-    icon: BarChart3,
-    title: 'AI Scoring',
-    description: 'Get instant feedback on delivery, language use, and topic development.',
-  },
-  {
-    icon: Target,
-    title: 'Targeted Retry',
-    description: 'Focus on your weakest areas — re-record just the intro, a claim, or a single sentence.',
-  },
-  {
-    icon: Repeat,
-    title: 'Track Progress',
-    description: 'See your score trend over time, identify recurring errors, and celebrate improvement.',
-  },
-];
-
-export default function HomePage() {
+export default function LandingPage() {
   const router = useRouter();
+
+  const features = [
+    {
+      icon: Mic,
+      title: '65+ Practice Tasks',
+      description: 'Listen & repeat and interview questions covering all TOEFL speaking topics',
+    },
+    {
+      icon: Brain,
+      title: 'AI-Powered Feedback',
+      description: 'Get instant scoring on delivery, language use, and topic development',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Track Progress',
+      description: 'See your improvement over time with detailed analytics',
+    },
+    {
+      icon: Smartphone,
+      title: 'Practice Anywhere',
+      description: 'Mobile-friendly design for practice on the go',
+    },
+  ];
+
+  const steps = [
+    { number: '1', title: 'Listen', description: 'Hear the TOEFL-style prompt' },
+    { number: '2', title: 'Speak', description: 'Record your response' },
+    { number: '3', title: 'Improve', description: 'Get AI feedback instantly' },
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', fontFamily: 'var(--font-comic)' }}>
-      {/* Navbar */}
-      <nav style={{
-        position: 'sticky',
-        top: '16px',
-        left: '16px',
-        right: '16px',
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(12px)',
-        borderRadius: '20px',
-        padding: '12px 24px',
-        border: '3px solid rgba(79,70,229,0.12)',
-        boxShadow: 'var(--shadow-clay-md)',
-      }}>
-        <span style={{ fontFamily: 'var(--font-baloo)', fontWeight: 700, fontSize: '20px', color: 'var(--color-primary)' }}>
-          TOEFL Trainer
-        </span>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={() => router.push('/toefl')}
-            style={{
-              background: 'var(--color-background)',
-              color: 'var(--color-primary)',
-              border: '3px solid var(--color-primary)',
-              borderRadius: 'var(--radius-pill)',
-              padding: '8px 20px',
-              fontWeight: 600,
-              fontFamily: 'var(--font-baloo)',
-              cursor: 'pointer',
-              transition: 'all 200ms ease',
-            }}>Log in</button>
-          <button
-            onClick={() => router.push('/toefl')}
-            style={{
-              background: 'var(--color-cta)',
-              color: 'white',
-              border: '3px solid transparent',
-              borderRadius: 'var(--radius-pill)',
-              padding: '8px 20px',
-              fontWeight: 600,
-              fontFamily: 'var(--font-baloo)',
-              cursor: 'pointer',
-              boxShadow: '0 4px 0 var(--color-cta-dark), 0 4px 12px rgba(34,197,94,0.3)',
-              transition: 'all 200ms ease-out',
-            }}>Get Started</button>
-        </div>
-      </nav>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative px-4 pt-12 pb-16 overflow-hidden">
+        {/* Background decoration */}
+        <div 
+          className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
+          style={{ 
+            background: 'radial-gradient(circle, var(--color-primary) 0%, transparent 70%)',
+            transform: 'translate(30%, -30%)',
+          }}
+        />
+        <div 
+          className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-15"
+          style={{ 
+            background: 'radial-gradient(circle, var(--color-accent) 0%, transparent 70%)',
+            transform: 'translate(-30%, 30%)',
+          }}
+        />
 
-      {/* Hero */}
-      <section style={{
-        padding: '80px 24px 60px',
-        textAlign: 'center',
-        maxWidth: '720px',
-        margin: '0 auto',
-      }}>
-        <div style={{
-          display: 'inline-block',
-          background: 'var(--color-primary)',
-          color: 'white',
-          borderRadius: 'var(--radius-pill)',
-          padding: '6px 16px',
-          fontSize: '14px',
-          fontWeight: 600,
-          marginBottom: '20px',
-          fontFamily: 'var(--font-baloo)',
-        }}>
-          For college & high school students
-        </div>
-        <h1 style={{
-          fontFamily: 'var(--font-baloo)',
-          fontSize: 'clamp(36px, 6vw, 56px)',
-          fontWeight: 700,
-          color: 'var(--color-text)',
-          lineHeight: 1.1,
-          marginBottom: '20px',
-        }}>
-          Speak. Score. Improve.
-        </h1>
-        <p style={{
-          fontSize: '18px',
-          color: 'var(--color-text-muted)',
-          lineHeight: 1.6,
-          marginBottom: '32px',
-        }}>
-          Practice TOEFL speaking tasks with AI-powered scoring, targeted feedback,
-          and a retry loop that actually helps you improve — not just get a number.
-        </p>
-        <button
-          onClick={() => router.push('/toefl')}
-          style={{
-            background: 'var(--color-cta)',
-            color: 'white',
-            border: '3px solid transparent',
-            borderRadius: 'var(--radius-pill)',
-            padding: '16px 40px',
-            fontSize: '18px',
-            fontWeight: 700,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            boxShadow: '0 6px 0 var(--color-cta-dark), 0 8px 20px rgba(34,197,94,0.4)',
-            transition: 'all 200ms ease-out',
-          }}>Start Practicing — Free</button>
-      </section>
-
-      {/* Feature Cards */}
-      <section style={{
-        maxWidth: '960px',
-        margin: '0 auto',
-        padding: '0 24px 80px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '24px',
-      }}>
-        {features.map(({ icon: Icon, title, description }) => (
-          <div
-            key={title}
-            onClick={() => router.push('/toefl')}
-            style={{
-              background: 'var(--color-background)',
-              borderRadius: 'var(--radius-clay)',
-              padding: '28px 24px',
-              border: '3px solid rgba(79,70,229,0.15)',
-              boxShadow: 'var(--shadow-clay-md)',
-              transition: 'all 200ms ease-out',
-              cursor: 'pointer',
+        <div className="relative max-w-lg mx-auto text-center">
+          {/* Badge */}
+          <div 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+            style={{ 
+              background: 'rgba(79, 70, 229, 0.1)',
+              border: '1px solid rgba(79, 70, 229, 0.2)',
             }}
           >
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'var(--color-primary)',
-              borderRadius: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px',
-              boxShadow: 'var(--shadow-clay-sm)',
-            }}>
-              <Icon size={24} color='white' />
-            </div>
-            <h3 style={{
-              fontFamily: 'var(--font-baloo)',
-              fontSize: '18px',
-              fontWeight: 600,
-              color: 'var(--color-text)',
-              marginBottom: '8px',
-            }}>{title}</h3>
-            <p style={{
-              fontSize: '14px',
-              color: 'var(--color-text-muted)',
-              lineHeight: 1.5,
-            }}>{description}</p>
+            <Star size={16} style={{ color: 'var(--color-accent)' }} />
+            <span 
+              className="text-sm font-medium"
+              style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-body)' }}
+            >
+              Free TOEFL Speaking Practice
+            </span>
           </div>
-        ))}
+
+          {/* Headline */}
+          <h1 
+            className="text-4xl font-bold mb-4 leading-tight"
+            style={{ 
+              fontFamily: 'var(--font-heading)',
+              color: 'var(--color-text-primary)',
+            }}
+          >
+            Speak Confidently.
+            <br />
+            <span style={{ color: 'var(--color-primary)' }}>Score Higher.</span>
+          </h1>
+
+          {/* Subheadline */}
+          <p 
+            className="text-lg mb-8 max-w-md mx-auto"
+            style={{ 
+              fontFamily: 'var(--font-body)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.6,
+            }}
+          >
+            Practice TOEFL speaking tasks with AI-powered feedback. 
+            Improve your delivery, language use, and topic development.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-12">
+            <Button 
+              size="lg" 
+              onClick={() => router.push('/auth/signin')}
+              icon={<Mic size={20} />}
+            >
+              Start Practicing
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => router.push('/toefl')}
+            >
+              Try Demo
+            </Button>
+          </div>
+
+          {/* Social Proof */}
+          <div className="flex items-center justify-center gap-6 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Users size={18} style={{ color: 'var(--color-text-muted)' }} />
+              <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                1,000+ students
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award size={18} style={{ color: 'var(--color-text-muted)' }} />
+              <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                AI-Powered Scoring
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="px-4 py-16" style={{ background: 'var(--color-bg-elevated)' }}>
+        <div className="max-w-lg mx-auto">
+          <h2 
+            className="text-2xl font-bold text-center mb-10"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            How It Works
+          </h2>
+
+          <div className="space-y-6">
+            {steps.map((step, index) => (
+              <div key={step.number} className="flex items-start gap-4">
+                <div 
+                  className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold"
+                  style={{ 
+                    background: 'var(--color-primary)',
+                    color: 'white',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {step.number}
+                </div>
+                <div className="flex-1 pt-1">
+                  <h3 
+                    className="text-lg font-semibold mb-1"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    {step.title}
+                  </h3>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                    {step.description}
+                  </p>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className="hidden sm:block pt-3">
+                    <ChevronRight size={20} style={{ color: 'var(--color-text-muted)' }} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="px-4 py-16">
+        <div className="max-w-lg mx-auto">
+          <h2 
+            className="text-2xl font-bold text-center mb-10"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Everything You Need
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={feature.title} padding="lg" hover>
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
+                    style={{ background: 'rgba(79, 70, 229, 0.1)' }}
+                  >
+                    <Icon size={20} style={{ color: 'var(--color-primary)' }} />
+                  </div>
+                  <h3 
+                    className="font-semibold mb-1"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    {feature.description}
+                  </p>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* CTA Section */}
-      <section style={{
-        background: 'var(--color-primary)',
-        padding: '60px 24px',
-        textAlign: 'center',
-      }}>
-        <h2 style={{
-          fontFamily: 'var(--font-baloo)',
-          fontSize: '32px',
-          fontWeight: 700,
-          color: 'white',
-          marginBottom: '16px',
-        }}>Ready to improve your speaking score?</h2>
-        <p style={{
-          fontSize: '16px',
-          color: 'rgba(255,255,255,0.8)',
-          marginBottom: '28px',
-        }}>Join thousands of students practicing with AI feedback every day.</p>
-        <button
-          onClick={() => router.push('/toefl')}
-          style={{
-            background: 'white',
-            color: 'var(--color-primary)',
-            border: '3px solid transparent',
-            borderRadius: 'var(--radius-pill)',
-            padding: '14px 36px',
-            fontSize: '16px',
-            fontWeight: 700,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            boxShadow: '0 6px 0 rgba(0,0,0,0.15)',
-            transition: 'all 200ms ease-out',
-          }}>Start Free Practice</button>
+      <section className="px-4 py-16" style={{ background: 'var(--color-bg-elevated)' }}>
+        <div className="max-w-lg mx-auto text-center">
+          <h2 
+            className="text-2xl font-bold mb-4"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Ready to Improve Your Speaking Score?
+          </h2>
+          <p 
+            className="mb-8"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            Join thousands of students who have improved their TOEFL speaking scores with AI-powered practice.
+          </p>
+          <Button 
+            size="lg" 
+            onClick={() => router.push('/auth/signin')}
+            icon={<Mic size={20} />}
+          >
+            Start Practicing Now
+          </Button>
+        </div>
       </section>
+
+      {/* Footer */}
+      <footer className="px-4 py-8 text-center">
+        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+          TOEFL Speaking Trainer — Practice makes perfect
+        </p>
+      </footer>
     </div>
   );
 }
