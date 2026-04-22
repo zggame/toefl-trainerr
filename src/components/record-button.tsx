@@ -138,6 +138,7 @@ export function RecordButton({ onRecordingComplete, onError, disabled, maxSecond
   }, [autoStart, disabled, phase, startRecording]);
 
   useEffect(() => {
+    disposedRef.current = false;
     return () => {
       disposedRef.current = true;
       clearTimer();

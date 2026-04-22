@@ -2,6 +2,7 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { RecordButton } from './record-button';
 
@@ -142,5 +143,17 @@ describe('RecordButton', () => {
 
     await waitFor(() => expect(TestMediaRecorder.instances).toHaveLength(1));
     expect(TestMediaRecorder.instances[0].state).toBe('recording');
+  });
+
+  test('auto-starts in React StrictMode after mount cleanup is replayed', async () => {
+    render(
+      <StrictMode>
+        <RecordButton onRecordingComplete={vi.fn()} disabled={false} autoStart />
+      </StrictMode>
+    );
+
+    await waitFor(() => {
+      expect(TestMediaRecorder.instances.some(instance => instance.state === 'recording')).toBe(true);
+    });
   });
 });
