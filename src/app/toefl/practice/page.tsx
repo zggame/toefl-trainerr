@@ -22,13 +22,12 @@ type Attempt = {
   overall_score: number;
 };
 
-type Step = 'loading' | 'playing' | 'prep' | 'record' | 'score';
+type Step = 'loading' | 'playing' | 'record' | 'score';
 
 export default function PracticePage() {
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
   const [showText, setShowText] = useState(false);
-  const [prepCountdown, setPrepCountdown] = useState<number | null>(null);
   const [step, setStep] = useState<Step>('loading');
   const [result, setResult] = useState<{ attempt: Attempt; scoring: ScoringResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,22 +44,8 @@ export default function PracticePage() {
       .catch(() => setError('Failed to load task'));
   }, []);
 
-  // Handle prep countdown
-  useEffect(() => {
-    if (prepCountdown === null) return;
-    if (prepCountdown > 0) {
-      const timer = setTimeout(() => setPrepCountdown(p => (p ?? 0) - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setStep('record');
-      setPrepCountdown(null);
-    }
-  }, [prepCountdown]);
-
   const handleAudioEnded = () => {
-    if (!task) return;
-    setStep('prep');
-    setPrepCountdown(task.prep_time_seconds || 15);
+    setStep('record');
   };
 
   const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
@@ -136,26 +121,6 @@ export default function PracticePage() {
         </div>
       )}
 
-      {/* Prep countdown */}
-      {step === 'prep' && prepCountdown !== null && (
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{
-            background: 'var(--color-primary)',
-            color: 'white',
-            borderRadius: '50%',
-            width: '80px', height: '80px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-baloo)',
-            fontSize: '32px', fontWeight: 700,
-            boxShadow: 'var(--shadow-clay-md)',
-            margin: '0 auto',
-          }}>
-            {prepCountdown}s
-          </div>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>Prep time — get ready!</p>
-        </div>
-      )}
-
       {/* Recording */}
       {step === 'record' && (
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -191,7 +156,7 @@ export default function PracticePage() {
         </div>
       )}
 
-      {(step === 'playing' || step === 'prep' || step === 'record') && task && (
+      {(step === 'playing' || step === 'record') && task && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <RecordButton
             onRecordingComplete={handleRecordingComplete}
@@ -201,12 +166,7 @@ export default function PracticePage() {
           />
           {step === 'playing' && (
             <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-              Listen carefully to the prompt
-            </p>
-          )}
-          {step === 'prep' && (
-            <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-              Prepare your response — recording starts automatically
+              Recording will start automatically when the prompt finishes
             </p>
           )}
         </div>
