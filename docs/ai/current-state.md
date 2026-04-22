@@ -3,7 +3,7 @@
 **Project:** toefl-trainerr  
 **Branch:** feat/toefl-phase1 (merged to main)  
 **Tag:** `v0.1.0-alpha.1`  
-**Last Updated:** 2026-04-22 (updated with audio playback fixes)
+**Last Updated:** 2026-04-22 (all recent changes pushed to origin/main)
 
 ---
 
