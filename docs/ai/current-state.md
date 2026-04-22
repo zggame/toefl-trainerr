@@ -145,7 +145,8 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - **Animations:** Playful (Duolingo-style bouncing)
 - **Dark Mode:** Follow system preference with manual toggle
 - **Bottom Nav:** Elevated center button for Practice (FAB style)
-- **Card spacing:** Horizontal: 4px left/right margin so content breathes with a visible gap between card edge and screen edge. Vertical: `gap` prop defaults to `true` (12px bottom margin between stacked cards). Tailwind utility margins (`mb-*`) don't work on Card because it uses inline styles — use the `marginBottom` prop or `gap` prop instead
+- **Card spacing:** Horizontal: 4px left/right margin so content breathes with a visible gap between card edge and screen edge. Vertical: `gap` prop defaults to `true` (12px bottom margin between stacked cards).
+- **Header alignment:** Non-card headers/text have `px-3` (12px) padding so they are indented MORE than the cards (4px), creating a clean hierarchy. Vertical spacing increased using `space-y-6` and `space-y-8` on page containers.
 
 ### Completed
 - [x] Design System v2.0 (`design-system/MASTER.md`)
@@ -164,6 +165,11 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - [x] Page enter animations (slide-up)
 - [x] Bottom nav tap feedback (active:scale-95)
 - [x] Card component with style prop and gap prop
+- [x] AudioPlayer — Card wrapper, consistent typography, proper icons
+- [x] Waveform — clean styling with design tokens
+- [x] RecordButton — design system fonts, tabular nums for timer
+- [x] ScoreCard — uses Card/ScoreDisplay/Button components, expandable details
+- [x] ScoreBreakdown — design system colors, cleaner layout
 
 ### Remaining
 - [ ] PWA icons (real PNGs) and service worker
