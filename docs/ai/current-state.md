@@ -90,8 +90,24 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 ---
 
+## Deployment Architecture
+
+**Decision:** Separate Supabase project for toefl-trainerr (do not share with smart-interview).
+
+**Stack:**
+- **Frontend:** Vercel (connected to `zggame/toefl-trainerr`)
+- **Backend:** New Supabase Cloud project (auth + DB + storage)
+- **AI:** Google Gemini API (`gemini-2.5-flash-lite`)
+
+**Rationale:** Clean isolation prevents schema conflicts, RLS policy collisions, and shared-resource contention. Supabase free tier supports 2 projects at no cost.
+
+**Status:** Not yet deployed. See `docs/ai/deployment.md` for step-by-step guide.
+
+---
+
 ## Follow-ups
 
+- [ ] Deploy to Vercel + new Supabase Cloud project
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
