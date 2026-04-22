@@ -2,7 +2,7 @@
 
 **Project:** toefl-trainerr  
 **Branch:** feat/toefl-phase1 (merged to main)  
-**Tag:** `v0.1.0-alpha.1`  
+**Tag:** `v0.2.0-alpha.1`
 **Last Updated:** 2026-04-22 (updated with real TOEFL Speaking simulation)
 
 ---
@@ -80,7 +80,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 | Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
 | Tests | ✅ 23/23 passing (`npm test`, 2026-04-22) |
 | Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
-| Supabase local | ✅ Running (port 54321) |
+| Supabase local | ✅ Running (port 54321) — **shared with `~/work/smart-interview`** |
 
 ## Latest Engineering Milestone
 
@@ -91,6 +91,28 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - Added dashboard entry points for guided practice and simulation mode.
 - Updated practice mode to support full sequential simulation recording, scoring, and final score summary while preserving guided mode.
 - Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, and duplicate-recording prevention.
+- Preserved phase-1 hardening already on `main`: score route validation, private bucket playback, attempt review audio, recording status, and itemized `scoring_details` review.
+
+### Previous Mainline Milestone
+
+- Added ESLint 9 flat config and Vitest config excluding `.worktrees/**`.
+- Added score-route tests for malformed requests, audio type validation, Gemini failure handling, previous-attempt ownership, and storage upload failure.
+- Hardened `POST /api/toefl/score` validation/error handling and made recording upload awaited before attempt insert.
+- Cleaned hook dependencies required by lint in auth, dashboard, audio player, and recorder components.
+- **Added audio playback to attempt review page** — `<audio>` player shows when `audio_url` is available.
+- **Added recording status indicator to ScoreCard** — shows "Recording will be available on the review page" with a direct link.
+- **Fixed private bucket playback** — score route now stores the storage path (not public URL); attempt fetch generates a signed URL via `createSignedUrl()` for 1-hour playback. Works with private `toefl_recordings` bucket.
+- **Added `scoring_details` JSONB column** — stores full per-dimension feedback (score, evidence, tip) as flexible JSON. Review page renders itemized breakdown with progress bars, evidence quotes, and actionable tips.
+
+---
+
+## Local Development Notes
+
+**Shared Supabase Instance:** The local Supabase instance on port 54321 is shared with `~/work/smart-interview`. Both projects use the same local database, auth, and storage. This means:
+- Starting one project's Supabase stops the other
+- Schema changes affect both projects
+- The `scoring_details` migration was applied automatically when Supabase started
+- For isolated development, use separate Supabase Cloud projects (see Deployment Architecture below)
 
 ---
 
@@ -120,9 +142,49 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 ---
 
+## Active Work: UI Revamp v2.0
+
+**Branch:** `feat/ui-revamp`
+**Worktree:** `.worktrees/ui-revamp`
+**Status:** In Progress
+
+### Design Decisions (Approved)
+- **Vibe:** Energetic & Motivational (reduces anxiety)
+- **Target:** High school & college students
+- **Mobile:** Yes, PWA-first
+- **Tech:** Tailwind CSS v4 + Dark Mode
+- **Landing Page:** The "wow" moment with video/demo
+- **Animations:** Playful (Duolingo-style bouncing)
+- **Dark Mode:** Follow system preference with manual toggle
+- **Bottom Nav:** Elevated center button for Practice (FAB style)
+
+### Completed
+- [x] Design System v2.0 (`design-system/MASTER.md`)
+- [x] Tailwind v4 CSS variables for light/dark themes
+- [x] Theme Provider with system preference + manual toggle
+- [x] Bottom Navigation with elevated Practice button
+- [x] Core UI components: Button, Card, ScoreDisplay
+- [x] Landing page with hero, features, how-it-works, CTA
+- [x] Dashboard with motivational stats, recent attempts
+- [x] Practice page (anxiety-reducing, minimal interface)
+- [x] Attempt review page with itemized breakdown
+- [x] PWA manifest.json
+
+### Remaining
+- [ ] History page
+- [ ] Profile page
+- [ ] PWA icons and service worker
+- [ ] Playful animations (score bounce, button bounce)
+- [ ] History and Profile pages
+- [ ] Final polish and accessibility audit
+
+---
+
 ## Follow-ups
 
 - [ ] Deploy to Vercel + new Supabase Cloud project
+- [x] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
+- [ ] **UI Revamp v2.0** — Complete remaining pages (history, profile) + animations + PWA polish
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
