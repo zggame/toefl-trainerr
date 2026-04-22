@@ -9,6 +9,7 @@ interface AudioPlayerProps {
   showTranscript?: boolean;
   onTranscriptToggle?: () => void;
   autoPlay?: boolean;
+  onEnded?: () => void;
 }
 
 const PLACEHOLDER_DOMAINS = ['soundhelix.com', 'example.com', 'placeholder'];
@@ -17,7 +18,7 @@ function isPlaceholderUrl(url: string): boolean {
   return PLACEHOLDER_DOMAINS.some(d => url.includes(d));
 }
 
-export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle, autoPlay }: AudioPlayerProps) {
+export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle, autoPlay, onEnded }: AudioPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const useTts = isPlaceholderUrl(audioUrl);
@@ -29,7 +30,7 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.onstart = () => setPlaying(true);
-    utterance.onend = () => setPlaying(false);
+    utterance.onend = () => { setPlaying(false); onEnded?.(); };
     utterance.onerror = () => setPlaying(false);
     window.speechSynthesis.speak(utterance);
   }, [transcript]);
@@ -72,7 +73,7 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
       border: '3px solid rgba(79,70,229,0.15)',
       boxShadow: 'var(--shadow-clay-sm)',
     }}>
-      {!useTts && <audio ref={audioRef} src={audioUrl} onEnded={() => setPlaying(false)} />}
+      {!useTts && <audio ref={audioRef} src={audioUrl} onEnded={() => { setPlaying(false); onEnded?.(); }} />}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
           onClick={toggle}

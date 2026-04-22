@@ -22,27 +22,30 @@ type Attempt = {
   overall_score: number;
 };
 
+type Step = 'loading' | 'playing' | 'prep' | 'record' | 'score';
+
 export default function PracticePage() {
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
   const [showText, setShowText] = useState(false);
   const [prepCountdown, setPrepCountdown] = useState<number | null>(null);
-  const [step, setStep] = useState<'loading' | 'prep' | 'record' | 'score'>('loading');
+  const [step, setStep] = useState<Step>('loading');
   const [result, setResult] = useState<{ attempt: Attempt; scoring: ScoringResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Load task on mount
   useEffect(() => {
     fetch('/api/toefl/tasks')
       .then(r => r.ok ? r.json() : Promise.reject(r))
       .then(data => {
         if (data.error) { setError(data.error); return; }
         setTask(data);
-        setStep('prep');
-        setPrepCountdown(data.prep_time_seconds || 15);
+        setStep('playing');
       })
       .catch(() => setError('Failed to load task'));
   }, []);
 
+  // Handle prep countdown
   useEffect(() => {
     if (prepCountdown === null) return;
     if (prepCountdown > 0) {
@@ -53,6 +56,12 @@ export default function PracticePage() {
       setPrepCountdown(null);
     }
   }, [prepCountdown]);
+
+  const handleAudioEnded = () => {
+    if (!task) return;
+    setStep('prep');
+    setPrepCountdown(task.prep_time_seconds || 15);
+  };
 
   const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
     if (!task) return;
@@ -72,7 +81,8 @@ export default function PracticePage() {
     });
 
     if (!res.ok) {
-      setError('Scoring failed. Please try again.');
+      const errData = await res.json().catch(() => ({ error: 'Scoring failed' }));
+      setError(errData.error || 'Scoring failed. Please try again.');
       setStep('record');
       return;
     }
@@ -104,6 +114,29 @@ export default function PracticePage() {
         {task?.category === 'listen_repeat' ? 'Listen and Repeat' : 'Interview Question'}
       </h1>
 
+      {/* Playing: audio prompt */}
+      {step === 'playing' && (
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <div style={{
+            background: 'var(--color-primary)',
+            color: 'white',
+            borderRadius: '50%',
+            width: '80px', height: '80px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--font-baloo)',
+            fontSize: '32px', fontWeight: 700,
+            boxShadow: 'var(--shadow-clay-md)',
+            margin: '0 auto',
+          }}>
+            <span style={{ animation: 'pulse 1.5s infinite' }}>▶</span>
+          </div>
+          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '12px' }}>
+            Listen to the prompt...
+          </p>
+        </div>
+      )}
+
+      {/* Prep countdown */}
       {step === 'prep' && prepCountdown !== null && (
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div style={{
@@ -115,10 +148,33 @@ export default function PracticePage() {
             fontFamily: 'var(--font-baloo)',
             fontSize: '32px', fontWeight: 700,
             boxShadow: 'var(--shadow-clay-md)',
+            margin: '0 auto',
           }}>
             {prepCountdown}s
           </div>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>Prep time</p>
+          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>Prep time — get ready!</p>
+        </div>
+      )}
+
+      {/* Recording */}
+      {step === 'record' && (
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <div style={{
+            background: 'var(--color-cta)',
+            color: 'white',
+            borderRadius: '50%',
+            width: '80px', height: '80px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--font-baloo)',
+            fontSize: '20px', fontWeight: 700,
+            boxShadow: 'var(--shadow-clay-md)',
+            margin: '0 auto',
+          }}>
+            REC
+          </div>
+          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-cta)', marginTop: '8px', fontWeight: 600 }}>
+            Recording started automatically!
+          </p>
         </div>
       )}
 
@@ -129,21 +185,28 @@ export default function PracticePage() {
             transcript={task.transcript}
             showTranscript={showText}
             onTranscriptToggle={() => setShowText(!showText)}
-            autoPlay={step === 'prep'}
+            autoPlay={step === 'playing'}
+            onEnded={handleAudioEnded}
           />
         </div>
       )}
 
-      {(step === 'prep' || step === 'record') && task && (
+      {(step === 'playing' || step === 'prep' || step === 'record') && task && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <RecordButton
             onRecordingComplete={handleRecordingComplete}
-            disabled={step === 'prep'}
+            disabled={step !== 'record'}
             maxSeconds={task?.record_time_seconds || 30}
+            autoStart={step === 'record'}
           />
+          {step === 'playing' && (
+            <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
+              Listen carefully to the prompt
+            </p>
+          )}
           {step === 'prep' && (
             <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-              Wait for prep time to end before recording
+              Prepare your response — recording starts automatically
             </p>
           )}
         </div>

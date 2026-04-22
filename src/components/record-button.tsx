@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Mic, Square } from 'lucide-react';
 import { Waveform } from './waveform';
 
@@ -8,13 +8,21 @@ interface RecordButtonProps {
   onRecordingComplete: (audioBlob: Blob, base64: string) => void;
   disabled?: boolean;
   maxSeconds?: number;
+  autoStart?: boolean;
 }
 
-export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45 }: RecordButtonProps) {
+export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, autoStart }: RecordButtonProps) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (autoStart && !recording && !disabled) {
+      startRecording();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, disabled]);
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
