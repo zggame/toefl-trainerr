@@ -3,7 +3,7 @@
 **Project:** toefl-trainerr  
 **Branch:** feat/toefl-phase1 (merged to main)  
 **Tag:** `v0.1.0-alpha.1`  
-**Last Updated:** 2026-04-22 (updated with audio playback fixes)
+**Last Updated:** 2026-04-22 (updated with real TOEFL Speaking simulation)
 
 ---
 
@@ -12,6 +12,7 @@
 ### Core Practice Loop
 - **Auth:** Google OAuth via Supabase Auth with middleware guards
 - **Flow:** Play audio prompt (TTS fallback) → auto-start recording when prompt ends → AI scoring → save attempt
+- **Simulation:** Real TOEFL Speaking mode runs 11 items in order — 7 listen-repeat, then 4 interview — with no prompt replay or transcript reveal
 - **Tasks:** 65 total — 30 listen-repeat + 35 interview, random selection per session
 - **Timer:** Countdown during recording (turns red at 5s), auto-stops at 0
 
@@ -26,13 +27,14 @@
 | Landing | `/` | ✅ Done |
 | Sign-in | `/auth/signin` | ✅ Done |
 | Dashboard | `/toefl` | ✅ Done |
-| Practice | `/toefl/practice` | ✅ Done |
+| Practice | `/toefl/practice?mode=guided` and `/toefl/practice?mode=simulation` | ✅ Done |
 | History | `/toefl/history` | ✅ Done |
 | Attempt Review | `/toefl/attempt/[id]` | ✅ Done |
 | Profile | `/toefl/profile` | ✅ Done |
 
 ### API Routes
 - `GET /api/toefl/tasks` — random task
+- `GET /api/toefl/simulation/tasks` — 11-item TOEFL Speaking simulation task plan
 - `POST /api/toefl/score` — AI scoring + save attempt
 - `GET /api/toefl/attempts` — history
 - `GET /api/toefl/attempts/[id]` — single attempt
@@ -76,21 +78,19 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 |-------|--------|
 | Build | ✅ Passes (`npm run build`, 2026-04-22) |
 | Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
-| Tests | ✅ 13/13 passing (`npm test`, 2026-04-22) |
+| Tests | ✅ 23/23 passing (`npm test`, 2026-04-22) |
 | Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
 | Supabase local | ✅ Running (port 54321) |
 
 ## Latest Engineering Milestone
 
-**Branch/worktree:** `main` at `/home/pooh/work/toefl-mini` (all recent edits in root, not worktree)
+**Branch/worktree:** `feat/real-toefl-simulation` at `/home/pooh/work/toefl-mini/.worktrees/real-toefl-simulation`
 
-- Added ESLint 9 flat config and Vitest config excluding `.worktrees/**`.
-- Added score-route tests for malformed requests, audio type validation, Gemini failure handling, previous-attempt ownership, and storage upload failure.
-- Hardened `POST /api/toefl/score` validation/error handling and made recording upload awaited before attempt insert.
-- Cleaned hook dependencies required by lint in auth, dashboard, audio player, and recorder components.
-- **Added audio playback to attempt review page** — `<audio>` player shows when `audio_url` is available.
-- **Added recording status indicator to ScoreCard** — shows "Recording will be available on the review page" with a direct link.
-- **Fixed private bucket playback** — score route now stores the storage path (not public URL); attempt fetch generates a signed URL via `createSignedUrl()` for 1-hour playback. Works with private `toefl_recordings` bucket.
+- Added simulation task planning utilities with tests for counts, ordering, prompt-bank sufficiency, and mode parsing.
+- Added authenticated `GET /api/toefl/simulation/tasks` to fetch and shuffle the required simulation task bank.
+- Added dashboard entry points for guided practice and simulation mode.
+- Updated practice mode to support full sequential simulation recording, scoring, and final score summary while preserving guided mode.
+- Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, and duplicate-recording prevention.
 
 ---
 
@@ -101,6 +101,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 3. **No retry loop yet** — Phase 2 feature (targeted retry, sentence-level retry)
 4. **No profile update UI** — API exists but page is read-only
 5. **Private recording playback** — ✅ Fixed. Score route stores storage path; attempt fetch generates signed URL. Verify bucket policies against the production Supabase project before launch.
+6. **Simulation prompt bank dependency** — Simulation requires at least 7 `listen_repeat` and 4 `interview` tasks in Supabase; the API returns a blocking 404 if the bank is underfilled.
 
 ---
 
@@ -127,4 +128,3 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - [ ] Generate real audio prompts (replace TTS fallback)
 - [ ] Score trend chart on dashboard
 - [ ] Streak tracking + profile updates
-- [ ] Simulation mode (no replay, no transcript)
