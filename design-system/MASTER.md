@@ -1,231 +1,495 @@
-# Design System Master File
+# TOEFL Speaking Trainer — Design System v2.0
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
-
----
-
-**Project:** TOEFL Speaking Trainer
-**Generated:** 2026-04-20
-**Audience:** College & high school students (ages 16–24)
-**Category:** Language Learning App — Youth-oriented
+> **Target Audience:** High school & college students preparing for TOEFL  
+> **Mood:** Energetic, Motivational, Reduces Anxiety  
+> **Platform:** Mobile-first PWA, responsive to desktop  
+> **Tech Stack:** Next.js + Tailwind CSS + Dark Mode
 
 ---
 
-## Global Rules
+## Philosophy
 
-### Color Palette
+**"Duolingo meets Notion"** — Playful enough to be engaging, clean enough to feel professional, with clear progress tracking to keep students motivated without overwhelming them.
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#4F46E5` | `--color-primary` |
-| Secondary | `#818CF8` | `--color-secondary` |
-| CTA/Accent | `#22C55E` | `--color-cta` |
-| Background | `#EEF2FF` | `--color-background` |
-| Text | `#312E81` | `--color-text` |
+TOEFL is stressful. The UI should feel like a supportive coach, not a demanding taskmaster.
 
-**Color Notes:** Learning indigo + progress green
+---
 
-### Typography
+## Color System
 
-- **Heading Font:** Baloo 2
-- **Body Font:** Comic Neue
-- **Mood:** playful, friendly, colorful, energetic, modern, youthful, motivating
-- **Best For:** Students, teenagers, young adults, educational games, engaging learning apps
-- **Google Fonts:** [Baloo 2 + Comic Neue](https://fonts.google.com/share?selection.family=Baloo+2:wght@400;500;600;700|Comic+Neue:wght@300;400;700)
+### Primary Palette
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Comic+Neue:wght@300;400;700&display=swap');
+| Token | Light Mode | Dark Mode | Usage |
+|-------|-----------|-----------|-------|
+| `primary` | `#4F46E5` | `#6366F1` | Main brand color, CTAs, active states |
+| `primary-light` | `#818CF8` | `#A5B4FC` | Hover states, highlights, secondary accents |
+| `primary-dark` | `#3730A3` | `#4F46E5` | Pressed states, emphasis |
+
+### Accent Colors (Energetic & Motivational)
+
+| Token | Light Mode | Dark Mode | Usage |
+|-------|-----------|-----------|-------|
+| `accent` | `#F97316` | `#FB923C` | Success, progress, streaks, achievements |
+| `accent-green` | `#22C55E` | `#4ADE80` | Good scores, positive feedback |
+| `accent-yellow` | `#EAB308` | `#FDE047` | Warnings, medium scores, tips |
+| `accent-red` | `#EF4444` | `#F87171` | Errors, low scores (use sparingly) |
+
+### Neutral Colors
+
+| Token | Light Mode | Dark Mode | Usage |
+|-------|-----------|-----------|-------|
+| `bg` | `#FFFFFF` | `#0F172A` | Page background |
+| `bg-elevated` | `#F8FAFC` | `#1E293B` | Cards, elevated surfaces |
+| `bg-overlay` | `rgba(0,0,0,0.04)` | `rgba(255,255,255,0.04)` | Subtle separators |
+| `text-primary` | `#0F172A` | `#F1F5F9` | Headings, primary text |
+| `text-secondary` | `#475569` | `#94A3B8` | Body text, descriptions |
+| `text-muted` | `#94A3B8` | `#64748B` | Placeholders, timestamps |
+| `border` | `#E2E8F0` | `#334155` | Card borders, dividers |
+
+### Score Colors
+
+| Score Range | Color | Dark Mode |
+|-------------|-------|-----------|
+| 3.5 - 4.0 | `#22C55E` (green) | `#4ADE80` |
+| 2.5 - 3.4 | `#4F46E5` (indigo) | `#6366F1` |
+| 1.5 - 2.4 | `#EAB308` (yellow) | `#FDE047` |
+| 0.0 - 1.4 | `#EF4444` (red) | `#F87171` |
+
+---
+
+## Typography
+
+### Font Family
+
+Replace the current "Baloo 2 + Comic Neue" (childish) with:
+
+| Role | Font | Fallback | Weight |
+|------|------|----------|--------|
+| **Headings** | `Outfit` | `system-ui, sans-serif` | 600, 700 |
+| **Body** | `Inter` | `system-ui, sans-serif` | 400, 500, 600 |
+| **Mono** | `JetBrains Mono` | `monospace` | 400, 500 | Timer, scores, stats |
+
+### Why These Fonts?
+
+- **Outfit:** Geometric, modern, friendly but not childish. Perfect for headlines.
+- **Inter:** Highly readable, professional, designed for screens. The standard for modern web apps.
+- **JetBrains Mono:** Clean monospace for numbers (timer, WPM, scores) — prevents jumping when digits change.
+
+### Type Scale
+
+| Token | Size | Line Height | Letter Spacing | Usage |
+|-------|------|-------------|----------------|-------|
+| `display` | 48px / 3rem | 1.1 | -0.02em | Hero headlines |
+| `h1` | 32px / 2rem | 1.2 | -0.01em | Page titles |
+| `h2` | 24px / 1.5rem | 1.3 | 0 | Section headings |
+| `h3` | 20px / 1.25rem | 1.4 | 0 | Card titles |
+| `body` | 16px / 1rem | 1.6 | 0 | Body text |
+| `body-sm` | 14px / 0.875rem | 1.5 | 0 | Secondary text |
+| `caption` | 12px / 0.75rem | 1.4 | 0.01em | Labels, timestamps |
+| `overline` | 11px / 0.6875rem | 1.2 | 0.05em | Badges, categories |
+
+---
+
+## Spacing System
+
+Use Tailwind's default spacing scale but with these base rules:
+
+- **Base unit:** 4px (Tailwind default)
+- **Page padding:** 16px mobile, 24px tablet, 32px desktop
+- **Card padding:** 20px mobile, 24px desktop
+- **Card gap:** 16px mobile, 24px desktop
+- **Section gap:** 32px mobile, 48px desktop
+- **Touch target:** Minimum 44px × 44px for all interactive elements
+
+---
+
+## Components
+
+### Cards
+
 ```
+Light Mode:
+- Background: bg-elevated (#F8FAFC)
+- Border: 1px solid border (#E2E8F0)
+- Border radius: 16px (rounded-2xl)
+- Shadow: subtle — 0 1px 3px rgba(0,0,0,0.08)
+- Hover: shadow increases slightly, border color darkens
 
-### Spacing Variables
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
-
-### Shadow Depths (Claymorphism)
-
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `4px 4px 8px rgba(0,0,0,0.08), -2px -2px 6px rgba(255,255,255,0.9)` | Subtle lift |
-| `--shadow-md` | `6px 6px 12px rgba(0,0,0,0.08), -4px -4px 10px rgba(255,255,255,0.9)` | Cards, buttons |
-| `--shadow-lg` | `8px 8px 16px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.9)` | Modals, featured cards |
-| `--shadow-xl` | `12px 12px 24px rgba(0,0,0,0.12), -6px -6px 16px rgba(255,255,255,0.95)` | Hero cards, primary CTAs |
-
----
-
-## Component Specs
+Dark Mode:
+- Background: bg-elevated (#1E293B)
+- Border: 1px solid border (#334155)
+- Same radius and shadow (adjusted for dark)
+```
 
 ### Buttons
 
-```css
-/* Primary Button — CTA */
-.btn-primary {
-  background: #22C55E;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 9999px; /* pill shape — youthful */
-  font-weight: 600;
-  font-family: 'Baloo 2', sans-serif;
-  transition: all 200ms ease-out;
-  cursor: pointer;
-  border: 3px solid transparent;
-  box-shadow: 0 4px 0 #16A34A, 0 4px 12px rgba(34,197,94,0.3);
-}
+**Primary Button:**
+- Background: primary
+- Text: white
+- Padding: 14px 24px
+- Border radius: 12px (rounded-xl)
+- Font: body, weight 600
+- Hover: primary-dark, slight scale (1.02)
+- Active: scale (0.98)
+- Shadow: 0 4px 14px rgba(79, 70, 229, 0.3)
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #16A34A, 0 6px 16px rgba(34,197,94,0.4);
-}
+**Secondary Button:**
+- Background: transparent
+- Border: 2px solid primary
+- Text: primary
+- Same padding/radius
+- Hover: primary with 10% opacity background
 
-.btn-primary:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 0 #16A34A;
-}
+**Ghost Button:**
+- Background: transparent
+- Text: text-secondary
+- Hover: bg-overlay
 
-/* Secondary Button */
-.btn-secondary {
-  background: #EEF2FF;
-  color: #4F46E5;
-  border: 3px solid #4F46E5;
-  padding: 12px 24px;
-  border-radius: 9999px;
-  font-weight: 600;
-  font-family: 'Baloo 2', sans-serif;
-  transition: all 200ms ease-out;
-  cursor: pointer;
-}
+### Score Display
 
-.btn-secondary:hover {
-  background: #4F46E5;
-  color: white;
-  transform: translateY(-2px);
-}
+```
+Large Score (Overall):
+- Font: JetBrains Mono, 64px, weight 700
+- Color: Dynamic based on score range
+- Decimal: smaller (32px) with /4 suffix
+
+Sub-scores:
+- Font: JetBrains Mono, 28px, weight 600
+- Color: Same dynamic logic
+- Label: caption size, text-muted
 ```
 
-### Cards (Claymorphism)
+### Progress Bars
 
-```css
-.card {
-  background: #EEF2FF;
-  border-radius: 20px;
-  padding: 24px;
-  border: 3px solid rgba(79,70,229,0.15);
-  box-shadow:
-    6px 6px 12px rgba(0,0,0,0.08),
-    -4px -4px 10px rgba(255,255,255,0.9);
-  transition: all 200ms ease-out;
-  cursor: pointer;
-}
+- Height: 8px
+- Background: bg-overlay
+- Fill: Dynamic color based on value
+- Border radius: full (rounded-full)
+- Animation: width transition 600ms ease-out on load
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    8px 8px 16px rgba(0,0,0,0.1),
-    -4px -4px 12px rgba(255,255,255,0.9);
-}
+### Badges
+
+```
+Mode Badge:
+- "Guided" — bg-primary/10 text-primary
+- "Simulation" — bg-accent/10 text-accent
+
+Score Badge:
+- "Excellent" — bg-green-100 text-green-700 (dark: bg-green-900/30 text-green-400)
+- "Good" — bg-indigo-100 text-indigo-700
+- "Needs Work" — bg-yellow-100 text-yellow-700
+- "Practice More" — bg-red-100 text-red-700
 ```
 
-### Inputs
+---
 
-```css
-.input {
-  padding: 14px 18px;
-  border: 3px solid rgba(79,70,229,0.2);
-  border-radius: 14px;
-  font-size: 16px;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(4px);
-  transition: all 200ms ease;
-  font-family: 'Comic Neue', sans-serif;
-}
+## Layout Patterns
 
-.input:focus {
-  border-color: #4F46E5;
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(79,70,229,0.15);
-  background: white;
-}
+### Mobile Navigation (Bottom Tab Bar)
+
+```
+Fixed bottom, 64px height
+Background: bg with backdrop-blur
+Border-top: 1px solid border
+Icons: 24px, Lucide
+Active: primary color + small indicator dot
+Inactive: text-muted
+Safe area padding for notched devices
 ```
 
-### Modals
+**Tabs:**
+1. Home (dashboard)
+2. Practice (microphone icon)
+3. History (clock icon)
+4. Profile (user icon)
+
+### Page Structure
+
+```
+Every page:
+┌─────────────────────────────┐
+│  Status Bar (safe area)     │
+├─────────────────────────────┤
+│  Header (optional)          │
+│  - Back button              │
+│  - Page title               │
+├─────────────────────────────┤
+│                             │
+│  Content (scrollable)       │
+│  - Generous padding         │
+│  - Card-based layout        │
+│                             │
+├─────────────────────────────┤
+│  Bottom Nav (if main page)  │
+│  Safe Area padding          │
+└─────────────────────────────┘
+```
+
+### Landing Page Structure
+
+```
+1. Hero Section
+   - Bold headline: "Speak Confidently. Score Higher."
+   - Subheadline explaining value prop
+   - Large CTA: "Start Practicing"
+   - Animated illustration or abstract shapes
+
+2. Social Proof
+   - Stats: "X students improved their score"
+   - Short testimonials or trust badges
+
+3. How It Works (3 steps)
+   - Step 1: Listen to prompt
+   - Step 2: Record your response
+   - Step 3: Get AI feedback
+   - Simple icons, minimal text
+
+4. Feature Highlights (Bento Grid)
+   - 65+ practice tasks
+   - Real-time AI scoring
+   - Detailed feedback
+   - Progress tracking
+   - Mobile-friendly
+
+5. CTA Section
+   - "Ready to improve your speaking score?"
+   - Final CTA button
+   - "No signup required to try"
+```
+
+---
+
+## Animations & Effects
+
+### Micro-interactions
+
+| Element | Trigger | Animation |
+|---------|---------|-----------|
+| Cards | Hover | translateY(-2px), shadow increase, 200ms ease |
+| Buttons | Hover | scale(1.02), 150ms ease |
+| Buttons | Active/Press | scale(0.98), 100ms ease |
+| Score reveal | Load | Count up from 0, 800ms, easeOutExpo |
+| Progress bar | Load | Width from 0% to value, 600ms ease-out |
+| Recording | Active | Pulse animation on mic icon, 1.5s infinite |
+| Nav items | Tap | Scale(0.95) then back, 100ms |
+| Toast/Notification | Enter | Slide up + fade in, 300ms |
+| Toast/Notification | Exit | Fade out, 200ms |
+
+### Page Transitions
+
+- **Enter:** Fade in + slight translateY(8px to 0), 300ms
+- **Exit:** Fade out, 150ms
+- Use Next.js App Router transitions or Framer Motion
+
+### Reduced Motion
 
 ```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
 ---
 
-## Style Guidelines
+## Dark Mode Strategy
 
-**Style:** Claymorphism
+### Implementation
 
-**Keywords:** Soft 3D, chunky, playful, bubbly, thick borders (3-4px), double shadows, rounded (16-24px), energetic, modern, youthful
+- Use Tailwind's `darkMode: 'class'` strategy
+- Toggle via system preference or manual toggle
+- Store preference in localStorage
+- Apply `dark` class to `<html>` element
 
-**Best For:** Students (16–24), educational apps, engaging learning experiences, onboarding flows, progress-driven UI
+### Dark Mode Colors
 
-**Key Effects:** Inner+outer shadows (subtle, no hard lines), soft press (200ms ease-out), fluffy elements, smooth transitions, pill-shaped buttons, large border-radius
+- Avoid pure black (`#000000`) — use `#0F172A` (slate-900) for less eye strain
+- Elevated surfaces: `#1E293B` (slate-800)
+- Text: `#F1F5F9` (slate-100) for primary, `#94A3B8` for secondary
+- Borders: `#334155` (slate-700)
+- Shadows are subtle — rely on border contrast instead
 
-### Page Pattern
+### Toggle Button
 
-**Pattern Name:** App Store Style Landing — Youth Edition
-
-- **Conversion Strategy:** Show real screenshots. Include ratings (4.5+ stars). Gamified progress indicators. Platform-specific CTAs.
-- **CTA Placement:** Prominent pill buttons throughout, floating action buttons on mobile
-- **Section Order:** 1. Hero with animated device mockup, 2. App feature highlights with icons, 3. Screenshots carousel, 4. Social proof (student testimonials), 5. Download CTAs
-
----
-
-## Anti-Patterns (Do NOT Use)
-
-- ❌ Boring, flat, corporate design — student audience needs energy
-- ❌ No motivation — must show progress, streaks, achievements
-- ❌ Too childish — college students won't use an app that looks like a kids game
-- ❌ Low energy — color should be vibrant, spacing should breathe, motion should feel alive
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
+```
+Position: Header or settings page
+Icon: Sun (light mode) / Moon (dark mode)
+Animation: Icon rotation on toggle
+```
 
 ---
 
-## Pre-Delivery Checklist
+## PWA Considerations
 
-Before delivering any UI code, verify:
+### Manifest
 
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+```json
+{
+  "name": "TOEFL Speaking Trainer",
+  "short_name": "TOEFL Speak",
+  "theme_color": "#4F46E5",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "orientation": "portrait"
+}
+```
+
+### Icons
+
+- Provide 192px and 512px icons
+- Maskable icon for adaptive shapes
+- Use primary color as background
+
+### Behaviors
+
+- `standalone` display mode (no browser chrome)
+- Add to home screen prompt
+- Offline page (cached shell)
+- Pull-to-refresh disabled where not needed
+- Overscroll-behavior: contain on main content
+
+---
+
+## Responsive Breakpoints
+
+| Name | Width | Usage |
+|------|-------|-------|
+| `sm` | 640px | Large phones |
+| `md` | 768px | Tablets |
+| `lg` | 1024px | Small laptops |
+| `xl` | 1280px | Desktops |
+| `2xl` | 1536px | Large screens |
+
+### Mobile-First Approach
+
+```css
+/* Base styles are mobile */
+.container {
+  padding: 16px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .container {
+    padding: 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .container {
+    padding: 32px;
+    max-width: 960px;
+  }
+}
+```
+
+---
+
+## Accessibility
+
+- WCAG AA minimum (4.5:1 contrast for text)
+- All interactive elements: minimum 44×44px touch target
+- Focus rings visible on all focusable elements
+- `prefers-reduced-motion` respected
+- Alt text on all images
+- Semantic HTML (button, not div with onClick)
+- ARIA labels where needed
+- Color is not the only indicator (icons + text)
+
+---
+
+## Anti-Patterns to Avoid
+
+❌ **Childish fonts** — No Baloo, Comic Sans, or overly playful typefaces  
+❌ **Excessive shadows** — Keep shadows subtle and consistent  
+❌ **Pure black in dark mode** — Always use dark slate, never #000000  
+❌ **Too many colors** — Stick to the defined palette  
+❌ **Busy layouts** — Generous whitespace, one action per screen on mobile  
+❌ **Small touch targets** — Minimum 44px for everything tappable  
+❌ **Emoji as icons** — Always use SVG icons (Lucide)  
+❌ **No feedback on tap** — Every tap must have visual feedback  
+❌ **Horizontal scroll** — Avoid on mobile, use vertical stacking  
+❌ **Cluttered dashboard** — Show only what's needed, hide details behind cards  
+
+---
+
+## File Structure
+
+```
+.worktrees/ui-revamp/
+├── public/
+│   ├── manifest.json          # PWA manifest
+│   ├── icons/
+│   │   ├── icon-192x192.png
+│   │   └── icon-512x512.png
+│   └── ...
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx         # Root layout with fonts, theme provider
+│   │   ├── globals.css        # Tailwind imports + custom CSS
+│   │   ├── page.tsx           # Landing page (revamped)
+│   │   ├── auth/
+│   │   ├── toefl/
+│   │   │   ├── layout.tsx     # App shell with bottom nav
+│   │   │   ├── page.tsx       # Dashboard
+│   │   │   ├── practice/
+│   │   │   ├── history/
+│   │   │   ├── attempt/
+│   │   │   └── profile/
+│   │   └── api/
+│   ├── components/
+│   │   ├── ui/                # Reusable UI components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── score-display.tsx
+│   │   │   ├── progress-bar.tsx
+│   │   │   ├── badge.tsx
+│   │   │   └── icon.tsx
+│   │   ├── layout/
+│   │   │   ├── bottom-nav.tsx
+│   │   │   ├── header.tsx
+│   │   │   └── page-wrapper.tsx
+│   │   ├── audio-player.tsx   # Revamped
+│   │   ├── record-button.tsx  # Revamped
+│   │   ├── score-card.tsx     # Revamped
+│   │   ├── score-breakdown.tsx # Revamped
+│   │   └── waveform.tsx       # Revamped
+│   ├── hooks/
+│   │   ├── use-theme.ts       # Dark mode management
+│   │   └── use-media-query.ts # Responsive helpers
+│   ├── lib/
+│   │   ├── utils.ts           # cn() helper, etc.
+│   │   └── constants.ts       # Design tokens
+│   └── types/
+│       └── index.ts
+├── tailwind.config.ts         # Extended config with design tokens
+├── next.config.js             # PWA config
+└── package.json
+```
+
+---
+
+## Implementation Order
+
+1. **Setup** — Tailwind config, fonts, colors, dark mode provider
+2. **Layout Components** — Bottom nav, header, page wrapper
+3. **UI Components** — Button, card, score display, progress bar, badge
+4. **Landing Page** — Hero, features, CTA (the "wow" moment)
+5. **Dashboard** — Stats cards, recent attempts, quick actions
+6. **Practice Page** — Audio player, record button, timer (reduce anxiety)
+7. **ScoreCard** — Score reveal animation, recording status
+8. **Review Page** — Full itemized breakdown
+9. **History & Profile** — List views, settings
+10. **PWA** — Manifest, icons, service worker, install prompt
+11. **Polish** — Animations, transitions, reduced motion, accessibility audit
+
+---
+
+*Generated with ui-ux-pro-max skill*  
+*For: TOEFL Speaking Trainer v2.0 UI Revamp*  
+*Worktree: `.worktrees/ui-revamp`*
