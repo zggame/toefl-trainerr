@@ -3,7 +3,7 @@
 **Project:** toefl-trainerr  
 **Branch:** feat/toefl-phase1 (merged to main)  
 **Tag:** `v0.1.0-alpha.1`  
-**Last Updated:** 2026-04-22
+**Last Updated:** 2026-04-22 (updated with audio playback fixes)
 
 ---
 
@@ -82,12 +82,15 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 ## Latest Engineering Milestone
 
-**Branch/worktree:** `main` at `/home/pooh/work/toefl-mini`
+**Branch/worktree:** `main` at `/home/pooh/work/toefl-mini` (all recent edits in root, not worktree)
 
 - Added ESLint 9 flat config and Vitest config excluding `.worktrees/**`.
 - Added score-route tests for malformed requests, audio type validation, Gemini failure handling, previous-attempt ownership, and storage upload failure.
 - Hardened `POST /api/toefl/score` validation/error handling and made recording upload awaited before attempt insert.
 - Cleaned hook dependencies required by lint in auth, dashboard, audio player, and recorder components.
+- **Added audio playback to attempt review page** — `<audio>` player shows when `audio_url` is available.
+- **Added recording status indicator to ScoreCard** — shows "Recording will be available on the review page" with a direct link.
+- **Fixed private bucket playback** — score route now stores the storage path (not public URL); attempt fetch generates a signed URL via `createSignedUrl()` for 1-hour playback. Works with private `toefl_recordings` bucket.
 
 ---
 
@@ -97,7 +100,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 2. **Audio placeholders** — All tasks use placeholder URLs; `AudioPlayer` falls back to browser TTS
 3. **No retry loop yet** — Phase 2 feature (targeted retry, sentence-level retry)
 4. **No profile update UI** — API exists but page is read-only
-5. **Private recording playback** — Attempt review now signs stored recording paths; verify bucket policies against the production Supabase project before launch.
+5. **Private recording playback** — ✅ Fixed. Score route stores storage path; attempt fetch generates signed URL. Verify bucket policies against the production Supabase project before launch.
 
 ---
 
