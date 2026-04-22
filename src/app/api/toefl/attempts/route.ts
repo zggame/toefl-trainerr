@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServer } from '@/lib/supabase-client';
+import { getAuthenticatedUser, getSupabaseServer } from '@/lib/supabase-client';
 
 export async function GET(request: NextRequest) {
-  const supabase = getSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const supabase = getSupabaseServer();
 
   const limit = parseInt(new URL(request.url).searchParams.get('limit') ?? '10', 10);
   const { data, error } = await supabase

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { parseAttemptsResponse } from '@/lib/toefl-attempts';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
@@ -12,7 +13,7 @@ export default function HistoryPage() {
   useEffect(() => {
     fetch('/api/toefl/attempts?limit=50')
       .then(r => r.json())
-      .then(data => { setAttempts(data || []); setLoading(false); })
+      .then(data => { setAttempts(parseAttemptsResponse(data)); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 

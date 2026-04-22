@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { parseAttemptsResponse } from '@/lib/toefl-attempts';
 import { Mic, TrendingUp, Flame, Target, User } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -10,7 +11,7 @@ export default function ProfilePage() {
   useEffect(() => {
     fetch('/api/toefl/attempts?limit=100')
       .then(r => r.json())
-      .then(data => { setAttempts(data || []); setLoading(false); })
+      .then(data => { setAttempts(parseAttemptsResponse(data)); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 

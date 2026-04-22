@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServer } from '@/lib/supabase-client';
+import { getAuthenticatedUser, getSupabaseServer } from '@/lib/supabase-client';
 import { scoreAudio } from '@/lib/gemini';
 
 export async function POST(request: NextRequest) {
-  const supabase = getSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const supabase = getSupabaseServer();
 
   const body = await request.json();
   const { audioBase64, mimeType, taskId, taskCategory, taskTranscript, mode, previousAttemptId } = body;

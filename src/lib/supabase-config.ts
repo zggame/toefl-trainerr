@@ -15,16 +15,15 @@ export interface SupabaseBrowserConfig {
 }
 
 export function getSupabaseBrowserConfig(
-  env: NodeJS.ProcessEnv = process.env
+  env?: NodeJS.ProcessEnv
 ): SupabaseBrowserConfig {
-  if (env.SUPABASE_USE_MOCK === 'true') {
+  if (env?.SUPABASE_USE_MOCK === 'true' || process.env.SUPABASE_USE_MOCK === 'true') {
     return { mode: 'mock', url: MOCK_SUPABASE_URL, anonKey: MOCK_SUPABASE_KEY };
   }
-  const url = env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = env?.NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = env?.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) {
-    console.warn('[supabase-config] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — using mock mode');
-    return { mode: 'mock', url: MOCK_SUPABASE_URL, anonKey: MOCK_SUPABASE_KEY };
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required');
   }
   return { mode: 'live', url, anonKey };
 }
