@@ -145,26 +145,29 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - **Animations:** Playful (Duolingo-style bouncing)
 - **Dark Mode:** Follow system preference with manual toggle
 - **Bottom Nav:** Elevated center button for Practice (FAB style)
+- **Card spacing:** Horizontal: 4px left/right margin so content breathes with a visible gap between card edge and screen edge. Vertical: `gap` prop defaults to `true` (12px bottom margin between stacked cards). Tailwind utility margins (`mb-*`) don't work on Card because it uses inline styles — use the `marginBottom` prop or `gap` prop instead
 
 ### Completed
 - [x] Design System v2.0 (`design-system/MASTER.md`)
 - [x] Tailwind v4 CSS variables for light/dark themes
 - [x] Theme Provider with system preference + manual toggle
 - [x] Bottom Navigation with elevated Practice button
-- [x] Core UI components: Button, Card, ScoreDisplay
+- [x] Core UI components: Button, Card, ScoreDisplay, PageTransition
 - [x] Landing page with hero, features, how-it-works, CTA
 - [x] Dashboard with motivational stats, recent attempts
 - [x] Practice page (anxiety-reducing, minimal interface)
 - [x] Attempt review page with itemized breakdown
 - [x] PWA manifest.json
+- [x] History page (filter by mode, score badges, consistent design)
+- [x] Profile page (stats grid, progress bars, focus area, theme toggle)
+- [x] Dark mode toggle in Profile page (light/dark/system)
+- [x] Page enter animations (slide-up)
+- [x] Bottom nav tap feedback (active:scale-95)
+- [x] Card component with style prop and gap prop
 
 ### Remaining
-- [ ] History page
-- [ ] Profile page
-- [ ] PWA icons and service worker
-- [ ] Playful animations (score bounce, button bounce)
-- [ ] History and Profile pages
-- [ ] Final polish and accessibility audit
+- [ ] PWA icons (real PNGs) and service worker
+- [ ] Merge feat/ui-revamp into main
 
 ---
 
@@ -172,7 +175,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 - [ ] Deploy to Vercel + new Supabase Cloud project
 - [x] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
-- [ ] **UI Revamp v2.0** — Complete remaining pages (history, profile) + animations + PWA polish
+- [ ] **UI Revamp v2.0** — PWA icons/service worker + merge to main
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
