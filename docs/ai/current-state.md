@@ -78,7 +78,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 | Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
 | Tests | ✅ 13/13 passing (`npm test`, 2026-04-22) |
 | Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
-| Supabase local | ✅ Running (port 54321) |
+| Supabase local | ✅ Running (port 54321) — **shared with `~/work/smart-interview`** |
 
 ## Latest Engineering Milestone
 
@@ -92,6 +92,16 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - **Added recording status indicator to ScoreCard** — shows "Recording will be available on the review page" with a direct link.
 - **Fixed private bucket playback** — score route now stores the storage path (not public URL); attempt fetch generates a signed URL via `createSignedUrl()` for 1-hour playback. Works with private `toefl_recordings` bucket.
 - **Added `scoring_details` JSONB column** — stores full per-dimension feedback (score, evidence, tip) as flexible JSON. Review page renders itemized breakdown with progress bars, evidence quotes, and actionable tips.
+
+---
+
+## Local Development Notes
+
+**Shared Supabase Instance:** The local Supabase instance on port 54321 is shared with `~/work/smart-interview`. Both projects use the same local database, auth, and storage. This means:
+- Starting one project's Supabase stops the other
+- Schema changes affect both projects
+- The `scoring_details` migration was applied automatically when Supabase started
+- For isolated development, use separate Supabase Cloud projects (see Deployment Architecture below)
 
 ---
 
