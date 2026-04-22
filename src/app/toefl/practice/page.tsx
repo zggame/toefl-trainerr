@@ -107,7 +107,7 @@ export default function PracticePage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="text-center">
+      <div className="text-center px-3">
         <span 
           className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-3"
           style={{ 
