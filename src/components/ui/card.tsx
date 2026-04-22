@@ -52,6 +52,8 @@ export function Card({
         boxShadow: 'var(--shadow-card)',
         transition: 'all 200ms ease',
         cursor: onClick ? 'pointer' : 'default',
+        marginLeft: '4px',
+        marginRight: '4px',
         marginBottom: marginBottom ?? (gap ? '12px' : undefined),
         ...paddingStyles[padding],
         ...style,
