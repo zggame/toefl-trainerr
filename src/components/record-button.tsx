@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, Square } from 'lucide-react';
 import { Waveform } from './waveform';
 
@@ -17,14 +17,15 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (autoStart && !recording && !disabled) {
-      startRecording();
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoStart, disabled]);
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRecording(false);
+  }, []);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
     const chunks: Blob[] = [];
@@ -55,15 +56,13 @@ export function RecordButton({ onRecordingComplete, disabled, maxSeconds = 45, a
         return prev - 1;
       });
     }, 1000);
-  };
+  }, [maxSeconds, onRecordingComplete, stopRecording]);
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current?.state === 'recording') {
-      mediaRecorderRef.current.stop();
+  useEffect(() => {
+    if (autoStart && !recording && !disabled) {
+      void Promise.resolve().then(startRecording);
     }
-    if (timerRef.current) clearInterval(timerRef.current);
-    setRecording(false);
-  };
+  }, [autoStart, disabled, recording, startRecording]);
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   const isUrgent = remaining <= 5;

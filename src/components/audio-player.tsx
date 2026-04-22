@@ -33,7 +33,7 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
     utterance.onend = () => { setPlaying(false); onEnded?.(); };
     utterance.onerror = () => setPlaying(false);
     window.speechSynthesis.speak(utterance);
-  }, [transcript]);
+  }, [onEnded, transcript]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis.cancel();

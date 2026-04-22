@@ -74,10 +74,20 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 | Check | Status |
 |-------|--------|
-| Build | ✅ Passes |
-| Tests | 8/8 passing |
+| Build | ✅ Passes (`npm run build`, 2026-04-22) |
+| Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
+| Tests | ✅ 13/13 passing (`npm test`, 2026-04-22) |
 | Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
 | Supabase local | ✅ Running (port 54321) |
+
+## Latest Engineering Milestone
+
+**Branch/worktree:** `main` at `/home/pooh/work/toefl-mini`
+
+- Added ESLint 9 flat config and Vitest config excluding `.worktrees/**`.
+- Added score-route tests for malformed requests, audio type validation, Gemini failure handling, previous-attempt ownership, and storage upload failure.
+- Hardened `POST /api/toefl/score` validation/error handling and made recording upload awaited before attempt insert.
+- Cleaned hook dependencies required by lint in auth, dashboard, audio player, and recorder components.
 
 ---
 
@@ -87,6 +97,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 2. **Audio placeholders** — All tasks use placeholder URLs; `AudioPlayer` falls back to browser TTS
 3. **No retry loop yet** — Phase 2 feature (targeted retry, sentence-level retry)
 4. **No profile update UI** — API exists but page is read-only
+5. **Private recording playback** — Attempt review now signs stored recording paths; verify bucket policies against the production Supabase project before launch.
 
 ---
 

@@ -21,7 +21,7 @@ export default function ToeflHome() {
         setLoading(false);
       }).catch(() => setLoading(false));
     });
-  }, []);
+  }, [router, supabase]);
 
   const latestScore = attempts[0]?.overall_score;
   const avgScore = attempts.length ? (attempts.reduce((s, a) => s + (a.overall_score || 0), 0) / attempts.length).toFixed(1) : null;
