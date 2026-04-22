@@ -72,7 +72,7 @@ export default function HistoryPage() {
                   {attempt.toefl_tasks?.category === 'listen_repeat' ? 'Listen and Repeat' : 'Interview'} · {attempt.toefl_tasks?.difficulty}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>
-                  {new Date(attempt.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {new Date(attempt.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' })}
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
