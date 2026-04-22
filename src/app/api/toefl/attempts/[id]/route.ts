@@ -19,5 +19,17 @@ export async function GET(
     .single();
 
   if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  // Generate a signed URL for private bucket playback
+  if (data.audio_url && typeof data.audio_url === 'string' && !data.audio_url.startsWith('http')) {
+    const { data: signedData } = await supabase.storage
+      .from('toefl_recordings')
+      .createSignedUrl(data.audio_url, 60 * 60); // 1 hour expiry
+
+    if (signedData?.signedUrl) {
+      data.audio_url = signedData.signedUrl;
+    }
+  }
+
   return NextResponse.json(data);
 }
