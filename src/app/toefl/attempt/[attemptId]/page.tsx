@@ -79,6 +79,19 @@ export default function AttemptReviewPage() {
         </div>
       </div>
 
+      {attempt.audio_url && (
+        <div style={{
+          background: 'white', borderRadius: '16px', padding: '16px',
+          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
+          marginBottom: '16px',
+        }}>
+          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px', marginBottom: '8px' }}>
+            Your recording
+          </p>
+          <audio src={attempt.audio_url} controls style={{ width: '100%' }} />
+        </div>
+      )}
+
       {attempt.suggestion && (
         <div style={{
           background: 'white', borderRadius: '16px', padding: '16px',
