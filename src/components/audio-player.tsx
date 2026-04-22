@@ -32,14 +32,30 @@ export function AudioPlayer({
 }: AudioPlayerProps) {
   const [playingSourceKey, setPlayingSourceKey] = useState<string | null>(null);
   const [endedSourceKey, setEndedSourceKey] = useState<string | null>(null);
+  const [startedSourceKey, setStartedSourceKey] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const useTts = isPlaceholderUrl(audioUrl);
   const sourceKey = `${audioUrl}::${transcript ?? ''}`;
   const playing = playingSourceKey === sourceKey;
   const hasEnded = endedSourceKey === sourceKey;
+  const hasStartedOnce = startedSourceKey === sourceKey;
 
-  const speak = useCallback(() => {
+  useEffect(() => {
+    window.speechSynthesis.cancel();
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch {
+        // Ignore browsers that reject resetting before metadata is ready.
+      }
+    }
+  }, [sourceKey]);
+
+  const startTts = useCallback(() => {
     if (!transcript) return;
+    setStartedSourceKey(sourceKey);
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(transcript);
     utterance.rate = 0.9;
@@ -53,6 +69,11 @@ export function AudioPlayer({
       setEndedSourceKey(sourceKey);
       onEnded?.();
     };
+    utterance.onpause = () => setPlayingSourceKey(null);
+    utterance.onresume = () => {
+      setPlayingSourceKey(sourceKey);
+      setEndedSourceKey(null);
+    };
     utterance.onerror = () => setPlayingSourceKey(null);
     window.speechSynthesis.speak(utterance);
   }, [onEnded, sourceKey, transcript]);
@@ -62,34 +83,88 @@ export function AudioPlayer({
     setPlayingSourceKey(null);
   }, []);
 
-  useEffect(() => {
-    if (autoPlay) {
-      if (useTts) {
-        speak();
-      } else if (audioRef.current) {
-        audioRef.current.play().then(() => {
-          setPlayingSourceKey(sourceKey);
-          setEndedSourceKey(null);
-        }).catch(() => {});
-      }
+  const pauseTts = useCallback(() => {
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
     }
-  }, [autoPlay, sourceKey, speak, useTts]);
+  }, []);
+
+  const resumeTts = useCallback(() => {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+  }, []);
+
+  const startNativeAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setStartedSourceKey(sourceKey);
+    audio.play().then(() => {
+      setPlayingSourceKey(sourceKey);
+      setEndedSourceKey(null);
+    }).catch(() => {
+      setStartedSourceKey(current => (current === sourceKey ? null : current));
+    });
+  }, [sourceKey]);
+
+  const canResumeNativeAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || audio.ended) return false;
+    return audio.currentTime > 0 && Number.isFinite(audio.duration) && audio.currentTime < audio.duration;
+  }, []);
+
+  useEffect(() => {
+    if (!autoPlay) return;
+    const timer = window.setTimeout(() => {
+      if (useTts) {
+        startTts();
+      } else if (audioRef.current) {
+        startNativeAudio();
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [autoPlay, sourceKey, startNativeAudio, startTts, useTts]);
 
   const toggle = () => {
     if (!allowReplay && hasEnded) return;
     if (useTts) {
+      if (!allowReplay) {
+        if (playing) {
+          pauseTts();
+          return;
+        }
+        if (window.speechSynthesis.paused) {
+          resumeTts();
+          return;
+        }
+        if (!hasStartedOnce) {
+          startTts();
+        }
+        return;
+      }
       if (playing) stopSpeaking();
-      else speak();
+      else startTts();
       return;
     }
     if (!audioRef.current) return;
+    if (!allowReplay) {
+      if (playing) {
+        audioRef.current.pause();
+        return;
+      }
+      if (!hasStartedOnce) {
+        startNativeAudio();
+        return;
+      }
+      if (canResumeNativeAudio()) {
+        startNativeAudio();
+      }
+      return;
+    }
     if (playing) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play().then(() => {
-        setPlayingSourceKey(sourceKey);
-        setEndedSourceKey(null);
-      }).catch(() => {});
+      startNativeAudio();
     }
   };
 
@@ -105,6 +180,12 @@ export function AudioPlayer({
         <audio
           ref={audioRef}
           src={audioUrl}
+          onPlay={() => {
+            setStartedSourceKey(sourceKey);
+            setPlayingSourceKey(sourceKey);
+            setEndedSourceKey(null);
+          }}
+          onPause={() => setPlayingSourceKey(null)}
           onEnded={() => {
             setPlayingSourceKey(null);
             setEndedSourceKey(sourceKey);
@@ -141,13 +222,14 @@ export function AudioPlayer({
         {allowReplay && (
           <button
             onClick={() => {
-              if (useTts) { stopSpeaking(); speak(); }
+              if (useTts) {
+                stopSpeaking();
+                startTts();
+              }
               else if (audioRef.current) {
+                audioRef.current.pause();
                 audioRef.current.currentTime = 0;
-                audioRef.current.play().then(() => {
-                  setPlayingSourceKey(sourceKey);
-                  setEndedSourceKey(null);
-                }).catch(() => {});
+                startNativeAudio();
               }
             }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
