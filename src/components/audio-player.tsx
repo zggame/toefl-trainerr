@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface AudioPlayerProps {
@@ -8,11 +8,18 @@ interface AudioPlayerProps {
   transcript?: string;
   showTranscript?: boolean;
   onTranscriptToggle?: () => void;
+  autoPlay?: boolean;
 }
 
-export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle }: AudioPlayerProps) {
+export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle, autoPlay }: AudioPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (autoPlay && audioRef.current) {
+      audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
+    }
+  }, [autoPlay]);
 
   const toggle = () => {
     if (!audioRef.current) return;

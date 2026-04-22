@@ -129,6 +129,7 @@ export default function PracticePage() {
             transcript={task.transcript}
             showTranscript={showText}
             onTranscriptToggle={() => setShowText(!showText)}
+            autoPlay={step === 'prep'}
           />
         </div>
       )}

@@ -27,8 +27,11 @@ export async function POST(request: NextRequest) {
       delivery_score: result.delivery.score,
       language_use_score: result.languageUse.score,
       topic_dev_score: result.topicDev.score,
+      transcript: result.transcript,
       errors: result.errors,
       suggestion: result.suggestion,
+      wpm: result.wpm,
+      filler_count: result.fillerCount,
       previous_attempt_id: previousAttemptId || null,
     })
     .select()

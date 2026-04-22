@@ -18,6 +18,9 @@ export type ScoringResult = {
   overallScore: number;
   errors: string[];
   suggestion: string;
+  transcript: string;
+  wpm: number;
+  fillerCount: number;
 };
 
 export async function scoreAudio(
@@ -49,7 +52,10 @@ Respond with ONLY a valid JSON object with this exact structure:
   \"topicDev\": { \"score\": 0-4, \"evidence\": \"specific quote or observation\", \"tip\": \"actionable improvement tip\" },
   \"overallScore\": 0-4,
   \"errors\": [\"error_type_1\", \"error_type_2\"],
-  \"suggestion\": \"one sentence coaching tip for overall improvement\"
+  \"suggestion\": \"one sentence coaching tip for overall improvement\",
+  \"transcript\": \"full verbatim transcription of the speaker's response\",
+  \"wpm\": estimated_words_per_minute_as_number,
+  \"fillerCount\": number_of_filler_words_detected_like_um_uh_like_you_know
 }
 
 Score guidelines: 4=strong, 3=good, 2=limited, 1=weak, 0=no response. Weight for overall: Delivery 30%, Language Use 30%, Topic Development 40%.
