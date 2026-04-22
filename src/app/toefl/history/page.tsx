@@ -65,7 +65,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <h1
           className="text-2xl font-bold mb-1"
@@ -79,7 +79,7 @@ export default function HistoryPage() {
       </div>
 
       {attempts.length > 0 && (
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-2">
           {filterOptions.map(opt => (
             <button
               key={opt.value}

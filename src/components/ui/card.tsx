@@ -53,8 +53,8 @@ export function Card({
         transition: 'all 200ms ease',
         cursor: onClick ? 'pointer' : 'default',
         marginBottom: marginBottom ?? (gap ? '12px' : undefined),
-        marginLeft: '4px',
-        marginRight: '4px',
+        marginLeft: '8px',
+        marginRight: '8px',
         ...paddingStyles[padding],
         ...style,
       }}

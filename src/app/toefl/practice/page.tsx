@@ -105,7 +105,7 @@ export default function PracticePage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
         <span 
@@ -209,7 +209,7 @@ export default function PracticePage() {
 
       {/* Score State */}
       {step === 'score' && result && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <Card padding="lg" className="text-center mb-6">
             <ScoreDisplay 
               score={result.scoring.overallScore} 
