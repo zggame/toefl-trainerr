@@ -59,7 +59,7 @@ export default function AttemptReviewPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" style={{ marginBottom: '12px' }}>
         <button
           onClick={() => router.push('/toefl/history')}
           className="touch-target p-2 rounded-lg"
@@ -79,7 +79,7 @@ export default function AttemptReviewPage() {
       </div>
 
       {/* Meta Info */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: '12px' }}>
         <div 
           className="flex items-center gap-1 text-sm"
           style={{ color: 'var(--color-text-muted)' }}
@@ -104,7 +104,7 @@ export default function AttemptReviewPage() {
 
       {/* Task Info */}
       {task && (
-        <Card padding="md" marginBottom="16px">
+        <Card padding="md">
           <div className="flex items-center gap-2 mb-2">
             <Tag size={16} style={{ color: 'var(--color-primary)' }} />
             <span className="text-sm font-medium">Task Info</span>
@@ -138,7 +138,7 @@ export default function AttemptReviewPage() {
       )}
 
       {/* Score */}
-      <Card padding="lg" className="text-center" marginBottom="16px">
+      <Card padding="lg" className="text-center">
         <ScoreDisplay score={attempt.overall_score} size="lg" />
         <div className="flex justify-around mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
           {[
@@ -162,9 +162,9 @@ export default function AttemptReviewPage() {
       </Card>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         {attempt.wpm != null && (
-          <Card padding="md" className="text-center">
+          <Card padding="md" className="text-center" gap={false}>
             <div className="flex items-center justify-center gap-2 mb-1">
               <Type size={16} style={{ color: 'var(--color-primary)' }} />
               <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>WPM</span>
@@ -178,7 +178,7 @@ export default function AttemptReviewPage() {
           </Card>
         )}
         {attempt.filler_count != null && (
-          <Card padding="md" className="text-center">
+          <Card padding="md" className="text-center" gap={false}>
             <div className="flex items-center justify-center gap-2 mb-1">
               <Mic size={16} style={{ color: 'var(--color-accent)' }} />
               <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Fillers</span>
@@ -195,7 +195,7 @@ export default function AttemptReviewPage() {
 
       {/* Transcript */}
       {attempt.transcript && (
-        <Card padding="md" marginBottom="16px">
+        <Card padding="md">
           <div className="flex items-center gap-2 mb-3">
             <Type size={16} style={{ color: 'var(--color-primary)' }} />
             <span className="text-sm font-medium">Your Transcript</span>
@@ -208,7 +208,7 @@ export default function AttemptReviewPage() {
 
       {/* Audio */}
       {attempt.audio_url && (
-        <Card padding="md" marginBottom="16px">
+        <Card padding="md">
           <p className="text-sm mb-2" style={{ color: 'var(--color-text-muted)' }}>
             Your Recording
           </p>
@@ -218,7 +218,7 @@ export default function AttemptReviewPage() {
 
       {/* Suggestion */}
       {attempt.suggestion && (
-        <Card padding="md" marginBottom="16px">
+        <Card padding="md">
           <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
             {attempt.suggestion}
           </p>
@@ -227,7 +227,7 @@ export default function AttemptReviewPage() {
 
       {/* Errors */}
       {attempt.errors?.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {attempt.errors.map((e: string) => (
             <span 
               key={e}
@@ -245,7 +245,7 @@ export default function AttemptReviewPage() {
 
       {/* Scoring Details */}
       {attempt.scoring_details && (
-        <Card padding="lg" marginBottom="16px">
+        <Card padding="lg">
           <h2 
             className="text-lg font-semibold mb-4"
             style={{ fontFamily: 'var(--font-heading)' }}
@@ -295,7 +295,7 @@ export default function AttemptReviewPage() {
       )}
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
         <Button 
           variant="secondary" 
           className="flex-1"

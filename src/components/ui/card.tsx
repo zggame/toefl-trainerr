@@ -6,6 +6,7 @@ interface CardProps {
   padding?: 'none' | 'sm' | 'md' | 'lg';
   onClick?: () => void;
   hover?: boolean;
+  gap?: boolean;
   marginBottom?: string;
 }
 
@@ -15,6 +16,7 @@ export function Card({
   padding = 'md',
   onClick,
   hover = true,
+  gap = true,
   marginBottom,
 }: CardProps) {
   const paddingStyles = {
@@ -48,7 +50,7 @@ export function Card({
         boxShadow: 'var(--shadow-card)',
         transition: 'all 200ms ease',
         cursor: onClick ? 'pointer' : 'default',
-        marginBottom: marginBottom ?? undefined,
+        marginBottom: marginBottom ?? (gap ? '12px' : undefined),
         ...paddingStyles[padding],
       }}
       onMouseEnter={handleMouseEnter}
