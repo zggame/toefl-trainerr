@@ -8,6 +8,8 @@ interface AudioPlayerProps {
   transcript?: string;
   showTranscript?: boolean;
   onTranscriptToggle?: () => void;
+  allowReplay?: boolean;
+  allowTranscript?: boolean;
   autoPlay?: boolean;
   onEnded?: () => void;
 }
@@ -18,7 +20,16 @@ function isPlaceholderUrl(url: string): boolean {
   return PLACEHOLDER_DOMAINS.some(d => url.includes(d));
 }
 
-export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle, autoPlay, onEnded }: AudioPlayerProps) {
+export function AudioPlayer({
+  audioUrl,
+  transcript,
+  showTranscript,
+  onTranscriptToggle,
+  allowReplay = true,
+  allowTranscript = true,
+  autoPlay,
+  onEnded,
+}: AudioPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const useTts = isPlaceholderUrl(audioUrl);
@@ -98,18 +109,20 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
             {playing ? (useTts ? 'Speaking...' : 'Playing...') : (useTts ? 'Tap to hear prompt' : 'Tap to play prompt')}
           </p>
         </div>
-        <button
-          onClick={() => {
-            if (useTts) { stopSpeaking(); speak(); }
-            else if (audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPlaying(true); }
-          }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
-          title='Replay'
-        >
-          {useTts ? <Volume2 size={18} /> : <RotateCcw size={18} />}
-        </button>
+        {allowReplay && (
+          <button
+            onClick={() => {
+              if (useTts) { stopSpeaking(); speak(); }
+              else if (audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPlaying(true); }
+            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
+            title='Replay'
+          >
+            {useTts ? <Volume2 size={18} /> : <RotateCcw size={18} />}
+          </button>
+        )}
       </div>
-      {transcript && onTranscriptToggle && (
+      {allowTranscript && transcript && onTranscriptToggle && (
         <button
           onClick={onTranscriptToggle}
           style={{
@@ -127,7 +140,7 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
           Show Text
         </button>
       )}
-      {showTranscript && transcript && (
+      {allowTranscript && showTranscript && transcript && (
         <div style={{
           marginTop: '12px',
           padding: '12px',
