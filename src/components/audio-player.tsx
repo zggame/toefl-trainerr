@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -11,17 +11,50 @@ interface AudioPlayerProps {
   autoPlay?: boolean;
 }
 
+const PLACEHOLDER_DOMAINS = ['soundhelix.com', 'example.com', 'placeholder'];
+
+function isPlaceholderUrl(url: string): boolean {
+  return PLACEHOLDER_DOMAINS.some(d => url.includes(d));
+}
+
 export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle, autoPlay }: AudioPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const useTts = isPlaceholderUrl(audioUrl);
+
+  const speak = useCallback(() => {
+    if (!transcript) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(transcript);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.onstart = () => setPlaying(true);
+    utterance.onend = () => setPlaying(false);
+    utterance.onerror = () => setPlaying(false);
+    window.speechSynthesis.speak(utterance);
+  }, [transcript]);
+
+  const stopSpeaking = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setPlaying(false);
+  }, []);
 
   useEffect(() => {
-    if (autoPlay && audioRef.current) {
-      audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
+    if (autoPlay) {
+      if (useTts) {
+        speak();
+      } else if (audioRef.current) {
+        audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
+      }
     }
-  }, [autoPlay]);
+  }, [autoPlay, useTts, speak]);
 
   const toggle = () => {
+    if (useTts) {
+      if (playing) stopSpeaking();
+      else speak();
+      return;
+    }
     if (!audioRef.current) return;
     if (playing) {
       audioRef.current.pause();
@@ -39,7 +72,7 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
       border: '3px solid rgba(79,70,229,0.15)',
       boxShadow: 'var(--shadow-clay-sm)',
     }}>
-      <audio ref={audioRef} src={audioUrl} onEnded={() => setPlaying(false)} />
+      {!useTts && <audio ref={audioRef} src={audioUrl} onEnded={() => setPlaying(false)} />}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
           onClick={toggle}
@@ -61,15 +94,18 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
             <div style={{ width: playing ? '60%' : '0%', height: '100%', background: 'var(--color-primary)', transition: 'width 300ms' }} />
           </div>
           <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px', fontFamily: 'var(--font-comic)' }}>
-            {playing ? 'Playing...' : 'Tap to play prompt'}
+            {playing ? (useTts ? 'Speaking...' : 'Playing...') : (useTts ? 'Tap to hear prompt' : 'Tap to play prompt')}
           </p>
         </div>
         <button
-          onClick={() => { if (audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPlaying(true); } }}
+          onClick={() => {
+            if (useTts) { stopSpeaking(); speak(); }
+            else if (audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPlaying(true); }
+          }}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
           title='Replay'
         >
-          <RotateCcw size={18} />
+          {useTts ? <Volume2 size={18} /> : <RotateCcw size={18} />}
         </button>
       </div>
       {transcript && onTranscriptToggle && (
