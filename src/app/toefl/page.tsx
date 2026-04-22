@@ -85,9 +85,9 @@ export default function DashboardPage() {
   const hasAttempts = stats && stats.totalAttempts > 0;
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Welcome Header */}
-      <div className="px-3">
+      <div style={{ paddingLeft: '12px', paddingRight: '12px' }}>
         <h1 
           className="text-2xl font-bold mb-1"
           style={{ fontFamily: 'var(--font-heading)' }}
@@ -230,7 +230,7 @@ export default function DashboardPage() {
 
       {/* Recent Attempts */}
       {hasAttempts && stats.recentAttempts.length > 0 && (
-        <div className="px-3">
+        <div style={{ paddingLeft: '12px', paddingRight: '12px' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 
               className="text-lg font-semibold"

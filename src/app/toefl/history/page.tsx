@@ -65,8 +65,8 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="px-3">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ paddingLeft: '12px', paddingRight: '12px' }}>
         <h1
           className="text-2xl font-bold mb-1"
           style={{ fontFamily: 'var(--font-heading)' }}
@@ -79,7 +79,7 @@ export default function HistoryPage() {
       </div>
 
       {attempts.length > 0 && (
-        <div className="flex gap-2 px-3 mb-6">
+        <div className="flex gap-2 mb-6" style={{ paddingLeft: '12px', paddingRight: '12px' }}>
           {filterOptions.map(opt => (
             <button
               key={opt.value}

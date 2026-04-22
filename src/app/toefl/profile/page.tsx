@@ -73,7 +73,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Profile Header */}
       <Card padding="lg" className="text-center">
         <div

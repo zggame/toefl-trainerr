@@ -105,9 +105,9 @@ export default function PracticePage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {/* Header */}
-      <div className="text-center px-3">
+      <div className="text-center" style={{ paddingLeft: '12px', paddingRight: '12px' }}>
         <span 
           className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-3"
           style={{ 
@@ -209,7 +209,7 @@ export default function PracticePage() {
 
       {/* Score State */}
       {step === 'score' && result && (
-        <div className="space-y-8">
+<div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <Card padding="lg" className="text-center mb-6">
             <ScoreDisplay 
               score={result.scoring.overallScore} 
