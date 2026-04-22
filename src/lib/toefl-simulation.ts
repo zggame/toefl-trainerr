@@ -23,13 +23,37 @@ export type SimulationTask = SimulationSourceTask & {
 export const INSUFFICIENT_SIMULATION_TASKS_MESSAGE =
   'Need at least 7 listen-repeat tasks and 4 interview tasks for simulation';
 
+const DIFFICULTY_RANK: Record<string, number> = {
+  easy: 0,
+  medium: 1,
+  hard: 2,
+};
+
 export function getPracticeMode(value: string | null | undefined): PracticeMode {
   return value === 'simulation' ? 'simulation' : 'guided';
 }
 
+function transcriptWordCount(task: SimulationSourceTask): number {
+  return (task.transcript ?? '').split(/\s+/).filter(Boolean).length;
+}
+
+function compareSimulationTaskDifficulty(a: SimulationSourceTask, b: SimulationSourceTask): number {
+  const difficultyDelta = (DIFFICULTY_RANK[a.difficulty ?? ''] ?? 99) - (DIFFICULTY_RANK[b.difficulty ?? ''] ?? 99);
+  if (difficultyDelta !== 0) return difficultyDelta;
+
+  const wordCountDelta = transcriptWordCount(a) - transcriptWordCount(b);
+  if (wordCountDelta !== 0) return wordCountDelta;
+
+  return a.id.localeCompare(b.id);
+}
+
 export function buildSimulationTaskPlan(tasks: SimulationSourceTask[]): SimulationTask[] {
-  const listenRepeat = tasks.filter((task): task is SimulationTask => task.category === 'listen_repeat');
-  const interview = tasks.filter((task): task is SimulationTask => task.category === 'interview');
+  const listenRepeat = tasks
+    .filter((task): task is SimulationTask => task.category === 'listen_repeat')
+    .sort(compareSimulationTaskDifficulty);
+  const interview = tasks
+    .filter((task): task is SimulationTask => task.category === 'interview')
+    .sort(compareSimulationTaskDifficulty);
 
   if (listenRepeat.length < SIMULATION_LISTEN_REPEAT_COUNT || interview.length < SIMULATION_INTERVIEW_COUNT) {
     throw new Error(INSUFFICIENT_SIMULATION_TASKS_MESSAGE);

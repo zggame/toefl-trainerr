@@ -51,6 +51,38 @@ describe('toefl simulation utilities', () => {
     expect(plan.map(task => task.simulationItemNumber)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
   });
 
+  test('starts simulation with the easiest shortest listen-repeat prompts', () => {
+    const plan = buildSimulationTaskPlan([
+      {
+        id: 'hard-long',
+        category: 'listen_repeat',
+        audio_url: 'https://example.test/hard.mp3',
+        transcript: 'This challenging academic announcement contains substantially more words than a beginner should repeat first.',
+        difficulty: 'hard',
+        prep_time_seconds: 0,
+        record_time_seconds: 45,
+      },
+      {
+        id: 'easy-short',
+        category: 'listen_repeat',
+        audio_url: 'https://example.test/easy.mp3',
+        transcript: 'Bring your ID card.',
+        difficulty: 'easy',
+        prep_time_seconds: 0,
+        record_time_seconds: 20,
+      },
+      ...listenRepeatTasks.slice(0, 6),
+      ...interviewTasks,
+    ]);
+
+    expect(plan[0]).toMatchObject({
+      id: 'easy-short',
+      difficulty: 'easy',
+      category: 'listen_repeat',
+    });
+    expect(plan.slice(0, 7).some(task => task.id === 'hard-long')).toBe(false);
+  });
+
   test('throws when the prompt bank lacks enough listen-repeat tasks', () => {
     expect(() => buildSimulationTaskPlan([...listenRepeatTasks.slice(0, 6), ...interviewTasks]))
       .toThrow('Need at least 7 listen-repeat tasks and 4 interview tasks for simulation');

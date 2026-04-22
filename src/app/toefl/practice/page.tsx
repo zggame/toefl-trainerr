@@ -354,6 +354,7 @@ export default function PracticePage() {
             allowReplay={!isSimulation}
             allowTranscript={!isSimulation}
             autoPlay={step === 'playing'}
+            playbackKey={activePromptKey ?? undefined}
             onEnded={() => handleAudioEnded(activePromptKey)}
           />
         </div>

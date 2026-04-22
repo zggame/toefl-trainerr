@@ -11,6 +11,7 @@ interface AudioPlayerProps {
   allowReplay?: boolean;
   allowTranscript?: boolean;
   autoPlay?: boolean;
+  playbackKey?: string;
   onEnded?: () => void;
 }
 
@@ -28,6 +29,7 @@ export function AudioPlayer({
   allowReplay = true,
   allowTranscript = true,
   autoPlay,
+  playbackKey,
   onEnded,
 }: AudioPlayerProps) {
   const [playingSourceKey, setPlayingSourceKey] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function AudioPlayer({
   const [startedSourceKey, setStartedSourceKey] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const useTts = isPlaceholderUrl(audioUrl);
-  const sourceKey = `${audioUrl}::${transcript ?? ''}`;
+  const sourceKey = playbackKey ?? `${audioUrl}::${transcript ?? ''}`;
   const playing = playingSourceKey === sourceKey;
   const hasStartedOnce = startedSourceKey === sourceKey;
 
