@@ -8,6 +8,7 @@ interface CardProps {
   hover?: boolean;
   gap?: boolean;
   marginBottom?: string;
+  style?: React.CSSProperties;
 }
 
 export function Card({
@@ -18,6 +19,7 @@ export function Card({
   hover = true,
   gap = true,
   marginBottom,
+  style,
 }: CardProps) {
   const paddingStyles = {
     none: { padding: 0 },
@@ -52,6 +54,7 @@ export function Card({
         cursor: onClick ? 'pointer' : 'default',
         marginBottom: marginBottom ?? (gap ? '12px' : undefined),
         ...paddingStyles[padding],
+        ...style,
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
