@@ -10,7 +10,7 @@ import { RecordButton } from '@/components/record-button';
 import { ScoreCard } from '@/components/score-card';
 import { SimulationResultList, type SimulationScoreResult } from '@/components/simulation-result-list';
 import { ScoringResult } from '@/lib/gemini';
-import { getPracticeMode, SIMULATION_TOTAL_ITEMS, type PracticeMode, type SimulationTask } from '@/lib/toefl-simulation';
+import { getPracticeMode, SIMULATION_TOTAL_ITEMS, SIMULATION_LISTEN_REPEAT_COUNT, type PracticeMode, type SimulationTask } from '@/lib/toefl-simulation';
 import { Mic, Headphones, Sparkles, RotateCcw, Home, Loader2, ChevronRight } from 'lucide-react';
 
 type Task = {
@@ -28,7 +28,7 @@ type Attempt = {
   overall_score: number;
 };
 
-type Step = 'loading' | 'playing' | 'record' | 'scoring' | 'score';
+type Step = 'loading' | 'playing' | 'record' | 'transition' | 'scoring' | 'score';
 
 type RecordedSimulationAnswer = { task: SimulationTask; base64: string; mimeType: string };
 
@@ -103,11 +103,12 @@ function PracticePageContent() {
         if (isSimulation) {
           setSimulationTasks(data);
           setTask(null);
+          setStep('transition'); // Start with transition for Part 1
         } else {
           setTask(data);
           setSimulationTasks([]);
+          setStep('playing');
         }
-        setStep('playing');
       } catch {
         if (!cancelled && isActiveRun(runId)) setError('Failed to load task');
       }
@@ -119,6 +120,12 @@ function PracticePageContent() {
       cancelled = true;
     };
   }, [isSimulation]);
+
+  useEffect(() => {
+    if (isSimulation && step === 'scoring' && simulationResults.length === simulationTasks.length) {
+      setStep('score');
+    }
+  }, [isSimulation, step, simulationResults.length, simulationTasks.length]);
 
   const handleAudioEnded = (promptKey: string | null) => {
     if (!promptKey || promptKey !== activePromptKeyRef.current) return;
@@ -158,43 +165,6 @@ function PracticePageContent() {
     return res.json();
   };
 
-  const scoreSimulationRecordings = async (recordings: RecordedSimulationAnswer[]) => {
-    const runId = practiceRunIdRef.current;
-    if (!isActiveRun(runId)) return;
-
-    setStep('scoring');
-    setSimulationResults([]);
-
-    for (const recording of recordings) {
-      if (!isActiveRun(runId)) return;
-
-      const itemNumber = recording.task.simulationItemNumber;
-      try {
-        const data = await submitScore(recording.task, recording.base64, recording.mimeType, 'simulation');
-        if (!isActiveRun(runId)) return;
-
-        const scoredResult: SimulationScoreResult = {
-          itemNumber,
-          task: recording.task,
-          attemptId: data.attempt.id,
-          overallScore: data.scoring.overallScore,
-        };
-        setSimulationResults(previous => [...previous, scoredResult]);
-      } catch (err) {
-        if (!isActiveRun(runId)) return;
-        const failedResult: SimulationScoreResult = {
-          itemNumber,
-          task: recording.task,
-          error: err instanceof Error ? err.message : 'Scoring failed',
-        };
-        setSimulationResults(previous => [...previous, failedResult]);
-      }
-    }
-
-    if (!isActiveRun(runId)) return;
-    setStep('score');
-  };
-
   const handleRecordingComplete = async (audioBlob: Blob, base64: string) => {
     if (!activeTask) return;
     const runId = practiceRunIdRef.current;
@@ -210,10 +180,50 @@ function PracticePageContent() {
     const mimeType = audioBlob.type || 'audio/webm';
 
     if (isSimulation) {
-      const recording = { task: activeTask as SimulationTask, base64, mimeType };
+      const currentTask = activeTask as SimulationTask;
+      const itemNumber = currentTask.simulationItemNumber;
+      
+      // Start background scoring for this item immediately
+      void (async () => {
+        try {
+          const data = await submitScore(currentTask, base64, mimeType, 'simulation');
+          if (!isActiveRun(runId)) return;
+          
+          setSimulationResults(prev => {
+            // Replace placeholder or add new result
+            const filtered = prev.filter(r => r.itemNumber !== itemNumber);
+            return [...filtered, {
+              itemNumber,
+              task: currentTask,
+              attemptId: data.attempt.id,
+              overallScore: data.scoring.overallScore
+            }].sort((a, b) => a.itemNumber - b.itemNumber);
+          });
+        } catch (err) {
+          if (!isActiveRun(runId)) return;
+          setSimulationResults(prev => {
+            const filtered = prev.filter(r => r.itemNumber !== itemNumber);
+            return [...filtered, {
+              itemNumber,
+              task: currentTask,
+              error: err instanceof Error ? err.message : 'Scoring failed'
+            }].sort((a, b) => a.itemNumber - b.itemNumber);
+          });
+        }
+      })();
+
+      // Add to recordings list (for tracking progress)
+      const recording = { task: currentTask, base64, mimeType };
       const nextRecordings = [...simulationRecordings, recording];
       setSimulationRecordings(nextRecordings);
 
+      // Check for phase transition (Q7 to Q8)
+      if (itemNumber === SIMULATION_LISTEN_REPEAT_COUNT && simulationIndex < simulationTasks.length - 1) {
+        setStep('transition');
+        return;
+      }
+
+      // Move to next item or final scoring screen
       if (simulationIndex < simulationTasks.length - 1) {
         setSimulationIndex(index => index + 1);
         setShowText(false);
@@ -221,7 +231,8 @@ function PracticePageContent() {
         return;
       }
 
-      await scoreSimulationRecordings(nextRecordings);
+      // Final item complete - show scoring overview
+      setStep('scoring');
       return;
     }
 
@@ -313,9 +324,10 @@ function PracticePageContent() {
         <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
           {step === 'playing' && 'The prompt will play automatically'}
           {step === 'record' && 'Speak naturally and clearly'}
+          {step === 'transition' && 'Listen & Repeat section complete'}
           {step === 'scoring' && (
             isSimulation 
-              ? `${simulationResults.length} of ${simulationRecordings.length} responses scored`
+              ? `${simulationResults.length} of ${simulationTasks.length} responses analyzed`
               : 'Our AI is reviewing your speaking'
           )}
           {step === 'score' && (
@@ -325,6 +337,53 @@ function PracticePageContent() {
           )}
         </p>
       </div>
+
+      {/* Transition State (Part 1 and Part 2) */}
+      {step === 'transition' && (
+        <Card padding="lg" className="text-center py-8 animate-slide-up">
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ 
+              background: simulationIndex === 0 
+                ? 'rgba(79, 70, 229, 0.1)' 
+                : 'rgba(249, 115, 22, 0.1)' 
+            }}
+          >
+            {simulationIndex === 0 ? (
+              <Headphones size={32} style={{ color: 'var(--color-primary)' }} />
+            ) : (
+              <Mic size={32} style={{ color: 'var(--color-accent)' }} />
+            )}
+          </div>
+          <h2 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+            {simulationIndex === 0 ? 'Part 1: Listen & Repeat' : 'Part 2: Interview'}
+          </h2>
+          <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+            {simulationIndex === 0 
+              ? 'Listen to short sentences and repeat them as accurately as possible.'
+              : 'Now you will respond to short interview questions on a variety of topics.'
+            }
+          </p>
+          <Button 
+            onClick={() => {
+              if (simulationIndex === 0 && step === 'transition' && activeTask) {
+                // Already at first task, just start
+                setStep('playing');
+              } else {
+                // Move from Q7 to Q8 or start first item
+                if (simulationIndex > 0) {
+                  setSimulationIndex(index => index + 1);
+                }
+                setShowText(false);
+                setStep('playing');
+              }
+            }}
+            icon={<ChevronRight size={18} />}
+          >
+            {simulationIndex === 0 ? 'Start Part 1' : 'Start Interview'}
+          </Button>
+        </Card>
+      )}
 
       {/* Playing State */}
       {step === 'playing' && (
@@ -386,7 +445,7 @@ function PracticePageContent() {
                 style={{ 
                   background: isSimulation ? 'var(--color-accent)' : 'var(--color-primary)',
                   width: isSimulation 
-                    ? `${(simulationResults.length / simulationRecordings.length) * 100}%` 
+                    ? `${(simulationResults.length / simulationTasks.length) * 100}%` 
                     : '60%',
                 }}
               />

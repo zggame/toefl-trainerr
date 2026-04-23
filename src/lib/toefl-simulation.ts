@@ -97,18 +97,9 @@ export function buildSimulationTaskPlan(tasks: SimulationSourceTask[]): Simulati
     throw new Error(INSUFFICIENT_SIMULATION_TASKS_MESSAGE);
   }
 
-  // Pick the "best" topic:
-  // 1. Sort by difficulty of their top tasks
-  // 2. Sort alphabetically by domain name for stability
-  candidateTopics.sort((a, b) => {
-    for (let i = 0; i < SIMULATION_INTERVIEW_COUNT; i++) {
-      const cmp = compareSimulationTaskDifficulty(a.tasks[i], b.tasks[i]);
-      if (cmp !== 0) return cmp;
-    }
-    return a.domain.localeCompare(b.domain);
-  });
-
-  const interview = candidateTopics[0].tasks.slice(0, SIMULATION_INTERVIEW_COUNT);
+  // Randomly pick one of the candidate topics to ensure variety
+  const chosenTopic = candidateTopics[Math.floor(Math.random() * candidateTopics.length)];
+  const interview = chosenTopic.tasks.slice(0, SIMULATION_INTERVIEW_COUNT);
 
   return [...listenRepeat.slice(0, SIMULATION_LISTEN_REPEAT_COUNT), ...interview].map((task, index) => ({
     ...task,
