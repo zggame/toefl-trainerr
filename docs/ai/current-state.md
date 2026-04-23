@@ -3,7 +3,7 @@
 **Project:** toefl-trainerr  
 **Branch:** feat/toefl-phase1 (merged to main)  
 **Tag:** `v0.2.0-alpha.1`
-**Last Updated:** 2026-04-22 (updated with real TOEFL Speaking simulation)
+**Last Updated:** 2026-04-22 (handoff: same-topic interview grouping in progress)
 
 ---
 
@@ -78,7 +78,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 |-------|--------|
 | Build | ✅ Passes (`npm run build`, 2026-04-22) |
 | Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
-| Tests | ✅ 23/23 passing (`npm test`, 2026-04-22) |
+| Tests | ✅ All tests passing (`npm test -- --run`, 2026-04-22) |
 | Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
 | Supabase local | ✅ Running (port 54321) — **shared with `~/work/smart-interview`** |
 
@@ -86,11 +86,14 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 **Branch/worktree:** `feat/real-toefl-simulation` at `/home/pooh/work/toefl-mini/.worktrees/real-toefl-simulation`
 
-- Added simulation task planning utilities with tests for counts, ordering, prompt-bank sufficiency, and mode parsing.
-- Added authenticated `GET /api/toefl/simulation/tasks` to fetch and shuffle the required simulation task bank.
+- Pushed real TOEFL simulation branch to `origin/feat/real-toefl-simulation`.
+- Added simulation task planning utilities with tests for counts, ordering, prompt-bank sufficiency, mode parsing, duplicate prompt suppression, and near-duplicate prompt suppression.
+- Added authenticated `GET /api/toefl/simulation/tasks` to fetch and build the required simulation task bank.
 - Added dashboard entry points for guided practice and simulation mode.
 - Updated practice mode to support full sequential simulation recording, scoring, and final score summary while preserving guided mode.
-- Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, and duplicate-recording prevention.
+- Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, duplicate-recording prevention, placeholder TTS end fallback, and React StrictMode recorder auto-start fix.
+- Added clickable simulation final-result rows linking successful items to `/toefl/attempt/[id]`, matching the history detail flow.
+- **Implemented interview topic grouping:** The final 4 interview items in simulation are now guaranteed to be from the same `topic_domain`.
 - Preserved phase-1 hardening already on `main`: score route validation, private bucket playback, attempt review audio, recording status, and itemized `scoring_details` review.
 
 ### Previous Mainline Milestone
@@ -124,6 +127,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 4. **No profile update UI** — API exists but page is read-only
 5. **Private recording playback** — ✅ Fixed. Score route stores storage path; attempt fetch generates signed URL. Verify bucket policies against the production Supabase project before launch.
 6. **Simulation prompt bank dependency** — Simulation requires at least 7 `listen_repeat` and 4 `interview` tasks in Supabase; the API returns a blocking 404 if the bank is underfilled.
+7. **Interview topic grouping implemented** — The planner now selects 4 unique interview prompts from one `topic_domain` for the final simulation items.
 
 ---
 

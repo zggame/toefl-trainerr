@@ -13,6 +13,7 @@ const listenRepeatTasks = Array.from({ length: 8 }, (_, index) => ({
   audio_url: `https://example.test/listen-${index + 1}.mp3`,
   transcript: `Listen sentence ${index + 1}`,
   difficulty: 'medium',
+  topic_domain: 'campus',
   prep_time_seconds: 0,
   record_time_seconds: 20,
 }));
@@ -23,6 +24,7 @@ const interviewTasks = Array.from({ length: 5 }, (_, index) => ({
   audio_url: `https://example.test/interview-${index + 1}.mp3`,
   transcript: `Interview question ${index + 1}`,
   difficulty: 'medium',
+  topic_domain: 'life_choice',
   prep_time_seconds: 0,
   record_time_seconds: 45,
 }));
@@ -155,6 +157,38 @@ describe('toefl simulation utilities', () => {
     expect(listenPrompts.filter(prompt => prompt === duplicateListenPrompt)).toHaveLength(1);
     expect(interviewPrompts.filter(prompt => prompt === duplicateInterviewPrompt)).toHaveLength(1);
     expect(listenPrompts.filter(prompt => prompt.includes('eight o')).length).toBeLessThanOrEqual(1);
+  });
+
+  test('selects all interview questions from the same topic domain', () => {
+    const mixedTopicInterviews = [
+      ...Array.from({ length: 3 }, (_, index) => ({
+        ...interviewTasks[index],
+        id: `education-${index}`,
+        topic_domain: 'education',
+        transcript: `Education question ${index + 1}`,
+      })),
+      ...Array.from({ length: 4 }, (_, index) => ({
+        ...interviewTasks[index],
+        id: `campus-life-${index}`,
+        topic_domain: 'campus_life',
+        transcript: `Campus life question ${index + 1}`,
+      })),
+      ...Array.from({ length: 4 }, (_, index) => ({
+        ...interviewTasks[index],
+        id: `technology-${index}`,
+        difficulty: 'hard',
+        topic_domain: 'technology',
+        transcript: `Technology question ${index + 1}`,
+      })),
+    ];
+
+    const plan = buildSimulationTaskPlan([...listenRepeatTasks, ...mixedTopicInterviews]);
+    const interviewTopicDomains = plan
+      .filter(task => task.category === 'interview')
+      .map(task => task.topic_domain);
+
+    expect(new Set(interviewTopicDomains)).toEqual(new Set(['campus_life']));
+    expect(interviewTopicDomains).toHaveLength(4);
   });
 
   test('throws when the prompt bank lacks enough listen-repeat tasks', () => {

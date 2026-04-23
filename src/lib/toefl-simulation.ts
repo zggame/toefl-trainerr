@@ -11,6 +11,7 @@ export type SimulationSourceTask = {
   audio_url: string;
   transcript: string | null;
   difficulty: string | null;
+  topic_domain: string | null;
   prep_time_seconds: number | null;
   record_time_seconds: number | null;
 };
@@ -44,7 +45,7 @@ function compareSimulationTaskDifficulty(a: SimulationSourceTask, b: SimulationS
   const wordCountDelta = transcriptWordCount(a) - transcriptWordCount(b);
   if (wordCountDelta !== 0) return wordCountDelta;
 
-  return a.id.localeCompare(b.id);
+  return 0;
 }
 
 function normalizedPromptText(task: SimulationSourceTask): string {
@@ -70,20 +71,46 @@ export function buildSimulationTaskPlan(tasks: SimulationSourceTask[]): Simulati
       .filter((task): task is SimulationTask => task.category === 'listen_repeat')
       .sort(compareSimulationTaskDifficulty)
   );
-  const interview = uniquePromptTasks(
-    tasks
-      .filter((task): task is SimulationTask => task.category === 'interview')
-      .sort(compareSimulationTaskDifficulty)
-  );
 
-  if (listenRepeat.length < SIMULATION_LISTEN_REPEAT_COUNT || interview.length < SIMULATION_INTERVIEW_COUNT) {
+  const interviewPool = tasks.filter((task): task is SimulationTask => task.category === 'interview');
+
+  // Group by topic_domain
+  const topicsMap = new Map<string, SimulationTask[]>();
+  for (const task of interviewPool) {
+    const domain = task.topic_domain ?? 'general';
+    if (!topicsMap.has(domain)) {
+      topicsMap.set(domain, []);
+    }
+    topicsMap.get(domain)!.push(task);
+  }
+
+  // Find candidate topics with enough unique questions
+  const candidateTopics: { domain: string; tasks: SimulationTask[] }[] = [];
+  for (const [domain, domainTasks] of topicsMap.entries()) {
+    const uniqueTasks = uniquePromptTasks(domainTasks.sort(compareSimulationTaskDifficulty));
+    if (uniqueTasks.length >= SIMULATION_INTERVIEW_COUNT) {
+      candidateTopics.push({ domain, tasks: uniqueTasks });
+    }
+  }
+
+  if (listenRepeat.length < SIMULATION_LISTEN_REPEAT_COUNT || candidateTopics.length === 0) {
     throw new Error(INSUFFICIENT_SIMULATION_TASKS_MESSAGE);
   }
 
-  return [
-    ...listenRepeat.slice(0, SIMULATION_LISTEN_REPEAT_COUNT),
-    ...interview.slice(0, SIMULATION_INTERVIEW_COUNT),
-  ].map((task, index) => ({
+  // Pick the "best" topic:
+  // 1. Sort by difficulty of their top tasks
+  // 2. Sort alphabetically by domain name for stability
+  candidateTopics.sort((a, b) => {
+    for (let i = 0; i < SIMULATION_INTERVIEW_COUNT; i++) {
+      const cmp = compareSimulationTaskDifficulty(a.tasks[i], b.tasks[i]);
+      if (cmp !== 0) return cmp;
+    }
+    return a.domain.localeCompare(b.domain);
+  });
+
+  const interview = candidateTopics[0].tasks.slice(0, SIMULATION_INTERVIEW_COUNT);
+
+  return [...listenRepeat.slice(0, SIMULATION_LISTEN_REPEAT_COUNT), ...interview].map((task, index) => ({
     ...task,
     simulationItemNumber: index + 1,
   }));
