@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import { ScoreBreakdown } from './score-breakdown';
 import { ScoringResult } from '@/lib/gemini';
-import { RotateCcw, Pencil, Check, Mic } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScoreDisplay } from '@/components/ui/score-display';
+import { RotateCcw, Pencil, Check, Mic, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ScoreCardProps {
   overallScore: number;
@@ -16,169 +19,83 @@ interface ScoreCardProps {
 
 export function ScoreCard({ overallScore, scoring, attemptId, onFullRetake, onTargetedRetry, onDone }: ScoreCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const pct = (overallScore / 4) * 100;
 
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: 'var(--radius-clay)',
-      padding: '24px',
-      border: '3px solid rgba(79,70,229,0.15)',
-      boxShadow: 'var(--shadow-clay-lg)',
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '48px', fontWeight: 700, color: 'var(--color-primary)' }}>
-          {overallScore.toFixed(1)}
-          <span style={{ fontSize: '20px', color: 'var(--color-text-muted)' }}> / 4</span>
-        </div>
-        <div style={{ height: '8px', background: 'rgba(0,0,0,0.08)', borderRadius: '4px', marginTop: '8px' }}>
-          <div style={{ width: `${pct}%`, height: '100%', background: 'var(--color-primary)', borderRadius: '4px', transition: 'width 600ms ease' }} />
-        </div>
-      </div>
+    <div className="space-y-4">
+      <Card padding="lg" className="text-center" gap>
+        <ScoreDisplay score={overallScore} size="lg" />
+        {/* Expand/Collapse */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full mt-4 flex items-center justify-center gap-1 text-sm font-medium touch-target"
+          style={{ color: 'var(--color-primary)' }}
+        >
+          {expanded ? <><ChevronUp size={16} /> Hide Details</> : <><ChevronDown size={16} /> Show Details</>}
+        </button>
+      </Card>
 
-      <button
-        onClick={() => setExpanded(!expanded)}
-        style={{
-          width: '100%',
-          background: 'var(--color-background)',
-          border: '2px solid rgba(79,70,229,0.2)',
-          borderRadius: '12px',
-          padding: '10px',
-          cursor: 'pointer',
-          fontFamily: 'var(--font-baloo)',
-          color: 'var(--color-primary)',
-          fontWeight: 600,
-          marginBottom: expanded ? '16px' : '0',
-        }}
-      >
-        {expanded ? 'Hide' : 'Show'} Score Details
-      </button>
-
-      {expanded && <ScoreBreakdown scoring={scoring} />}
+      {expanded && (
+        <Card padding="lg">
+          <ScoreBreakdown scoring={scoring} />
+        </Card>
+      )}
 
       {scoring.errors.length > 0 && (
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '12px', marginBottom: '16px' }}>
+        <div className="flex flex-wrap gap-2">
           {scoring.errors.map(e => (
-            <span key={e} style={{
-              background: 'rgba(245,158,11,0.15)',
-              color: '#D97706',
-              border: '2px solid rgba(245,158,11,0.3)',
-              borderRadius: 'var(--radius-pill)',
-              padding: '4px 12px',
-              fontSize: '12px',
-              fontFamily: 'var(--font-baloo)',
-            }}>{e}</span>
+            <span
+              key={e}
+              className="px-3 py-1 rounded-full text-xs font-medium"
+              style={{
+                background: 'rgba(245, 158, 11, 0.15)',
+                color: '#D97706',
+              }}
+            >
+              {e}
+            </span>
           ))}
         </div>
       )}
 
       {attemptId && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '10px 12px',
-          background: 'rgba(79,70,229,0.06)',
-          borderRadius: '12px',
-          marginBottom: '16px',
-          border: '2px solid rgba(79,70,229,0.12)',
-        }}>
-          <Mic size={16} color='var(--color-primary)' />
-          <span style={{ fontFamily: 'var(--font-comic)', fontSize: '13px', color: 'var(--color-text)' }}>
-            Recording will be available on the review page
-          </span>
-          <a
-            href={`/toefl/attempt/${attemptId}`}
-            style={{
-              marginLeft: 'auto',
-              fontFamily: 'var(--font-baloo)',
-              fontSize: '13px',
-              color: 'var(--color-primary)',
-              textDecoration: 'none',
-              fontWeight: 600,
-            }}
-          >
-            View →
-          </a>
-        </div>
+        <Card padding="sm">
+          <div className="flex items-center gap-2">
+            <Mic size={16} style={{ color: 'var(--color-primary)' }} />
+            <span className="text-sm flex-1" style={{ color: 'var(--color-text-secondary)' }}>
+              Recording saved
+            </span>
+            <a
+              href={`/toefl/attempt/${attemptId}`}
+              className="text-sm font-semibold"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              View →
+            </a>
+          </div>
+        </Card>
       )}
 
-      <p style={{
-        fontSize: '14px',
-        color: 'var(--color-text)',
-        fontFamily: 'var(--font-comic)',
-        padding: '12px',
-        background: 'var(--color-background)',
-        borderRadius: '12px',
-        marginBottom: '20px',
-        border: '2px solid rgba(79,70,229,0.1)',
-      }}>
-        {scoring.suggestion}
-      </p>
+      {scoring.suggestion && (
+        <Card padding="md">
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            💡 {scoring.suggestion}
+          </p>
+        </Card>
+      )}
 
-      <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
-        <button
-          onClick={onFullRetake}
-          style={{
-            background: 'var(--color-primary)',
-            color: 'white',
-            border: '3px solid transparent',
-            borderRadius: 'var(--radius-pill)',
-            padding: '12px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            justifyContent: 'center',
-            boxShadow: 'var(--shadow-clay-sm)',
-            transition: 'all 200ms ease',
-          }}
-        >
-          <RotateCcw size={18} /> Full Retake
-        </button>
-        <button
-          onClick={onTargetedRetry}
-          style={{
-            background: 'white',
-            color: 'var(--color-primary)',
-            border: '3px solid var(--color-primary)',
-            borderRadius: 'var(--radius-pill)',
-            padding: '12px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            justifyContent: 'center',
-            transition: 'all 200ms ease',
-          }}
-        >
-          <Pencil size={18} /> Targeted Retry
-        </button>
-        <button
-          onClick={onDone}
-          style={{
-            background: 'var(--color-cta)',
-            color: 'white',
-            border: '3px solid transparent',
-            borderRadius: 'var(--radius-pill)',
-            padding: '12px',
-            fontWeight: 600,
-            fontFamily: 'var(--font-baloo)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            justifyContent: 'center',
-            boxShadow: '0 4px 0 var(--color-cta-dark)',
-            transition: 'all 200ms ease',
-          }}
-        >
-          <Check size={18} /> Done
-        </button>
+      <div className="flex flex-col gap-3 pt-2">
+        <Button onClick={onFullRetake} icon={<RotateCcw size={18} />} fullWidth>
+          Full Retake
+        </Button>
+        <Button variant="secondary" onClick={onTargetedRetry} icon={<Pencil size={18} />} fullWidth>
+          Targeted Retry
+        </Button>
+        <Button variant="ghost" onClick={onDone} icon={<Check size={18} />} fullWidth>
+          Done
+        </Button>
       </div>
     </div>
   );

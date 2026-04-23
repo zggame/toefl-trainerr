@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Primary Indigo -->
+  <rect width="512" height="512" rx="112" fill="#4F46E5"/>
+
+  <!-- Headphones -->
+  <!-- Headband -->
+  <path d="M128 256v-64c0-70.692 57.308-128 128-128s128 57.308 128 128v64" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Earcups -->
+  <rect x="96" y="208" width="64" height="96" rx="32" fill="white"/>
+  <rect x="352" y="208" width="64" height="96" rx="32" fill="white"/>
+
+  <!-- Speaking Waveform (Accent Green) -->
+  <rect x="200" y="160" width="16" height="48" rx="8" fill="#22C55E"/>
+  <rect x="232" y="136" width="16" height="96" rx="8" fill="#22C55E"/>
+  <rect x="264" y="120" width="16" height="128" rx="8" fill="#22C55E"/>
+  <rect x="296" y="148" width="16" height="72" rx="8" fill="#22C55E"/>
+
+  <!-- Text: "TOEFL" (Using a geometric sans-serif similar to Outfit) -->
+  <text x="256" y="380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="88" fill="white" text-anchor="middle" letter-spacing="-2">TOEFL</text>
+
+  <!-- Open Book -->
+  <path d="M256 460v-40c-30-20-70-20-112-8v24c42-12 82-12 112 8z" fill="white"/>
+  <path d="M256 460v-40c30-20 70-20 112-8v24c-42-12-82-12-112 8z" fill="white"/>
+  <!-- Book Pages effect -->
+  <path d="M144 412c30-10 65-10 112 8" stroke="white" stroke-width="16" stroke-linecap="round"/>
+  <path d="M368 412c-30-10-65-10-112 8" stroke="white" stroke-width="16" stroke-linecap="round"/>
+</svg>

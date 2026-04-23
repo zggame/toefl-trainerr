@@ -1,162 +1,401 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getSupabaseBrowser } from '@/lib/supabase-client';
-import { parseAttemptsResponse } from '@/lib/toefl-attempts';
 import { useRouter } from 'next/navigation';
-import { Mic, TrendingUp, Flame, Target } from 'lucide-react';
-import type { User } from '@supabase/supabase-js';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScoreDisplay } from '@/components/ui/score-display';
+import { Mic, Flame, TrendingUp, Clock, ChevronRight, Target, Layout } from 'lucide-react';
 
-export default function ToeflHome() {
-  const [attempts, setAttempts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+interface DashboardStats {
+  totalAttempts: number;
+  avgScore: number;
+  streakDays: number;
+  recentAttempts: Array<{
+    id: string;
+    overall_score: number;
+    created_at: string;
+    category: string;
+    mode: 'guided' | 'simulation';
+  }>;
+}
+
+export default function DashboardPage() {
   const router = useRouter();
-  const supabase = getSupabaseBrowser();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [practiceMode, setPracticeMode] = useState<'guided' | 'simulation'>('guided');
 
   useEffect(() => {
-    supabase.auth.getUser().then((result: { data: { user: User | null } }) => {
-      if (!result.data.user) { router.push('/auth/signin'); return; }
-      fetch('/api/toefl/attempts?limit=5').then(r => r.json()).then(data => {
-        setAttempts(parseAttemptsResponse(data));
-        setLoading(false);
-      }).catch(() => setLoading(false));
-    });
-  }, [router, supabase]);
+    fetch('/api/toefl/attempts')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: any[]) => {
+        const attempts = Array.isArray(data) ? data : [];
+        const scores = attempts.map((a: any) => a.overall_score).filter(Boolean);
+        const avgScore = scores.length > 0 
+          ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length 
+          : 0;
 
-  const latestScore = attempts[0]?.overall_score;
-  const avgScore = attempts.length ? (attempts.reduce((s, a) => s + (a.overall_score || 0), 0) / attempts.length).toFixed(1) : null;
+        setStats({
+          totalAttempts: attempts.length,
+          avgScore,
+          streakDays: 0, // TODO: calculate from attempts
+          recentAttempts: attempts.slice(0, 5).map((a: any) => ({
+            id: a.id,
+            overall_score: a.overall_score,
+            created_at: a.created_at,
+            category: a.toefl_tasks?.category || 'practice',
+            mode: a.mode || 'guided',
+          })),
+        });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 3.5) return 'Excellent';
+    if (score >= 2.5) return 'Good';
+    if (score >= 1.5) return 'Needs Work';
+    return 'Practice More';
+  };
+
+  const getScoreBadgeColor = (score: number) => {
+    if (score >= 3.5) return 'rgba(34, 197, 94, 0.15)';
+    if (score >= 2.5) return 'rgba(79, 70, 229, 0.15)';
+    if (score >= 1.5) return 'rgba(234, 179, 8, 0.15)';
+    return 'rgba(239, 68, 68, 0.15)';
+  };
+
+  const getScoreTextColor = (score: number) => {
+    if (score >= 3.5) return 'var(--color-score-excellent)';
+    if (score >= 2.5) return 'var(--color-score-good)';
+    if (score >= 1.5) return 'var(--color-score-needs-work)';
+    return 'var(--color-score-practice)';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div 
+          className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
+        />
+      </div>
+    );
+  }
+
+  const hasAttempts = stats && stats.totalAttempts > 0;
 
   return (
-    <div style={{ paddingBottom: '80px' }}>
-      <h1 style={{ fontFamily: 'var(--font-baloo)', fontSize: '28px', fontWeight: 700, marginBottom: '24px' }}>
-        TOEFL Trainer
-      </h1>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          textAlign: 'center',
-        }}>
-          <Mic size={24} color='var(--color-primary)' style={{ marginBottom: '8px' }} />
-          <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-text)' }}>
-            {latestScore ? `${Number(latestScore).toFixed(1)}` : '—'}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>Latest Score</div>
-        </div>
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          textAlign: 'center',
-        }}>
-          <TrendingUp size={24} color='var(--color-cta)' style={{ marginBottom: '8px' }} />
-          <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-text)' }}>
-            {avgScore || '—'}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>Avg Score</div>
-        </div>
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          textAlign: 'center',
-        }}>
-          <Flame size={24} color='#F59E0B' style={{ marginBottom: '8px' }} />
-          <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-text)' }}>
-            {attempts.length}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>Attempts</div>
-        </div>
-        <div style={{
-          background: 'white', borderRadius: '16px', padding: '16px',
-          border: '3px solid rgba(79,70,229,0.15)', boxShadow: 'var(--shadow-clay-sm)',
-          textAlign: 'center',
-        }}>
-          <Target size={24} color='var(--color-secondary)' style={{ marginBottom: '8px' }} />
-          <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-text)' }}>
-            4.0
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>Target</div>
-        </div>
-      </div>
-
-      <button
-        onClick={() => router.push('/toefl/practice')}
-        style={{
-          width: '100%',
-          background: 'var(--color-cta)',
-          color: 'white',
-          border: '3px solid transparent',
-          borderRadius: 'var(--radius-pill)',
-          padding: '16px',
-          fontSize: '18px',
-          fontWeight: 700,
-          fontFamily: 'var(--font-baloo)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '10px',
-          boxShadow: '0 6px 0 var(--color-cta-dark), var(--shadow-clay-md)',
-          marginBottom: '24px',
-          transition: 'all 200ms ease',
-        }}
-      >
-        <Mic size={22} /> Start Practice
-      </button>
-
-      <div style={{
-        display: 'flex',
-        background: 'white',
-        borderRadius: 'var(--radius-pill)',
-        padding: '4px',
-        marginBottom: '24px',
-        border: '3px solid rgba(79,70,229,0.15)',
-      }}>
-        <button style={{
-          flex: 1, padding: '10px', border: 'none', borderRadius: 'var(--radius-pill)',
-          background: 'var(--color-primary)', color: 'white',
-          fontFamily: 'var(--font-baloo)', fontWeight: 600, cursor: 'pointer',
-        }}>Guided</button>
-        <button style={{
-          flex: 1, padding: '10px', border: 'none', borderRadius: 'var(--radius-pill)',
-          background: 'transparent', color: 'var(--color-text-muted)',
-          fontFamily: 'var(--font-baloo)', fontWeight: 600, cursor: 'pointer',
-        }}>Simulation</button>
-      </div>
-
-      <h2 style={{ fontFamily: 'var(--font-baloo)', fontSize: '18px', fontWeight: 600, marginBottom: '12px' }}>
-        Recent Attempts
-      </h2>
-      {loading ? <p style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>Loading...</p> : attempts.length === 0 ? (
-        <p style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>No attempts yet. Start practicing!</p>
-      ) : attempts.map(attempt => (
-        <div
-          key={attempt.id}
-          onClick={() => router.push(`/toefl/attempt/${attempt.id}`)}
-          style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '14px 16px',
-            marginBottom: '8px',
-            border: '3px solid rgba(79,70,229,0.12)',
-            boxShadow: 'var(--shadow-clay-sm)',
-            cursor: 'pointer',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Welcome Header */}
+      <div style={{ paddingLeft: '12px', paddingRight: '12px' }}>
+        <h1 
+          className="text-2xl font-bold mb-1"
+          style={{ fontFamily: 'var(--font-heading)' }}
         >
+          Good to see you!
+        </h1>
+        <p style={{ color: 'var(--color-text-secondary)' }}>
+          {hasAttempts 
+            ? "Keep up the great work! You're improving every day."
+            : "Ready to start your TOEFL speaking practice?"
+          }
+        </p>
+      </div>
+
+      {/* Mode Toggle */}
+      <div style={{ paddingLeft: '12px', paddingRight: '12px', marginBottom: '4px' }}>
+        <div style={{
+          display: 'flex',
+          background: 'var(--color-bg-elevated)',
+          borderRadius: '12px',
+          padding: '4px',
+          border: '1px solid var(--color-border)',
+        }}>
+          <button 
+            onClick={() => setPracticeMode('guided')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              border: 'none',
+              borderRadius: '8px',
+              background: practiceMode === 'guided' ? 'var(--color-primary)' : 'transparent',
+              color: practiceMode === 'guided' ? 'white' : 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 200ms ease',
+            }}
+          >
+            Guided
+          </button>
+          <button 
+            onClick={() => setPracticeMode('simulation')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              border: 'none',
+              borderRadius: '8px',
+              background: practiceMode === 'simulation' ? 'var(--color-accent)' : 'transparent',
+              color: practiceMode === 'simulation' ? 'white' : 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 200ms ease',
+            }}
+          >
+            Simulation
+          </button>
+        </div>
+      </div>
+
+      {/* Quick Action */}
+      <Card 
+        padding="lg" 
+        className="relative overflow-hidden"
+        onClick={() => router.push(`/toefl/practice?mode=${practiceMode}`)}
+      >
+        <div 
+          className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10"
+          style={{ 
+            background: practiceMode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)',
+            transform: 'translate(30%, -30%)',
+          }}
+        />
+        <div className="relative flex items-center justify-between">
           <div>
-            <div style={{ fontFamily: 'var(--font-baloo)', fontWeight: 600 }}>{attempt.mode}</div>
-            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>
-              {new Date(attempt.created_at).toLocaleDateString()}
-            </div>
+            <h2 
+              className="text-lg font-semibold mb-1"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              {practiceMode === 'simulation' ? 'Start Simulation' : 'Start Practice'}
+            </h2>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {practiceMode === 'simulation' 
+                ? "Full 11-task speaking exam"
+                : "Guided speaking exercise"
+              }
+            </p>
           </div>
-          <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '22px', fontWeight: 700, color: 'var(--color-primary)' }}>
-            {Number(attempt.overall_score).toFixed(1)}
+          <div 
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ background: practiceMode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)' }}
+          >
+            <Mic size={24} color="white" />
           </div>
         </div>
-      ))}
+      </Card>
+
+      {/* Stats Grid */}
+      {hasAttempts && (
+        <div className="grid grid-cols-2 gap-4">
+          <Card padding="md">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp size={18} style={{ color: 'var(--color-primary)' }} />
+              <span 
+                className="text-sm font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Avg Score
+              </span>
+            </div>
+            <ScoreDisplay score={stats.avgScore} size="sm" />
+          </Card>
+
+          <Card padding="md">
+            <div className="flex items-center gap-2 mb-2">
+              <Target size={18} style={{ color: 'var(--color-accent)' }} />
+              <span 
+                className="text-sm font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Attempts
+              </span>
+            </div>
+            <div 
+              className="text-2xl font-bold"
+              style={{ 
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              {stats.totalAttempts}
+            </div>
+          </Card>
+
+          <Card padding="md">
+            <div className="flex items-center gap-2 mb-2">
+              <Flame size={18} style={{ color: '#F97316' }} />
+              <span 
+                className="text-sm font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Streak
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span 
+                className="text-2xl font-bold"
+                style={{ 
+                  fontFamily: 'var(--font-mono)',
+                  color: '#F97316',
+                }}
+              >
+                {stats.streakDays}
+              </span>
+              <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                days
+              </span>
+            </div>
+          </Card>
+
+          <Card padding="md">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock size={18} style={{ color: 'var(--color-primary-light)' }} />
+              <span 
+                className="text-sm font-medium"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Best Score
+              </span>
+            </div>
+            <div 
+              className="text-2xl font-bold"
+              style={{ 
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--color-score-excellent)',
+              }}
+            >
+              {stats.recentAttempts.length > 0 
+                ? Math.max(...stats.recentAttempts.map(a => a.overall_score || 0)).toFixed(1)
+                : '0.0'
+              }
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Recent Attempts */}
+      {hasAttempts && stats.recentAttempts.length > 0 && (
+        <div style={{ paddingLeft: '12px', paddingRight: '12px' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 
+              className="text-lg font-semibold"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              Recent Practice
+            </h2>
+            <button
+              onClick={() => router.push('/toefl/history')}
+              className="flex items-center gap-1 text-sm"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              View All
+              <ChevronRight size={16} />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {stats.recentAttempts.map((attempt) => (
+              <Card 
+                key={attempt.id}
+                padding="md"
+                onClick={() => router.push(`/toefl/attempt/${attempt.id}`)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ 
+                        background: attempt.mode === 'simulation' 
+                          ? 'rgba(249, 115, 22, 0.1)' 
+                          : 'rgba(79, 70, 229, 0.1)' 
+                      }}
+                    >
+                      <Mic size={18} style={{ color: attempt.mode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)' }} />
+                    </div>
+                    <div>
+                      <p className="font-medium" style={{ fontFamily: 'var(--font-heading)' }}>
+                        {attempt.category === 'listen_repeat' ? 'Listen & Repeat' : 'Interview'}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                          style={{ 
+                            background: attempt.mode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)',
+                            color: 'white',
+                          }}
+                        >
+                          {attempt.mode || 'guided'}
+                        </span>
+                        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                          {new Date(attempt.created_at).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span 
+                      className="text-lg font-bold"
+                      style={{ 
+                        fontFamily: 'var(--font-mono)',
+                        color: getScoreTextColor(attempt.overall_score),
+                      }}
+                    >
+                      {attempt.overall_score?.toFixed(1) || '0.0'}
+                    </span>
+                    <span 
+                      className="block text-xs px-2 py-0.5 rounded-full mt-1"
+                      style={{ 
+                        background: getScoreBadgeColor(attempt.overall_score),
+                        color: getScoreTextColor(attempt.overall_score),
+                      }}
+                    >
+                      {getScoreLabel(attempt.overall_score)}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!hasAttempts && (
+        <Card padding="lg" className="text-center">
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'rgba(79, 70, 229, 0.1)' }}
+          >
+            <Mic size={32} style={{ color: 'var(--color-primary)' }} />
+          </div>
+          <h3 
+            className="text-lg font-semibold mb-2"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            No Practice Yet
+          </h3>
+          <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+            Start your first speaking exercise and track your progress here.
+          </p>
+          <Button 
+            onClick={() => router.push(`/toefl/practice?mode=${practiceMode}`)}
+            icon={<Mic size={18} />}
+          >
+            Start First Practice
+          </Button>
+        </Card>
+      )}
     </div>
   );
 }
