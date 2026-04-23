@@ -1,0 +1,119 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e8]:
+      - img "Google" [ref=e10]
+      - generic [ref=e11]: Sign in with Google
+    - generic [ref=e12]:
+      - generic [ref=e14]:
+        - heading "Sign in" [level=1] [ref=e15]
+        - paragraph [ref=e16]:
+          - text: to continue to
+          - button "smart-interview" [ref=e17] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e21]:
+          - generic [ref=e26]:
+            - textbox "Email or phone" [active] [ref=e27]
+            - generic:
+              - generic: Email or phone
+          - paragraph [ref=e28]:
+            - link "Forgot email?" [ref=e29] [cursor=pointer]:
+              - /url: /signin/v2/usernamerecovery?app_domain=http://127.0.0.1:54321&client_id=208754598518-5fth68uagduuj6attlmd0tq7dd86so9h.apps.googleusercontent.com&continue=https://accounts.google.com/signin/oauth/legacy/consent?authuser%3Dunknown%26part%3DAJi8hAPu3jq1QGELQ2rdLsin7xoHO1VOd0d5h3ulEzxA27jqUgQ_aEJAVBh55jImXvQ7onvbLkUWOQtAtD-BPcOqFQaF5ufsK0-xErDEvKaY_gSS9dY-mHqDGTOe21scjGrRJL70rVuvoFX1rELZvF-cVs3ax5LVrQ6AOQOsWegqmNeduTyl2ABlwDgXkttiVQUCO3rB633vPKnWSuQDFiuYOg_Iy71Hma5ozi2Ipg9m_nLSQjGGZLz2PuhlVdqgpgaqO3cO4MidhwKE4w0AzfOAGzzwbknffi1tTi3L7KcFeyXiSFgucNJ_5BzTNb2CoahJK5Wo2HMt717jfKPqLisoT1ck7cpwGsd8eRBfGnR2p0cV4nAOpit9XP0vNDYNTev-gDBfswRTSqQHkbFdjsi51nFWPfmfd6CczwggcPk5YCTAByPRzJAWU6QvGRQTkAz4cSQ-LPWiog2g3Dgq9nWVLUUhpz7mMB4tVeZfM5IGh2jtmut3sVcpViDdKR-brLlnf42tf8xnuvzBAYJ0_n3Fqnd7lRwDL9GhXbLC1qJPXqQbu-HwdNJPBoRaQlR1hVIUDtyBBcJORlmIS7kBiQslatJBrUdI20BoXLqyFppbUcLdctoRRr24HnjU7lFr0s38pqGcFr2D%26flowName%3DGeneralOAuthFlow%26as%3DS-601817928%253A1776818989784232%26client_id%3D208754598518-5fth68uagduuj6attlmd0tq7dd86so9h.apps.googleusercontent.com%23&dsh=S-601817928:1776818989784232&flowName=GeneralOAuthLite&o2v=2&opparams=%253Fredirect_to%253Dhttp%25253A%25252F%25252Flocalhost%25253A3000%25252Fauth%25252Fcallback&rart=ANgoxcfSRUIIIRuDEfNqsoFWidr3mXg1IlDHVXHs4nlYENSs-5T33GeHdfKrPi5Tcd6ACXIP3djM-489Q7rD_QaaXZ14VPteD0fNCiC0ytTtsdhd835aVf4&redirect_uri=http://127.0.0.1:54321/auth/v1/callback&response_type=code&scope=email+profile&service=lso&state=68061f36-74af-4427-994d-6d694629be41
+        - generic [ref=e31]:
+          - button "Next" [ref=e33]
+          - link "Create account" [ref=e35] [cursor=pointer]:
+            - /url: /lifecycle/flows/signup?app_domain=http://127.0.0.1:54321&client_id=208754598518-5fth68uagduuj6attlmd0tq7dd86so9h.apps.googleusercontent.com&continue=https://accounts.google.com/signin/oauth/legacy/consent?authuser%3Dunknown%26part%3DAJi8hAPu3jq1QGELQ2rdLsin7xoHO1VOd0d5h3ulEzxA27jqUgQ_aEJAVBh55jImXvQ7onvbLkUWOQtAtD-BPcOqFQaF5ufsK0-xErDEvKaY_gSS9dY-mHqDGTOe21scjGrRJL70rVuvoFX1rELZvF-cVs3ax5LVrQ6AOQOsWegqmNeduTyl2ABlwDgXkttiVQUCO3rB633vPKnWSuQDFiuYOg_Iy71Hma5ozi2Ipg9m_nLSQjGGZLz2PuhlVdqgpgaqO3cO4MidhwKE4w0AzfOAGzzwbknffi1tTi3L7KcFeyXiSFgucNJ_5BzTNb2CoahJK5Wo2HMt717jfKPqLisoT1ck7cpwGsd8eRBfGnR2p0cV4nAOpit9XP0vNDYNTev-gDBfswRTSqQHkbFdjsi51nFWPfmfd6CczwggcPk5YCTAByPRzJAWU6QvGRQTkAz4cSQ-LPWiog2g3Dgq9nWVLUUhpz7mMB4tVeZfM5IGh2jtmut3sVcpViDdKR-brLlnf42tf8xnuvzBAYJ0_n3Fqnd7lRwDL9GhXbLC1qJPXqQbu-HwdNJPBoRaQlR1hVIUDtyBBcJORlmIS7kBiQslatJBrUdI20BoXLqyFppbUcLdctoRRr24HnjU7lFr0s38pqGcFr2D%26flowName%3DGeneralOAuthFlow%26as%3DS-601817928%253A1776818989784232%26client_id%3D208754598518-5fth68uagduuj6attlmd0tq7dd86so9h.apps.googleusercontent.com%23&dsh=S-601817928:1776818989784232&flowEntry=SignUp&flowName=GlifWebSignIn&o2v=2&opparams=%253Fredirect_to%253Dhttp%25253A%25252F%25252Flocalhost%25253A3000%25252Fauth%25252Fcallback&rart=ANgoxcfSRUIIIRuDEfNqsoFWidr3mXg1IlDHVXHs4nlYENSs-5T33GeHdfKrPi5Tcd6ACXIP3djM-489Q7rD_QaaXZ14VPteD0fNCiC0ytTtsdhd835aVf4&redirect_uri=http://127.0.0.1:54321/auth/v1/callback&response_type=code&scope=email+profile&service=lso&signInUrl=https://accounts.google.com/signin/oauth?app_domain%3Dhttp://127.0.0.1:54321%26client_id%3D208754598518-5fth68uagduuj6attlmd0tq7dd86so9h.apps.googleusercontent.com%26continue%3Dhttps://accounts.google.com/signin/oauth/legacy/consent?authuser%253Dunknown%2526part%253DAJi8hAPu3jq1QGELQ2rdLsin7xoHO1VOd0d5h3ulEzxA27jqUgQ_aEJAVBh55jImXvQ7onvbLkUWOQtAtD-BPcOqFQaF5ufsK0-xErDEvKaY_gSS9dY-mHqDGTOe21scjGrRJL70rVuvoFX1rELZvF-cVs3ax5LVrQ6AOQOsWegqmNeduTyl2ABlwDgXkttiVQUCO3rB633vPKnWSuQDFiuYOg_Iy71Hma5ozi2Ipg9m_nLSQjGGZLz2PuhlVdqgpgaqO3cO4MidhwKE4w0AzfOAGzzwbknffi1tTi3L7KcFeyXiSFgucNJ_5BzTNb2CoahJK5Wo2HMt717jfKPqLisoT1ck7cpwGsd8eRBfGnR2p0cV4nAOpit9XP0vNDYNTev-gDBfswRTSqQHkbFdjsi51nFWPfmfd6CczwggcPk5YCTAByPRzJAWU6QvGRQTkAz4cSQ-LPWiog2g3Dgq9nWVLUUhpz7mMB4tVeZfM5IGh2jtmut3sVcpViDdKR-brLlnf42tf8xnuvzBAYJ0_n3Fqnd7lRwDL9GhXbLC1qJPXqQbu-HwdNJPBoRaQlR1hVIUDtyBBcJORlmIS7kBiQslatJBrUdI20BoXLqyFppbUcLdctoRRr24HnjU7lFr0s38pqGcFr2D%2526flowName%253DGeneralOAuthFlow%2526as%253DS-601817928%25253A1776818989784232%2526client_id%253D208754598518-5fth68uagduuj6attlmd0tq7dd86so9h.apps.googleusercontent.com%2523%26dsh%3DS-601817928:1776818989784232%26flowName%3DGeneralOAuthLite%26o2v%3D2%26opparams%3D%25253Fredirect_to%25253Dhttp%2525253A%2525252F%2525252Flocalhost%2525253A3000%2525252Fauth%2525252Fcallback%26rart%3DANgoxcfSRUIIIRuDEfNqsoFWidr3mXg1IlDHVXHs4nlYENSs-5T33GeHdfKrPi5Tcd6ACXIP3djM-489Q7rD_QaaXZ14VPteD0fNCiC0ytTtsdhd835aVf4%26redirect_uri%3Dhttp://127.0.0.1:54321/auth/v1/callback%26response_type%3Dcode%26scope%3Demail%2Bprofile%26service%3Dlso%26state%3D68061f36-74af-4427-994d-6d694629be41&state=68061f36-74af-4427-994d-6d694629be41
+  - contentinfo [ref=e36]:
+    - combobox [ref=e39] [cursor=pointer]:
+      - option "Afrikaans"
+      - option "azərbaycan"
+      - option "bosanski"
+      - option "català"
+      - option "Čeština"
+      - option "Cymraeg"
+      - option "Dansk"
+      - option "Deutsch"
+      - option "eesti"
+      - option "English (United Kingdom)"
+      - option "English (United States)" [selected]
+      - option "Español (España)"
+      - option "Español (Latinoamérica)"
+      - option "euskara"
+      - option "Filipino"
+      - option "Français (Canada)"
+      - option "Français (France)"
+      - option "Gaeilge"
+      - option "galego"
+      - option "Hrvatski"
+      - option "Indonesia"
+      - option "isiZulu"
+      - option "íslenska"
+      - option "Italiano"
+      - option "Kiswahili"
+      - option "latviešu"
+      - option "lietuvių"
+      - option "magyar"
+      - option "Melayu"
+      - option "Nederlands"
+      - option "norsk"
+      - option "o‘zbek"
+      - option "polski"
+      - option "Português (Brasil)"
+      - option "Português (Portugal)"
+      - option "română"
+      - option "shqip"
+      - option "Slovenčina"
+      - option "slovenščina"
+      - option "srpski (latinica)"
+      - option "Suomi"
+      - option "Svenska"
+      - option "Tiếng Việt"
+      - option "Türkçe"
+      - option "Ελληνικά"
+      - option "беларуская"
+      - option "български"
+      - option "кыргызча"
+      - option "қазақ тілі"
+      - option "македонски"
+      - option "монгол"
+      - option "Русский"
+      - option "српски (ћирилица)"
+      - option "Українська"
+      - option "ქართული"
+      - option "հայերեն"
+      - option "‫עברית‬‎"
+      - option "‫اردو‬‎"
+      - option "‫العربية‬‎"
+      - option "‫فارسی‬‎"
+      - option "አማርኛ"
+      - option "नेपाली"
+      - option "मराठी"
+      - option "हिन्दी"
+      - option "অসমীয়া"
+      - option "বাংলা"
+      - option "ਪੰਜਾਬੀ"
+      - option "ગુજરાતી"
+      - option "ଓଡ଼ିଆ"
+      - option "தமிழ்"
+      - option "తెలుగు"
+      - option "ಕನ್ನಡ"
+      - option "മലയാളം"
+      - option "සිංහල"
+      - option "ไทย"
+      - option "ລາວ"
+      - option "မြန်မာ"
+      - option "ខ្មែរ"
+      - option "한국어"
+      - option "中文（香港）"
+      - option "日本語"
+      - option "简体中文"
+      - option "繁體中文"
+    - list [ref=e40]:
+      - listitem [ref=e41]:
+        - link "Help" [ref=e42] [cursor=pointer]:
+          - /url: https://support.google.com/accounts?hl=en-US&p=account_iph
+      - listitem [ref=e43]:
+        - link "Privacy" [ref=e44] [cursor=pointer]:
+          - /url: https://accounts.google.com/TOS?loc=US&hl=en-US&privacy=true
+      - listitem [ref=e45]:
+        - link "Terms" [ref=e46] [cursor=pointer]:
+          - /url: https://accounts.google.com/TOS?loc=US&hl=en-US

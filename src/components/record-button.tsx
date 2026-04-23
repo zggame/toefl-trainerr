@@ -143,7 +143,12 @@ export function RecordButton({
       const timer = setTimeout(() => {
         void startRecording();
       }, 100);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (phaseRef.current === 'idle') {
+          autoStartConsumedRef.current = false;
+        }
+      };
     }
   }, [autoStart, disabled, phase, startRecording]);
 

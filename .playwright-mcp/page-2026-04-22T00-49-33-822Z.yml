@@ -1,0 +1,9 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "TOEFL Speaking Trainer" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Sign in to track your progress and practice
+    - button "Continue with Google" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+      - text: Continue with Google
+  - button "Open Next.js Dev Tools" [ref=e17] [cursor=pointer]:
+    - img [ref=e18]
