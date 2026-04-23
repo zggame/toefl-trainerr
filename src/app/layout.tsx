@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from './providers';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 
 export const metadata: Metadata = {
   title: 'TOEFL Speaking Trainer',
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="app-container">
               {children}
             </div>
+            <ServiceWorkerRegistration />
           </AuthProvider>
         </ThemeProvider>
       </body>
