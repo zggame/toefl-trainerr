@@ -145,8 +145,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - **Animations:** Playful (Duolingo-style bouncing)
 - **Dark Mode:** Follow system preference with manual toggle
 - **Bottom Nav:** Elevated center button for Practice (FAB style)
-- **Card spacing:** Horizontal: 4px left/right margin so content breathes with a visible gap between card edge and screen edge. Vertical: `gap` prop defaults to `true` (12px bottom margin between stacked cards).
-- **Header alignment:** Non-card headers/text have `px-3` (12px) padding so they are indented MORE than the cards (4px), creating a clean hierarchy. Vertical spacing increased using `space-y-6` and `space-y-8` on page containers.
+- **Layout & Spacing:** All rules documented in `.worktrees/ui-revamp/design-system/LAYOUT.md` — the authoritative reference for page wrappers, header padding, card margins, and vertical gaps.
 
 ### Completed
 - [x] Design System v2.0 (`design-system/MASTER.md`)
@@ -159,6 +158,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - [x] Practice page (anxiety-reducing, minimal interface)
 - [x] Attempt review page with itemized breakdown
 - [x] PWA manifest.json
+- [x] PWA icons (192x192, 512x512, maskable) and updated manifest
 - [x] History page (filter by mode, score badges, consistent design)
 - [x] Profile page (stats grid, progress bars, focus area, theme toggle)
 - [x] Dark mode toggle in Profile page (light/dark/system)
