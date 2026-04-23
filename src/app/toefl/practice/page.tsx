@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScoreDisplay } from '@/components/ui/score-display';
 import { AudioPlayer } from '@/components/audio-player';
 import { RecordButton } from '@/components/record-button';
 import { ScoreCard } from '@/components/score-card';
 import { SimulationResultList, type SimulationScoreResult } from '@/components/simulation-result-list';
 import { ScoringResult } from '@/lib/gemini';
 import { getPracticeMode, SIMULATION_TOTAL_ITEMS, type PracticeMode, type SimulationTask } from '@/lib/toefl-simulation';
-import { Loader2 } from 'lucide-react';
+import { Mic, Headphones, Sparkles, RotateCcw, Home, Loader2, ChevronRight } from 'lucide-react';
 
 type Task = {
   id: string;
@@ -243,102 +246,215 @@ export default function PracticePage() {
     : null;
 
   if (error) return (
-    <div style={{ textAlign: 'center', padding: '40px' }}>
-      <p style={{ color: '#EF4444', fontFamily: 'var(--font-comic)', marginBottom: '16px' }}>{error}</p>
-      <button onClick={() => router.push('/toefl')} style={{
-        background: 'var(--color-primary)', color: 'white', border: 'none',
-        borderRadius: 'var(--radius-pill)', padding: '10px 20px',
-        fontFamily: 'var(--font-baloo)', cursor: 'pointer',
-      }}>Back to Home</button>
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div 
+        className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+        style={{ background: 'rgba(239, 68, 68, 0.1)' }}
+      >
+        <Sparkles size={32} style={{ color: 'var(--color-accent-red)' }} />
+      </div>
+      <p className="mb-6" style={{ color: 'var(--color-accent-red)' }}>{error}</p>
+      <Button onClick={() => router.push('/toefl')}>
+        Back to Home
+      </Button>
     </div>
   );
 
   if (!activeTask && step === 'loading') return (
-    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-comic)' }}>
-      Loading {isSimulation ? 'simulation' : 'task'}...
-    </p>
+    <div className="flex items-center justify-center py-24">
+      <div 
+        className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+        style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
+      />
+    </div>
   );
 
   return (
-    <div>
-      <h1 style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, marginBottom: '20px' }}>
-        {activeTask?.category === 'listen_repeat' ? 'Listen and Repeat' : 'Take an Interview'}
-      </h1>
-
-      {isSimulation && (
-        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginBottom: '16px', fontSize: '14px' }}>
-          Simulation · Item {Math.min(simulationIndex + 1, SIMULATION_TOTAL_ITEMS)} of {SIMULATION_TOTAL_ITEMS}
-        </p>
-      )}
-
-      {/* Playing: audio prompt */}
-      {step === 'playing' && (
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{
-            background: 'var(--color-primary)',
-            color: 'white',
-            borderRadius: '50%',
-            width: '80px', height: '80px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-baloo)',
-            fontSize: '32px', fontWeight: 700,
-            boxShadow: 'var(--shadow-clay-md)',
-            margin: '0 auto',
-          }}>
-            <span style={{ animation: 'pulse 1.5s infinite' }}>▶</span>
-          </div>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '12px' }}>
-            Listen to the prompt...
-          </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Header */}
+      <div className="text-center" style={{ paddingLeft: '12px', paddingRight: '12px' }}>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span 
+            className="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+            style={{ 
+              background: isSimulation ? 'var(--color-accent)' : 'var(--color-primary)',
+              color: 'white',
+            }}
+          >
+            {isSimulation ? 'Simulation' : 'Guided Practice'}
+          </span>
+          <span 
+            className="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+            style={{ 
+              background: 'rgba(79, 70, 229, 0.1)',
+              color: 'var(--color-primary)',
+            }}
+          >
+            {activeTask?.category === 'listen_repeat' ? 'Listen & Repeat' : 'Interview'}
+          </span>
         </div>
-      )}
-
-      {/* Recording */}
-      {step === 'record' && (
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{
-            background: 'var(--color-cta)',
-            color: 'white',
-            borderRadius: '50%',
-            width: '80px', height: '80px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-baloo)',
-            fontSize: '20px', fontWeight: 700,
-            boxShadow: 'var(--shadow-clay-md)',
-            margin: '0 auto',
-          }}>
-            REC
-          </div>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-cta)', marginTop: '8px', fontWeight: 600 }}>
-            Recording started automatically!
+        
+        {isSimulation && step !== 'score' && (
+          <p className="text-xs font-bold mb-2" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+            ITEM {Math.min(simulationIndex + 1, SIMULATION_TOTAL_ITEMS)} OF {SIMULATION_TOTAL_ITEMS}
           </p>
-        </div>
-      )}
+        )}
 
-      {/* Scoring */}
-      {step === 'scoring' && (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 24px',
-          background: 'white',
-          borderRadius: 'var(--radius-clay)',
-          border: '3px solid rgba(79,70,229,0.15)',
-          boxShadow: 'var(--shadow-clay-md)',
-        }}>
-          <Loader2 size={48} color='var(--color-primary)' style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
-          <p style={{ fontFamily: 'var(--font-baloo)', fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>
-            {isSimulation ? 'Scoring your simulation...' : 'Scoring your response...'}
-          </p>
-          <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', marginTop: '8px' }}>
-            {isSimulation
+        <h1 
+          className="text-xl font-semibold"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
+          {step === 'playing' && 'Listen Carefully'}
+          {step === 'record' && 'Your Turn to Speak'}
+          {step === 'scoring' && (isSimulation ? 'Scoring Simulation' : 'Analyzing Response')}
+          {step === 'score' && (isSimulation ? 'Simulation Complete' : 'Great Job!')}
+        </h1>
+        
+        <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+          {step === 'playing' && 'The prompt will play automatically'}
+          {step === 'record' && 'Speak naturally and clearly'}
+          {step === 'scoring' && (
+            isSimulation 
               ? `${simulationResults.length} of ${simulationRecordings.length} responses scored`
-              : 'Analyzing delivery, language use, and topic development'}
+              : 'Our AI is reviewing your speaking'
+          )}
+          {step === 'score' && (
+            isSimulation 
+              ? 'Review your full simulation breakdown'
+              : 'Here is your detailed feedback'
+          )}
+        </p>
+      </div>
+
+      {/* Playing State */}
+      {step === 'playing' && (
+        <div className="flex flex-col items-center py-6">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mb-3"
+            style={{ 
+              background: isSimulation ? 'var(--color-accent)' : 'var(--color-primary)',
+              boxShadow: 'var(--shadow-button)',
+            }}
+          >
+            <Headphones size={32} color="white" />
+          </div>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            Playing prompt...
           </p>
         </div>
       )}
 
+      {/* Recording State */}
+      {step === 'record' && (
+        <div className="flex flex-col items-center py-6">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mb-3 relative"
+            style={{ background: 'var(--color-accent-red)' }}
+          >
+            {/* Pulse animation */}
+            <div 
+              className="absolute inset-0 rounded-full animate-ping opacity-30"
+              style={{ background: 'var(--color-accent-red)' }}
+            />
+            <Mic size={32} color="white" />
+          </div>
+          <p className="text-sm font-medium" style={{ color: 'var(--color-accent-red)' }}>
+            Recording...
+          </p>
+        </div>
+      )}
+
+      {/* Scoring State */}
+      {step === 'scoring' && (
+        <Card padding="lg" className="text-center py-12">
+          <div className="flex items-center justify-center mb-4">
+            <Loader2 size={48} className="animate-spin" style={{ color: isSimulation ? 'var(--color-accent)' : 'var(--color-primary)' }} />
+          </div>
+          <h2 
+            className="text-lg font-semibold mb-2"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            {isSimulation ? 'Processing Results' : 'Scoring Your Response'}
+          </h2>
+          <div className="mt-6 flex justify-center">
+            <div 
+              className="w-32 h-2 rounded-full overflow-hidden"
+              style={{ background: 'var(--color-bg-overlay)' }}
+            >
+              <div 
+                className="h-full rounded-full transition-all duration-500"
+                style={{ 
+                  background: isSimulation ? 'var(--color-accent)' : 'var(--color-primary)',
+                  width: isSimulation 
+                    ? `${(simulationResults.length / simulationRecordings.length) * 100}%` 
+                    : '60%',
+                }}
+              />
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Score State (Single Task) */}
+      {step === 'score' && !isSimulation && result && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <ScoreCard
+            overallScore={result.scoring.overallScore}
+            scoring={result.scoring}
+            attemptId={result.attempt.id}
+            onFullRetake={() => window.location.reload()}
+            onTargetedRetry={() => router.push(`/toefl/attempt/${result.attempt.id}?retry=targeted`)}
+            onDone={() => router.push('/toefl')}
+          />
+        </div>
+      )}
+
+      {/* Score State (Simulation) */}
+      {step === 'score' && isSimulation && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <Card padding="lg" className="text-center">
+            <div className="mb-2">
+              <span className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+                Average Score
+              </span>
+            </div>
+            <ScoreDisplay 
+              score={averageSimulationScore ?? 0} 
+              size="lg" 
+            />
+            <p className="text-sm mt-4" style={{ color: 'var(--color-text-secondary)' }}>
+              {successfullyScoredResults.length} of {simulationRecordings.length} items scored successfully
+            </p>
+          </Card>
+
+          <div style={{ paddingLeft: '12px', paddingRight: '12px' }}>
+            <h3 className="text-lg font-bold mb-3" style={{ fontFamily: 'var(--font-heading)' }}>
+              Item Breakdown
+            </h3>
+            <SimulationResultList results={simulationResults} />
+          </div>
+
+          <div className="flex flex-col gap-3 pt-4">
+            <Button 
+              onClick={() => window.location.reload()}
+              icon={<RotateCcw size={18} />}
+            >
+              Start New Simulation
+            </Button>
+            <Button 
+              variant="secondary"
+              onClick={() => router.push('/toefl')}
+              icon={<Home size={18} />}
+            >
+              Back to Dashboard
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Audio Player */}
       {activeTask && step !== 'score' && (
-        <div style={{ marginBottom: '24px' }}>
+        <div className="mt-4">
           <AudioPlayer
             audioUrl={activeTask.audio_url}
             transcript={activeTask.transcript ?? ''}
@@ -353,14 +469,9 @@ export default function PracticePage() {
         </div>
       )}
 
-      {step === 'playing' && activeTask && !isSimulation && (
-        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px', textAlign: 'center' }}>
-          Recording will start automatically when the prompt finishes
-        </p>
-      )}
-
-      {step === 'record' && activeTask && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+      {/* Record Button */}
+      {(step === 'playing' || step === 'record') && activeTask && (
+        <div className="flex flex-col items-center gap-4">
           <RecordButton
             key={activePromptKey ?? activeTask.id}
             onRecordingComplete={handleRecordingComplete}
@@ -369,81 +480,16 @@ export default function PracticePage() {
             maxSeconds={activeTask.record_time_seconds || 30}
             autoStart
           />
+          {step === 'playing' && (
+            <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>
+              Recording will start automatically when the prompt finishes
+            </p>
+          )}
           {recordingError && (
-            <p style={{ fontFamily: 'var(--font-comic)', color: '#EF4444', fontSize: '14px', fontWeight: 600 }}>
+            <p className="text-sm text-center font-medium" style={{ color: 'var(--color-accent-red)' }}>
               {recordingError}
             </p>
           )}
-        </div>
-      )}
-
-      {step === 'score' && !isSimulation && result && (
-        <ScoreCard
-          overallScore={result.scoring.overallScore}
-          scoring={result.scoring}
-          attemptId={result.attempt.id}
-          onFullRetake={() => window.location.reload()}
-          onTargetedRetry={() => router.push(`/toefl/attempt/${result.attempt.id}?retry=targeted`)}
-          onDone={() => router.push('/toefl')}
-        />
-      )}
-
-      {isSimulation && step === 'score' && (
-        <div style={{
-          background: 'white',
-          borderRadius: 'var(--radius-clay)',
-          padding: '24px',
-          border: '3px solid rgba(79,70,229,0.15)',
-          boxShadow: 'var(--shadow-clay-lg)',
-        }}>
-          <h2 style={{ fontFamily: 'var(--font-baloo)', fontSize: '24px', fontWeight: 700, color: 'var(--color-text)', marginBottom: '16px' }}>
-            Simulation Complete
-          </h2>
-          <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ fontFamily: 'var(--font-baloo)', fontSize: '42px', fontWeight: 700, color: 'var(--color-primary)' }}>
-              {averageSimulationScore === null ? '—' : averageSimulationScore.toFixed(1)}
-              <span style={{ fontSize: '18px', color: 'var(--color-text-muted)' }}> / 4 average</span>
-            </div>
-            <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)' }}>
-              {successfullyScoredResults.length} of {simulationRecordings.length} items scored successfully
-            </p>
-          </div>
-
-          <SimulationResultList results={simulationResults} />
-
-          <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                background: 'var(--color-primary)',
-                color: 'white',
-                border: '3px solid transparent',
-                borderRadius: 'var(--radius-pill)',
-                padding: '12px',
-                fontWeight: 600,
-                fontFamily: 'var(--font-baloo)',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-clay-sm)',
-              }}
-            >
-              Start Another Simulation
-            </button>
-            <button
-              onClick={() => router.push('/toefl')}
-              style={{
-                background: 'white',
-                color: 'var(--color-primary)',
-                border: '3px solid var(--color-primary)',
-                borderRadius: 'var(--radius-pill)',
-                padding: '12px',
-                fontWeight: 600,
-                fontFamily: 'var(--font-baloo)',
-                cursor: 'pointer',
-              }}
-            >
-              Back to Home
-            </button>
-          </div>
         </div>
       )}
     </div>

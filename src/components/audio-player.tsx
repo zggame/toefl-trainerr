@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -56,7 +57,9 @@ export function AudioPlayer({
 
   useEffect(() => {
     clearTtsFallback();
-    window.speechSynthesis.cancel();
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     const audio = audioRef.current;
     if (audio) {
       audio.pause();
@@ -156,17 +159,11 @@ export function AudioPlayer({
   };
 
   return (
-    <div style={{
-      background: 'var(--color-surface)',
-      borderRadius: '16px',
-      padding: '16px',
-      border: '3px solid rgba(79,70,229,0.15)',
-      boxShadow: 'var(--shadow-clay-sm)',
-    }}>
+    <Card padding="md" gap={false}>
       {!useTts && (
-        <audio
-          ref={audioRef}
-          src={audioUrl}
+        <audio 
+          ref={audioRef} 
+          src={audioUrl} 
           onPlay={() => {
             setStartedSourceKey(sourceKey);
             setPlayingSourceKey(sourceKey);
@@ -176,87 +173,88 @@ export function AudioPlayer({
           onEnded={() => {
             setPlayingSourceKey(null);
             setEndedSourceKey(sourceKey);
-            onEnded?.();
-          }}
+            onEndedRef.current?.();
+          }} 
         />
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="flex items-center gap-3">
         <button
           disabled={!allowReplay && hasStartedOnce}
           onClick={toggle}
+          className="touch-target flex items-center justify-center shrink-0 rounded-full active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            width: '48px', height: '48px',
+            width: '48px',
+            height: '48px',
             background: 'var(--color-primary)',
-            borderRadius: '50%',
-            border: 'none',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: !allowReplay && hasStartedOnce ? 'not-allowed' : 'pointer',
-            opacity: !allowReplay && hasStartedOnce ? 0.6 : 1,
-            boxShadow: 'var(--shadow-clay-sm)',
-            transition: 'all 200ms ease',
+            boxShadow: 'var(--shadow-button)',
+            transition: 'transform 150ms ease',
           }}
         >
-          {playing ? <Pause size={20} color='white' /> : <Play size={20} color='white' style={{ marginLeft: '2px' }} />}
+          {playing
+            ? <Pause size={20} color="white" />
+            : <Play size={20} color="white" style={{ marginLeft: '2px' }} />
+          }
         </button>
-        <div style={{ flex: 1 }}>
-          <div style={{ height: '4px', background: 'rgba(79,70,229,0.2)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ width: playing ? '60%' : '0%', height: '100%', background: 'var(--color-primary)', transition: 'width 300ms' }} />
+        <div className="flex-1 min-w-0">
+          <div
+            className="h-1 rounded-full overflow-hidden"
+            style={{ background: 'var(--color-bg-overlay)' }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{
+                width: playing ? '60%' : '0%',
+                background: 'var(--color-primary)',
+              }}
+            />
           </div>
-          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px', fontFamily: 'var(--font-comic)' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
             {playing ? (useTts ? 'Speaking...' : 'Playing...') : (useTts ? 'Tap to hear prompt' : 'Tap to play prompt')}
           </p>
         </div>
+        
         {allowReplay && (
           <button
             onClick={() => {
               if (useTts) {
                 stopSpeaking();
                 startTts();
-              }
-              else if (audioRef.current) {
+              } else if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current.currentTime = 0;
                 startNativeAudio();
               }
             }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
-            title='Replay'
+            className="touch-target p-2 rounded-lg"
+            style={{ color: 'var(--color-text-muted)' }}
+            title="Replay"
           >
             {useTts ? <Volume2 size={18} /> : <RotateCcw size={18} />}
           </button>
         )}
       </div>
+
       {allowTranscript && transcript && onTranscriptToggle && (
         <button
           onClick={onTranscriptToggle}
-          style={{
-            marginTop: '12px',
-            background: 'var(--color-background)',
-            border: '2px solid rgba(79,70,229,0.2)',
-            borderRadius: 'var(--radius-pill)',
-            padding: '6px 16px',
-            fontSize: '13px',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-baloo)',
-            color: 'var(--color-primary)',
-          }}
+          className="mt-3 text-sm font-medium touch-target flex items-center gap-1"
+          style={{ color: 'var(--color-primary)' }}
         >
-          Show Text
+          {showTranscript ? <><ChevronUp size={16} /> Hide Text</> : <><ChevronDown size={16} /> Show Text</>}
         </button>
       )}
+
       {allowTranscript && showTranscript && transcript && (
-        <div style={{
-          marginTop: '12px',
-          padding: '12px',
-          background: 'var(--color-background)',
-          borderRadius: '12px',
-          fontSize: '14px',
-          fontFamily: 'var(--font-comic)',
-          color: 'var(--color-text)',
-        }}>
+        <div
+          className="mt-3 p-3 rounded-xl text-sm leading-relaxed"
+          style={{
+            background: 'var(--color-bg-overlay)',
+            color: 'var(--color-text-secondary)',
+          }}
+        >
           {transcript}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, Square } from 'lucide-react';
+import { Mic, Square, Loader2 } from 'lucide-react';
 import { Waveform } from './waveform';
 
 interface RecordButtonProps {
@@ -14,7 +14,13 @@ interface RecordButtonProps {
 
 type RecordingPhase = 'idle' | 'starting' | 'recording' | 'finalizing';
 
-export function RecordButton({ onRecordingComplete, onError, disabled, maxSeconds = 45, autoStart }: RecordButtonProps) {
+export function RecordButton({ 
+  onRecordingComplete, 
+  onError, 
+  disabled, 
+  maxSeconds = 45, 
+  autoStart 
+}: RecordButtonProps) {
   const [phase, setPhase] = useState<RecordingPhase>('idle');
   const [remaining, setRemaining] = useState(maxSeconds);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -133,7 +139,11 @@ export function RecordButton({ onRecordingComplete, onError, disabled, maxSecond
 
     if (phase === 'idle' && !disabled && !autoStartConsumedRef.current) {
       autoStartConsumedRef.current = true;
-      void Promise.resolve().then(startRecording);
+      // Use a small delay to ensure stream is ready and previous state is settled
+      const timer = setTimeout(() => {
+        void startRecording();
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [autoStart, disabled, phase, startRecording]);
 
@@ -156,53 +166,68 @@ export function RecordButton({ onRecordingComplete, onError, disabled, maxSecond
   const buttonDisabled = disabled || processing;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex items-center gap-6">
         {recording && (
-          <div style={{
-            fontFamily: 'var(--font-baloo)',
-            fontSize: '28px',
-            fontWeight: 700,
-            color: isUrgent ? '#EF4444' : 'var(--color-cta)',
-            transition: 'color 200ms',
-          }}>
+          <div
+            className="font-bold tabular-nums"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '32px',
+              color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-primary)',
+              transition: 'color 200ms',
+            }}
+          >
             {formatTime(remaining)}
           </div>
         )}
         <button
           onClick={recording ? stopRecording : startRecording}
           disabled={buttonDisabled}
+          className="touch-target flex items-center justify-center shrink-0 rounded-full active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             width: '72px',
             height: '72px',
-            borderRadius: '50%',
-            border: recording ? '4px solid var(--color-cta)' : '4px solid var(--color-primary)',
-            background: recording ? 'rgba(34,197,94,0.1)' : 'var(--color-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: buttonDisabled ? 'not-allowed' : 'pointer',
-            boxShadow: recording ? '0 0 0 8px rgba(34,197,94,0.15)' : 'var(--shadow-clay-md)',
+            border: recording ? '4px solid var(--color-accent-red)' : '4px solid var(--color-primary)',
+            background: recording ? 'rgba(239, 68, 68, 0.1)' : 'var(--color-primary)',
+            boxShadow: recording ? '0 0 0 8px rgba(239, 68, 68, 0.15)' : 'var(--shadow-button)',
             transition: 'all 200ms ease',
           }}
         >
-          {recording ? <Square size={28} color='var(--color-cta)' /> : <Mic size={28} color='white' />}
+          {processing ? (
+            <Loader2 size={24} color={recording ? 'var(--color-accent-red)' : 'white'} className="animate-spin" />
+          ) : recording ? (
+            <Square size={24} color="var(--color-accent-red)" fill="var(--color-accent-red)" />
+          ) : (
+            <Mic size={24} color="white" />
+          )}
         </button>
       </div>
+      
       <Waveform analyzing={recording} />
-      {recording ? (
-        <p style={{ fontFamily: 'var(--font-comic)', color: isUrgent ? '#EF4444' : 'var(--color-cta)', fontSize: '14px', fontWeight: isUrgent ? 700 : 400 }}>
-          {isUrgent ? 'Time is almost up!' : 'Recording... Tap to stop early'}
-        </p>
-      ) : processing ? (
-        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-          {phase === 'starting' ? 'Starting recorder...' : 'Processing recording...'}
-        </p>
-      ) : (
-        <p style={{ fontFamily: 'var(--font-comic)', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-          Time limit: {maxSeconds} seconds
-        </p>
-      )}
+      
+      <div className="text-center h-6">
+        {recording ? (
+          <p
+            className="text-sm"
+            style={{
+              color: isUrgent ? 'var(--color-accent-red)' : 'var(--color-text-secondary)',
+              fontWeight: isUrgent ? 600 : 400,
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            {isUrgent ? 'Time is almost up!' : 'Recording... Tap to stop'}
+          </p>
+        ) : processing ? (
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}>
+            {phase === 'starting' ? 'Preparing recorder...' : 'Finalizing audio...'}
+          </p>
+        ) : (
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-body)' }}>
+            Max: {maxSeconds}s
+          </p>
+        )}
+      </div>
     </div>
   );
 }
