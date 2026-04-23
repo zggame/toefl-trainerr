@@ -80,25 +80,26 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 | Check | Status |
 |-------|--------|
-| Build | ✅ Passes (`npm run build`, 2026-04-22) |
-| Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
-| Tests | ✅ All tests passing (`npm test -- --run`, 2026-04-22) |
-| Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
+| Build | ✅ Passes (`npm run build`, 2026-04-23) |
+| Lint | ✅ Passes (`npm run lint`, 2026-04-23) |
+| Unit Tests | ✅ 33/33 passing (`npm test`, 2026-04-23) |
+| E2E Tests | ✅ Initial Playwright setup complete |
+| Gemini API | ✅ Verified live (gemini-2.5-flash-lite) with dry-run scripts |
 | Supabase local | ✅ Running (port 54321) — **shared with `~/work/smart-interview`** |
 
 ## Latest Engineering Milestone
 
 **Branch/worktree:** `main` at `/home/pooh/work/toefl-mini`
 
-- Synced `feat/ui-revamp` with simulation logic.
-- Added simulation task planning utilities with tests for counts, ordering, prompt-bank sufficiency, mode parsing, duplicate prompt suppression, and near-duplicate prompt suppression.
-- Added authenticated `GET /api/toefl/simulation/tasks` to fetch and build the required simulation task bank.
-- Added dashboard entry points for guided practice and simulation mode.
-- Updated practice mode to support full sequential simulation recording, scoring, and final score summary while preserving guided mode.
+- **Implemented User-Level Usage Limits:** Added daily scoring caps (e.g., 10/day for free users) and `user_tier` logic to protect the API budget.
+- **Added Token Monitoring:** Logging exact prompt and completion token usage from Gemini into the `toefl_attempts` table.
+- **Simulation Background Scoring:** Refactored the simulation loop to submit recordings for scoring immediately in the background, significantly reducing the final wait time.
+- **Simulation Transitions:** Added clear transition screens for Part 1 (Listen & Repeat) and Part 2 (Interview) to improve the testing UX.
+- **Playwright Setup:** Added `playwright.config.ts` and an initial e2e test suite for validating the simulation flow.
+- **Next.js 16 Migration:** Successfully migrated `middleware.ts` to `proxy.ts` to follow the latest Next.js conventions and fix build warnings.
+- Synced `feat/ui-revamp` with simulation logic and fully merged UI Revamp v2.0 into main.
 - Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, duplicate-recording prevention, placeholder TTS end fallback, and React StrictMode recorder auto-start fix.
-- Added clickable simulation final-result rows linking successful items to `/toefl/attempt/[id]`, matching the history detail flow.
-- **Implemented interview topic grouping:** The final 4 interview items in simulation are now guaranteed to be from the same `topic_domain`.
-- Preserved phase-1 hardening already on `main`: score route validation, private bucket playback, attempt review audio, recording status, and itemized `scoring_details` review.
+- **Implemented interview topic grouping:** The final 4 interview items in simulation are now guaranteed to be from the same `topic_domain` (and randomized).
 
 ---
 
@@ -165,11 +166,19 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 ## Follow-ups
 
-- [ ] Deploy to Vercel + new Supabase Cloud project
-- [x] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
-- [x] **UI Revamp v2.0** — PWA icons/service worker + merge to main
-- [ ] Phase 2: Targeted retry + sentence-level retry
-- [ ] Phase 2: Side-by-side attempt comparison
-- [ ] Generate real audio prompts (replace TTS fallback)
-- [ ] Score trend chart on dashboard
-- [ ] Streak tracking + profile updates
+### High Priority
+- [ ] Deploy `main` branch to Vercel + new Supabase Cloud project.
+
+### 🎨 UX/UI Polish
+- [ ] **Responsive Desktop Layout:** Design and implement a layout for larger screens (iPad, Desktop) that uses horizontal space better.
+
+### 🎙️ AI Audio & Speech
+- [ ] **Gemini Speech Integration:** Replace browser TTS fallback with Gemini-generated audio prompts for a more natural testing experience.
+- [ ] **Model Example Answers:** Generate "Ideal Model Answers" (audio + transcript) on-demand for users to hear how a top-scoring response sounds.
+- [ ] **Speaker Selection:** Allow selection of different AI speakers/personas and document the choices.
+
+### ⚙️ Engine & Account Management
+- [ ] **Account Management & Monetization:** Integrate payment gateway (Stripe/Lemon Squeezy) to support a "Premium" tier and build an Admin Dashboard.
+- [ ] **History Enhancements:** Add search by transcript/content, filter by score range, and filter by practice mode.
+- [ ] **Simulation Result Details:** Ensure every score in the simulation summary links directly to its detailed `/toefl/attempt/[id]` page.
+- [ ] **Phase 2 Features:** Targeted retry + sentence-level retry, side-by-side attempt comparison.
