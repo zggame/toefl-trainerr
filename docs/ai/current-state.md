@@ -2,8 +2,8 @@
 
 **Project:** toefl-trainerr  
 **Branch:** feat/toefl-phase1 (merged to main)  
-**Tag:** `v0.2.0-alpha.1`  
-**Last Updated:** 2026-04-22 (all recent changes pushed to origin/main)
+**Tag:** `v0.2.0-alpha.1`
+**Last Updated:** 2026-04-22 (handoff: same-topic interview grouping in progress)
 
 ---
 
@@ -12,6 +12,7 @@
 ### Core Practice Loop
 - **Auth:** Google OAuth via Supabase Auth with middleware guards
 - **Flow:** Play audio prompt (TTS fallback) → auto-start recording when prompt ends → AI scoring → save attempt
+- **Simulation:** Real TOEFL Speaking mode runs 11 items in order — 7 listen-repeat, then 4 interview — with no prompt replay or transcript reveal
 - **Tasks:** 65 total — 30 listen-repeat + 35 interview, random selection per session
 - **Timer:** Countdown during recording (turns red at 5s), auto-stops at 0
 
@@ -26,13 +27,14 @@
 | Landing | `/` | ✅ Done |
 | Sign-in | `/auth/signin` | ✅ Done |
 | Dashboard | `/toefl` | ✅ Done |
-| Practice | `/toefl/practice` | ✅ Done |
+| Practice | `/toefl/practice?mode=guided` and `/toefl/practice?mode=simulation` | ✅ Done |
 | History | `/toefl/history` | ✅ Done |
 | Attempt Review | `/toefl/attempt/[id]` | ✅ Done |
 | Profile | `/toefl/profile` | ✅ Done |
 
 ### API Routes
 - `GET /api/toefl/tasks` — random task
+- `GET /api/toefl/simulation/tasks` — 11-item TOEFL Speaking simulation task plan
 - `POST /api/toefl/score` — AI scoring + save attempt
 - `GET /api/toefl/attempts` — history
 - `GET /api/toefl/attempts/[id]` — single attempt
@@ -76,13 +78,25 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 |-------|--------|
 | Build | ✅ Passes (`npm run build`, 2026-04-22) |
 | Lint | ✅ Passes (`npm run lint`, 2026-04-22) |
-| Tests | ✅ 13/13 passing (`npm test`, 2026-04-22) |
+| Tests | ✅ All tests passing (`npm test -- --run`, 2026-04-22) |
 | Gemini API | ✅ Verified live (gemini-2.5-flash-lite) |
 | Supabase local | ✅ Running (port 54321) — **shared with `~/work/smart-interview`** |
 
 ## Latest Engineering Milestone
 
-**Branch/worktree:** `main` at `/home/pooh/work/toefl-mini` (all recent edits in root, not worktree)
+**Branch/worktree:** `feat/real-toefl-simulation` at `/home/pooh/work/toefl-mini/.worktrees/real-toefl-simulation`
+
+- Pushed real TOEFL simulation branch to `origin/feat/real-toefl-simulation`.
+- Added simulation task planning utilities with tests for counts, ordering, prompt-bank sufficiency, mode parsing, duplicate prompt suppression, and near-duplicate prompt suppression.
+- Added authenticated `GET /api/toefl/simulation/tasks` to fetch and build the required simulation task bank.
+- Added dashboard entry points for guided practice and simulation mode.
+- Updated practice mode to support full sequential simulation recording, scoring, and final score summary while preserving guided mode.
+- Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, duplicate-recording prevention, placeholder TTS end fallback, and React StrictMode recorder auto-start fix.
+- Added clickable simulation final-result rows linking successful items to `/toefl/attempt/[id]`, matching the history detail flow.
+- **Implemented interview topic grouping:** The final 4 interview items in simulation are now guaranteed to be from the same `topic_domain`.
+- Preserved phase-1 hardening already on `main`: score route validation, private bucket playback, attempt review audio, recording status, and itemized `scoring_details` review.
+
+### Previous Mainline Milestone
 
 - Added ESLint 9 flat config and Vitest config excluding `.worktrees/**`.
 - Added score-route tests for malformed requests, audio type validation, Gemini failure handling, previous-attempt ownership, and storage upload failure.
@@ -112,6 +126,8 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 3. **No retry loop yet** — Phase 2 feature (targeted retry, sentence-level retry)
 4. **No profile update UI** — API exists but page is read-only
 5. **Private recording playback** — ✅ Fixed. Score route stores storage path; attempt fetch generates signed URL. Verify bucket policies against the production Supabase project before launch.
+6. **Simulation prompt bank dependency** — Simulation requires at least 7 `listen_repeat` and 4 `interview` tasks in Supabase; the API returns a blocking 404 if the bank is underfilled.
+7. **Interview topic grouping implemented** — The planner now selects 4 unique interview prompts from one `topic_domain` for the final simulation items.
 
 ---
 
@@ -130,13 +146,51 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 
 ---
 
+## Active Work: UI Revamp v2.0
+
+**Branch:** `feat/ui-revamp`
+**Worktree:** `.worktrees/ui-revamp`
+**Status:** In Progress
+
+### Design Decisions (Approved)
+- **Vibe:** Energetic & Motivational (reduces anxiety)
+- **Target:** High school & college students
+- **Mobile:** Yes, PWA-first
+- **Tech:** Tailwind CSS v4 + Dark Mode
+- **Landing Page:** The "wow" moment with video/demo
+- **Animations:** Playful (Duolingo-style bouncing)
+- **Dark Mode:** Follow system preference with manual toggle
+- **Bottom Nav:** Elevated center button for Practice (FAB style)
+
+### Completed
+- [x] Design System v2.0 (`design-system/MASTER.md`)
+- [x] Tailwind v4 CSS variables for light/dark themes
+- [x] Theme Provider with system preference + manual toggle
+- [x] Bottom Navigation with elevated Practice button
+- [x] Core UI components: Button, Card, ScoreDisplay
+- [x] Landing page with hero, features, how-it-works, CTA
+- [x] Dashboard with motivational stats, recent attempts
+- [x] Practice page (anxiety-reducing, minimal interface)
+- [x] Attempt review page with itemized breakdown
+- [x] PWA manifest.json
+
+### Remaining
+- [ ] History page
+- [ ] Profile page
+- [ ] PWA icons and service worker
+- [ ] Playful animations (score bounce, button bounce)
+- [ ] History and Profile pages
+- [ ] Final polish and accessibility audit
+
+---
+
 ## Follow-ups
 
 - [ ] Deploy to Vercel + new Supabase Cloud project
 - [x] **Save scoring details as JSONB** — flexible schema for review page itemized breakdown (evidence + tips per dimension); easy to extend without migrations
+- [ ] **UI Revamp v2.0** — Complete remaining pages (history, profile) + animations + PWA polish
 - [ ] Phase 2: Targeted retry + sentence-level retry
 - [ ] Phase 2: Side-by-side attempt comparison
 - [ ] Generate real audio prompts (replace TTS fallback)
 - [ ] Score trend chart on dashboard
 - [ ] Streak tracking + profile updates
-- [ ] Simulation mode (no replay, no transcript)

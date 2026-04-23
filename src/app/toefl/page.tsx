@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScoreDisplay } from '@/components/ui/score-display';
-import { Mic, Flame, TrendingUp, Clock, ChevronRight, Target } from 'lucide-react';
+import { Mic, Flame, TrendingUp, Clock, ChevronRight, Target, Layout } from 'lucide-react';
 
 interface DashboardStats {
   totalAttempts: number;
@@ -16,6 +16,7 @@ interface DashboardStats {
     overall_score: number;
     created_at: string;
     category: string;
+    mode: 'guided' | 'simulation';
   }>;
 }
 
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [practiceMode, setPracticeMode] = useState<'guided' | 'simulation'>('guided');
 
   useEffect(() => {
     fetch('/api/toefl/attempts')
@@ -43,6 +45,7 @@ export default function DashboardPage() {
             overall_score: a.overall_score,
             created_at: a.created_at,
             category: a.toefl_tasks?.category || 'practice',
+            mode: a.mode || 'guided',
           })),
         });
         setLoading(false);
@@ -102,16 +105,64 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* Mode Toggle */}
+      <div style={{ paddingLeft: '12px', paddingRight: '12px', marginBottom: '4px' }}>
+        <div style={{
+          display: 'flex',
+          background: 'var(--color-bg-elevated)',
+          borderRadius: '12px',
+          padding: '4px',
+          border: '1px solid var(--color-border)',
+        }}>
+          <button 
+            onClick={() => setPracticeMode('guided')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              border: 'none',
+              borderRadius: '8px',
+              background: practiceMode === 'guided' ? 'var(--color-primary)' : 'transparent',
+              color: practiceMode === 'guided' ? 'white' : 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 200ms ease',
+            }}
+          >
+            Guided
+          </button>
+          <button 
+            onClick={() => setPracticeMode('simulation')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              border: 'none',
+              borderRadius: '8px',
+              background: practiceMode === 'simulation' ? 'var(--color-accent)' : 'transparent',
+              color: practiceMode === 'simulation' ? 'white' : 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 600,
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 200ms ease',
+            }}
+          >
+            Simulation
+          </button>
+        </div>
+      </div>
+
       {/* Quick Action */}
       <Card 
         padding="lg" 
         className="relative overflow-hidden"
-        onClick={() => router.push('/toefl/practice')}
+        onClick={() => router.push(`/toefl/practice?mode=${practiceMode}`)}
       >
         <div 
           className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10"
           style={{ 
-            background: 'var(--color-primary)',
+            background: practiceMode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)',
             transform: 'translate(30%, -30%)',
           }}
         />
@@ -121,18 +172,18 @@ export default function DashboardPage() {
               className="text-lg font-semibold mb-1"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
-              Start Practice
+              {practiceMode === 'simulation' ? 'Start Simulation' : 'Start Practice'}
             </h2>
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              {hasAttempts 
-                ? "Continue your practice session"
-                : "Begin your first speaking exercise"
+              {practiceMode === 'simulation' 
+                ? "Full 11-task speaking exam"
+                : "Guided speaking exercise"
               }
             </p>
           </div>
           <div 
             className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--color-primary)' }}
+            style={{ background: practiceMode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)' }}
           >
             <Mic size={24} color="white" />
           </div>
@@ -178,7 +229,7 @@ export default function DashboardPage() {
 
           <Card padding="md">
             <div className="flex items-center gap-2 mb-2">
-              <Flame size={18} style={{ color: 'var(--color-accent)' }} />
+              <Flame size={18} style={{ color: '#F97316' }} />
               <span 
                 className="text-sm font-medium"
                 style={{ color: 'var(--color-text-secondary)' }}
@@ -191,7 +242,7 @@ export default function DashboardPage() {
                 className="text-2xl font-bold"
                 style={{ 
                   fontFamily: 'var(--font-mono)',
-                  color: 'var(--color-accent)',
+                  color: '#F97316',
                 }}
               >
                 {stats.streakDays}
@@ -259,22 +310,37 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-3">
                     <div 
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(79, 70, 229, 0.1)' }}
+                      style={{ 
+                        background: attempt.mode === 'simulation' 
+                          ? 'rgba(249, 115, 22, 0.1)' 
+                          : 'rgba(79, 70, 229, 0.1)' 
+                      }}
                     >
-                      <Mic size={18} style={{ color: 'var(--color-primary)' }} />
+                      <Mic size={18} style={{ color: attempt.mode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)' }} />
                     </div>
                     <div>
                       <p className="font-medium" style={{ fontFamily: 'var(--font-heading)' }}>
                         {attempt.category === 'listen_repeat' ? 'Listen & Repeat' : 'Interview'}
                       </p>
-                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                        {new Date(attempt.created_at).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                          style={{ 
+                            background: attempt.mode === 'simulation' ? 'var(--color-accent)' : 'var(--color-primary)',
+                            color: 'white',
+                          }}
+                        >
+                          {attempt.mode || 'guided'}
+                        </span>
+                        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                          {new Date(attempt.created_at).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
@@ -323,7 +389,7 @@ export default function DashboardPage() {
             Start your first speaking exercise and track your progress here.
           </p>
           <Button 
-            onClick={() => router.push('/toefl/practice')}
+            onClick={() => router.push(`/toefl/practice?mode=${practiceMode}`)}
             icon={<Mic size={18} />}
           >
             Start First Practice
