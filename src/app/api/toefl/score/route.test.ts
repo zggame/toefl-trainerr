@@ -4,16 +4,13 @@ import { scoreAudio } from '@/lib/gemini';
 import { getAuthenticatedUser, getSupabaseServer } from '@/lib/supabase-client';
 
 const single = vi.fn();
-const select = vi.fn(() => ({ eq: eqFirst, single }));
-const eqSecond = vi.fn(() => ({ select, single }));
-const eqFirst = vi.fn(() => ({ eq: eqSecond }));
-const updateEq = vi.fn();
-const update = vi.fn(() => ({ eq: updateEq }));
-const insert = vi.fn(() => ({ select }));
+const eq = vi.fn();
+eq.mockReturnValue({ eq, single });
+const select = vi.fn(() => ({ eq, single }));
 const from = vi.fn(() => ({
   select,
-  insert,
-  update,
+  insert: vi.fn(() => ({ select })),
+  update: vi.fn(() => ({ eq })),
 }));
 const upload = vi.fn();
 const getPublicUrl = vi.fn(() => ({ data: { publicUrl: 'https://example.test/audio.webm' } }));
@@ -70,13 +67,17 @@ describe('TOEFL score route', () => {
     vi.mocked(scoreAudio).mockResolvedValue(scoringResult);
     from.mockClear();
     select.mockClear();
-    insert.mockClear();
-    update.mockClear();
-    updateEq.mockReset();
-    eqFirst.mockClear();
-    eqSecond.mockClear();
+    eq.mockClear();
     single.mockReset();
-    single.mockResolvedValue({ data: { id: 'attempt-1' }, error: null });
+    single.mockResolvedValue({ 
+      data: { 
+        daily_attempt_count: 0, 
+        last_attempt_reset: new Date().toISOString(), 
+        user_tier: 'free',
+        total_attempts: 0
+      }, 
+      error: null 
+    });
     upload.mockReset();
     upload.mockResolvedValue({ data: { fullPath: 'user-1/task.webm' }, error: null });
     getPublicUrl.mockClear();
@@ -109,6 +110,7 @@ describe('TOEFL score route', () => {
   });
 
   test('validates previousAttemptId belongs to the authenticated user', async () => {
+    // First call to single is for previousAttemptId check
     single.mockResolvedValueOnce({ data: null, error: { message: 'not found' } });
 
     const response = await POST(
@@ -118,8 +120,8 @@ describe('TOEFL score route', () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: 'Previous attempt not found' });
     expect(scoreAudio).not.toHaveBeenCalled();
-    expect(eqFirst).toHaveBeenCalledWith('id', '22222222-2222-4222-8222-222222222222');
-    expect(eqSecond).toHaveBeenCalledWith('user_id', 'user-1');
+    expect(eq).toHaveBeenCalledWith('id', '22222222-2222-4222-8222-222222222222');
+    expect(eq).toHaveBeenCalledWith('user_id', 'user-1');
   });
 
   test('surfaces recording upload failures instead of silently swallowing them', async () => {
@@ -129,5 +131,66 @@ describe('TOEFL score route', () => {
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({ error: 'Recording upload failed' });
+  });
+
+  test('enforces daily limit for free users', async () => {
+    // Mock profile to have reached limit
+    single.mockResolvedValueOnce({ 
+      data: { 
+        daily_attempt_count: 10, 
+        last_attempt_reset: new Date().toISOString(), 
+        user_tier: 'free',
+        total_attempts: 100
+      }, 
+      error: null 
+    });
+
+    const response = await POST(request(validBody) as never);
+
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({ 
+      error: 'Daily limit reached. Please upgrade to Premium or try again tomorrow!',
+      limitReached: true 
+    });
+    expect(scoreAudio).not.toHaveBeenCalled();
+  });
+
+  test('resets daily limit if it is a new day', async () => {
+    // Mock profile with limit from yesterday
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    single.mockResolvedValueOnce({ 
+      data: { 
+        daily_attempt_count: 10, 
+        last_attempt_reset: yesterday.toISOString(), 
+        user_tier: 'free',
+        total_attempts: 100
+      }, 
+      error: null 
+    });
+
+    const response = await POST(request(validBody) as never);
+
+    expect(response.status).toBe(200);
+    expect(scoreAudio).toHaveBeenCalled();
+  });
+
+  test('allows premium users to bypass daily limit', async () => {
+    // Mock profile with 10 attempts but premium tier
+    single.mockResolvedValueOnce({ 
+      data: { 
+        daily_attempt_count: 10, 
+        last_attempt_reset: new Date().toISOString(), 
+        user_tier: 'premium',
+        total_attempts: 100
+      }, 
+      error: null 
+    });
+
+    const response = await POST(request(validBody) as never);
+
+    expect(response.status).toBe(200);
+    expect(scoreAudio).toHaveBeenCalled();
   });
 });

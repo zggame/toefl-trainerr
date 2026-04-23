@@ -82,6 +82,32 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // --- Usage Monitoring & Limits ---
+  const { data: profile, error: profileError } = await supabase
+    .from('toefl_profiles')
+    .select('daily_attempt_count, last_attempt_reset, user_tier, total_attempts')
+    .eq('user_id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+  }
+
+  const MAX_FREE_DAILY = 10; // Allow 10 attempts for initial testing
+  const now = new Date();
+  const lastReset = new Date(profile.last_attempt_reset);
+  const isNewDay = now.toDateString() !== lastReset.toDateString();
+
+  let currentDailyCount = isNewDay ? 0 : profile.daily_attempt_count;
+
+  if (profile.user_tier === 'free' && currentDailyCount >= MAX_FREE_DAILY) {
+    return NextResponse.json({ 
+      error: 'Daily limit reached. Please upgrade to Premium or try again tomorrow!',
+      limitReached: true 
+    }, { status: 429 });
+  }
+  // --- End Usage Monitoring ---
+
   let result;
   try {
     result = await scoreAudio(
@@ -106,7 +132,7 @@ export async function POST(request: NextRequest) {
 
   const storagePath = uploadData.path ?? uploadData.fullPath ?? fileName;
 
-  const { data: attempt, error } = await supabase
+  const { data: attempt, error: attemptError } = await supabase
     .from('toefl_attempts')
     .insert({
       user_id: user.id,
@@ -128,13 +154,27 @@ export async function POST(request: NextRequest) {
         languageUse: result.languageUse,
         topicDev: result.topicDev,
       },
+      prompt_tokens: result.usage?.promptTokens || 0,
+      completion_tokens: result.usage?.completionTokens || 0,
+      total_tokens: result.usage?.totalTokens || 0,
     })
     .select()
     .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (attemptError) {
+    return NextResponse.json({ error: attemptError.message }, { status: 500 });
   }
+
+  // Update user profile usage counts
+  await supabase
+    .from('toefl_profiles')
+    .update({
+      daily_attempt_count: currentDailyCount + 1,
+      total_attempts: (profile.total_attempts || 0) + 1,
+      last_attempt_reset: now.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq('user_id', user.id);
 
   return NextResponse.json({ attempt, scoring: result });
 }

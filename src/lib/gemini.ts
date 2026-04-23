@@ -38,6 +38,11 @@ export type ScoringResult = {
   transcript: string;
   wpm: number;
   fillerCount: number;
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 };
 
 export async function scoreAudio(
@@ -96,7 +101,17 @@ Only respond with the JSON object, no additional text.`;
   const text = response.text;
   if (!text) throw new Error('Gemini returned empty response');
 
-  return JSON.parse(text) as ScoringResult;
+  const result = JSON.parse(text) as ScoringResult;
+
+  if (response.usageMetadata) {
+    result.usage = {
+      promptTokens: response.usageMetadata.promptTokenCount ?? 0,
+      completionTokens: response.usageMetadata.candidatesTokenCount ?? 0,
+      totalTokens: response.usageMetadata.totalTokenCount ?? 0,
+    };
+  }
+
+  return result;
 }
 
 export async function transcribeAudio(
