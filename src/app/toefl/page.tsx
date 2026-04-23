@@ -9,6 +9,7 @@ import { Mic, Flame, TrendingUp, Clock, ChevronRight, Target, Layout } from 'luc
 
 interface DashboardStats {
   totalAttempts: number;
+  dailyAttempts: number;
   avgScore: number;
   streakDays: number;
   recentAttempts: Array<{
@@ -27,19 +28,23 @@ export default function DashboardPage() {
   const [practiceMode, setPracticeMode] = useState<'guided' | 'simulation'>('guided');
 
   useEffect(() => {
-    fetch('/api/toefl/attempts')
-      .then(r => r.ok ? r.json() : [])
-      .then((data: any[]) => {
-        const attempts = Array.isArray(data) ? data : [];
+    // Fetch both attempts and profile for full dashboard stats
+    Promise.all([
+      fetch('/api/toefl/attempts').then(r => r.ok ? r.json() : []),
+      fetch('/api/toefl/profile').then(r => r.ok ? r.json() : null)
+    ])
+      .then(([attemptsData, profileData]) => {
+        const attempts = Array.isArray(attemptsData) ? attemptsData : [];
         const scores = attempts.map((a: any) => a.overall_score).filter(Boolean);
         const avgScore = scores.length > 0 
           ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length 
           : 0;
 
         setStats({
-          totalAttempts: attempts.length,
+          totalAttempts: profileData?.total_attempts ?? attempts.length,
+          dailyAttempts: profileData?.daily_attempt_count ?? 0,
           avgScore,
-          streakDays: 0, // TODO: calculate from attempts
+          streakDays: profileData?.streak_days ?? 0,
           recentAttempts: attempts.slice(0, 5).map((a: any) => ({
             id: a.id,
             overall_score: a.overall_score,
@@ -216,14 +221,19 @@ export default function DashboardPage() {
                 Attempts
               </span>
             </div>
-            <div 
-              className="text-2xl font-bold"
-              style={{ 
-                fontFamily: 'var(--font-mono)',
-                color: 'var(--color-text-primary)',
-              }}
-            >
-              {stats.totalAttempts}
+            <div className="flex items-baseline gap-1">
+              <span 
+                className="text-2xl font-bold"
+                style={{ 
+                  fontFamily: 'var(--font-mono)',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
+                {stats.dailyAttempts}
+              </span>
+              <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                / {stats.totalAttempts} total
+              </span>
             </div>
           </Card>
 

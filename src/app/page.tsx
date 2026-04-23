@@ -40,7 +40,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen pb-8">
       {/* Hero Section */}
-      <section className="relative px-4 pt-12 pb-16 overflow-hidden">
+      <section className="relative px-4 pt-20 pb-16 overflow-hidden">
         {/* Background decoration */}
         <div 
           className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
