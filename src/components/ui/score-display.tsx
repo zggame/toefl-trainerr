@@ -30,6 +30,7 @@ export function ScoreDisplay({
 
   useEffect(() => {
     if (!animated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayScore(score);
       return;
     }

@@ -24,6 +24,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     
     // Load saved preference
@@ -37,6 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!mounted) return;
 
     const resolved = theme === 'system' ? getSystemTheme() : theme;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResolvedTheme(resolved);
 
     const root = document.documentElement;
