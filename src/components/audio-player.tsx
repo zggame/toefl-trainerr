@@ -8,7 +8,10 @@ interface AudioPlayerProps {
   transcript?: string;
   showTranscript?: boolean;
   onTranscriptToggle?: () => void;
+  allowReplay?: boolean;
+  allowTranscript?: boolean;
   autoPlay?: boolean;
+  playbackKey?: string;
   onEnded?: () => void;
 }
 
@@ -18,51 +21,138 @@ function isPlaceholderUrl(url: string): boolean {
   return PLACEHOLDER_DOMAINS.some(d => url.includes(d));
 }
 
-export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscriptToggle, autoPlay, onEnded }: AudioPlayerProps) {
-  const [playing, setPlaying] = useState(false);
+export function AudioPlayer({
+  audioUrl,
+  transcript,
+  showTranscript,
+  onTranscriptToggle,
+  allowReplay = true,
+  allowTranscript = true,
+  autoPlay,
+  playbackKey,
+  onEnded,
+}: AudioPlayerProps) {
+  const [playingSourceKey, setPlayingSourceKey] = useState<string | null>(null);
+  const [endedSourceKey, setEndedSourceKey] = useState<string | null>(null);
+  const [startedSourceKey, setStartedSourceKey] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const onEndedRef = useRef(onEnded);
+  const ttsFallbackTimerRef = useRef<number | null>(null);
   const useTts = isPlaceholderUrl(audioUrl);
+  const sourceKey = playbackKey ?? `${audioUrl}::${transcript ?? ''}`;
+  const playing = playingSourceKey === sourceKey;
+  const hasStartedOnce = startedSourceKey === sourceKey;
 
-  const speak = useCallback(() => {
-    if (!transcript) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(transcript);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.onstart = () => setPlaying(true);
-    utterance.onend = () => { setPlaying(false); onEnded?.(); };
-    utterance.onerror = () => setPlaying(false);
-    window.speechSynthesis.speak(utterance);
-  }, [transcript]);
-
-  const stopSpeaking = useCallback(() => {
-    window.speechSynthesis.cancel();
-    setPlaying(false);
+  const clearTtsFallback = useCallback(() => {
+    if (ttsFallbackTimerRef.current !== null) {
+      window.clearTimeout(ttsFallbackTimerRef.current);
+      ttsFallbackTimerRef.current = null;
+    }
   }, []);
 
   useEffect(() => {
-    if (autoPlay) {
-      if (useTts) {
-        speak();
-      } else if (audioRef.current) {
-        audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
+    onEndedRef.current = onEnded;
+  }, [onEnded]);
+
+  useEffect(() => {
+    clearTtsFallback();
+    window.speechSynthesis.cancel();
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch {
+        // Ignore browsers that reject resetting before metadata is ready.
       }
     }
-  }, [autoPlay, useTts, speak]);
+  }, [clearTtsFallback, sourceKey]);
+
+  useEffect(() => () => clearTtsFallback(), [clearTtsFallback]);
+
+  const startTts = useCallback(() => {
+    if (!transcript) return;
+    clearTtsFallback();
+    setStartedSourceKey(sourceKey);
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(transcript);
+    let finished = false;
+    const finishPlayback = () => {
+      if (finished) return;
+      finished = true;
+      clearTtsFallback();
+      setPlayingSourceKey(null);
+      setEndedSourceKey(sourceKey);
+      onEndedRef.current?.();
+    };
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.onstart = () => {
+      setPlayingSourceKey(sourceKey);
+      setEndedSourceKey(null);
+    };
+    utterance.onend = finishPlayback;
+    utterance.onpause = () => setPlayingSourceKey(null);
+    utterance.onresume = () => {
+      setPlayingSourceKey(sourceKey);
+      setEndedSourceKey(null);
+    };
+    utterance.onerror = () => setPlayingSourceKey(null);
+    window.speechSynthesis.speak(utterance);
+    const estimatedDurationMs = Math.max(3000, Math.ceil(((transcript.split(/\s+/).filter(Boolean).length / 2.4) + 1) * 1000));
+    ttsFallbackTimerRef.current = window.setTimeout(finishPlayback, estimatedDurationMs);
+  }, [clearTtsFallback, sourceKey, transcript]);
+
+  const stopSpeaking = useCallback(() => {
+    clearTtsFallback();
+    window.speechSynthesis.cancel();
+    setPlayingSourceKey(null);
+  }, [clearTtsFallback]);
+
+  const startNativeAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setStartedSourceKey(sourceKey);
+    audio.play().then(() => {
+      setPlayingSourceKey(sourceKey);
+      setEndedSourceKey(null);
+    }).catch(() => {
+      setStartedSourceKey(current => (current === sourceKey ? null : current));
+    });
+  }, [sourceKey]);
+
+  useEffect(() => {
+    if (!autoPlay) return;
+    const timer = window.setTimeout(() => {
+      if (useTts) {
+        startTts();
+      } else if (audioRef.current) {
+        startNativeAudio();
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [autoPlay, sourceKey, startNativeAudio, startTts, useTts]);
 
   const toggle = () => {
     if (useTts) {
+      if (!allowReplay) {
+        if (!hasStartedOnce) startTts();
+        return;
+      }
       if (playing) stopSpeaking();
-      else speak();
+      else startTts();
       return;
     }
     if (!audioRef.current) return;
+    if (!allowReplay) {
+      if (!hasStartedOnce) startNativeAudio();
+      return;
+    }
     if (playing) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      startNativeAudio();
     }
-    setPlaying(!playing);
   };
 
   return (
@@ -73,9 +163,26 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
       border: '3px solid rgba(79,70,229,0.15)',
       boxShadow: 'var(--shadow-clay-sm)',
     }}>
-      {!useTts && <audio ref={audioRef} src={audioUrl} onEnded={() => { setPlaying(false); onEnded?.(); }} />}
+      {!useTts && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onPlay={() => {
+            setStartedSourceKey(sourceKey);
+            setPlayingSourceKey(sourceKey);
+            setEndedSourceKey(null);
+          }}
+          onPause={() => setPlayingSourceKey(null)}
+          onEnded={() => {
+            setPlayingSourceKey(null);
+            setEndedSourceKey(sourceKey);
+            onEnded?.();
+          }}
+        />
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
+          disabled={!allowReplay && hasStartedOnce}
           onClick={toggle}
           style={{
             width: '48px', height: '48px',
@@ -83,7 +190,8 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
             borderRadius: '50%',
             border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
+            cursor: !allowReplay && hasStartedOnce ? 'not-allowed' : 'pointer',
+            opacity: !allowReplay && hasStartedOnce ? 0.6 : 1,
             boxShadow: 'var(--shadow-clay-sm)',
             transition: 'all 200ms ease',
           }}
@@ -98,18 +206,27 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
             {playing ? (useTts ? 'Speaking...' : 'Playing...') : (useTts ? 'Tap to hear prompt' : 'Tap to play prompt')}
           </p>
         </div>
-        <button
-          onClick={() => {
-            if (useTts) { stopSpeaking(); speak(); }
-            else if (audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); setPlaying(true); }
-          }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
-          title='Replay'
-        >
-          {useTts ? <Volume2 size={18} /> : <RotateCcw size={18} />}
-        </button>
+        {allowReplay && (
+          <button
+            onClick={() => {
+              if (useTts) {
+                stopSpeaking();
+                startTts();
+              }
+              else if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+                startNativeAudio();
+              }
+            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
+            title='Replay'
+          >
+            {useTts ? <Volume2 size={18} /> : <RotateCcw size={18} />}
+          </button>
+        )}
       </div>
-      {transcript && onTranscriptToggle && (
+      {allowTranscript && transcript && onTranscriptToggle && (
         <button
           onClick={onTranscriptToggle}
           style={{
@@ -127,7 +244,7 @@ export function AudioPlayer({ audioUrl, transcript, showTranscript, onTranscript
           Show Text
         </button>
       )}
-      {showTranscript && transcript && (
+      {allowTranscript && showTranscript && transcript && (
         <div style={{
           marginTop: '12px',
           padding: '12px',

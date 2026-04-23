@@ -140,6 +140,7 @@ Always specify:
 - Do not batch unrelated changes
 - Use squash only if explicitly requested
 - Default to merge commits for PRs
+- During long workflows, commit after each meaningful unit of work (e.g., a new feature, a passing test, a refactor step) — do not wait until the end
 
 ### Build Gate
 

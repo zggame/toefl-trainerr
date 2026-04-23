@@ -3,17 +3,18 @@
 import { useState } from 'react';
 import { ScoreBreakdown } from './score-breakdown';
 import { ScoringResult } from '@/lib/gemini';
-import { RotateCcw, Pencil, Check } from 'lucide-react';
+import { RotateCcw, Pencil, Check, Mic } from 'lucide-react';
 
 interface ScoreCardProps {
   overallScore: number;
   scoring: ScoringResult;
+  attemptId?: string;
   onFullRetake: () => void;
   onTargetedRetry: () => void;
   onDone: () => void;
 }
 
-export function ScoreCard({ overallScore, scoring, onFullRetake, onTargetedRetry, onDone }: ScoreCardProps) {
+export function ScoreCard({ overallScore, scoring, attemptId, onFullRetake, onTargetedRetry, onDone }: ScoreCardProps) {
   const [expanded, setExpanded] = useState(false);
   const pct = (overallScore / 4) * 100;
 
@@ -68,6 +69,37 @@ export function ScoreCard({ overallScore, scoring, onFullRetake, onTargetedRetry
               fontFamily: 'var(--font-baloo)',
             }}>{e}</span>
           ))}
+        </div>
+      )}
+
+      {attemptId && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '10px 12px',
+          background: 'rgba(79,70,229,0.06)',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          border: '2px solid rgba(79,70,229,0.12)',
+        }}>
+          <Mic size={16} color='var(--color-primary)' />
+          <span style={{ fontFamily: 'var(--font-comic)', fontSize: '13px', color: 'var(--color-text)' }}>
+            Recording will be available on the review page
+          </span>
+          <a
+            href={`/toefl/attempt/${attemptId}`}
+            style={{
+              marginLeft: 'auto',
+              fontFamily: 'var(--font-baloo)',
+              fontSize: '13px',
+              color: 'var(--color-primary)',
+              textDecoration: 'none',
+              fontWeight: 600,
+            }}
+          >
+            View →
+          </a>
         </div>
       )}
 

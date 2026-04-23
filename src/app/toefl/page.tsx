@@ -21,7 +21,7 @@ export default function ToeflHome() {
         setLoading(false);
       }).catch(() => setLoading(false));
     });
-  }, []);
+  }, [router, supabase]);
 
   const latestScore = attempts[0]?.overall_score;
   const avgScore = attempts.length ? (attempts.reduce((s, a) => s + (a.overall_score || 0), 0) / attempts.length).toFixed(1) : null;
@@ -80,7 +80,7 @@ export default function ToeflHome() {
       </div>
 
       <button
-        onClick={() => router.push('/toefl/practice')}
+        onClick={() => router.push('/toefl/practice?mode=guided')}
         style={{
           width: '100%',
           background: 'var(--color-cta)',
@@ -112,12 +112,12 @@ export default function ToeflHome() {
         marginBottom: '24px',
         border: '3px solid rgba(79,70,229,0.15)',
       }}>
-        <button style={{
+        <button onClick={() => router.push('/toefl/practice?mode=guided')} style={{
           flex: 1, padding: '10px', border: 'none', borderRadius: 'var(--radius-pill)',
           background: 'var(--color-primary)', color: 'white',
           fontFamily: 'var(--font-baloo)', fontWeight: 600, cursor: 'pointer',
         }}>Guided</button>
-        <button style={{
+        <button onClick={() => router.push('/toefl/practice?mode=simulation')} style={{
           flex: 1, padding: '10px', border: 'none', borderRadius: 'var(--radius-pill)',
           background: 'transparent', color: 'var(--color-text-muted)',
           fontFamily: 'var(--font-baloo)', fontWeight: 600, cursor: 'pointer',
