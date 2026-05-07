@@ -4,78 +4,78 @@
 
 @theme {
   /* Typography */
-  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-heading: 'Manrope', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Colors - Light Mode */
-  --color-primary: #4F46E5;
-  --color-primary-light: #818CF8;
-  --color-primary-dark: #3730A3;
-  --color-accent: #F97316;
-  --color-accent-light: #FB923C;
-  --color-accent-green: #22C55E;
+  /* Colors - Light Mode (Architectural Ledger) */
+  --color-primary: #001735;
+  --color-primary-container: #0d2c52;
+  --color-primary-light: #455f88;
+  --color-accent: #00a874; /* Tertiary Emerald */
+  --color-accent-light: #6ffbbe;
+  --color-accent-green: #00a874;
   --color-accent-yellow: #EAB308;
-  --color-accent-red: #EF4444;
+  --color-accent-red: #ba1a1a;
 
-  --color-bg: #F7F4EE;
-  --color-bg-elevated: #FFFFFF;
-  --color-bg-overlay: rgba(15, 23, 42, 0.04);
-  --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-text-muted: #64748B;
-  --color-border: #E2E8F0;
+  --color-bg: #f6fafe;
+  --color-bg-elevated: #ffffff;
+  --color-bg-low: #f0f4f8;
+  --color-bg-overlay: rgba(0, 27, 60, 0.04);
+  --color-text-primary: #171c1f;
+  --color-text-secondary: #43474f;
+  --color-text-muted: #747780;
+  --color-border: rgba(196, 198, 208, 0.15); /* Ghost Border */
 
   /* Score Colors */
-  --color-score-excellent: #22C55E;
-  --color-score-good: #4F46E5;
+  --color-score-excellent: #00a874;
+  --color-score-good: #001735;
   --color-score-needs-work: #EAB308;
-  --color-score-practice: #EF4444;
+  --color-score-practice: #ba1a1a;
 
-  /* Shadows */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-  --shadow-fab: 0 4px 14px rgba(79, 70, 229, 0.35);
-  --shadow-button: 0 4px 14px rgba(79, 70, 229, 0.25);
+  /* Shadows - Ambient & Deep */
+  --shadow-card: 0 4px 6px rgba(0, 27, 60, 0.02);
+  --shadow-card-hover: 0 20px 40px rgba(0, 27, 60, 0.06);
+  --shadow-fab: 0 10px 20px rgba(0, 27, 60, 0.15);
+  --shadow-button: 0 4px 12px rgba(0, 27, 60, 0.1);
 
-  /* Radius */
-  --radius-card: 24px;
-  --radius-button: 14px;
+  /* Radius - Architectural */
+  --radius-card: 16px;
+  --radius-button: 8px;
   --radius-pill: 9999px;
 }
 
-/* Dark Mode Colors */
+/* Dark Mode Colors (Premium Architectural) */
 .dark {
-  --color-primary: #6366F1;
-  --color-primary-light: #A5B4FC;
-  --color-primary-dark: #4F46E5;
-  --color-accent: #FB923C;
-  --color-accent-light: #FDBA74;
-  --color-accent-green: #4ADE80;
+  --color-primary: #adc7f7;
+  --color-primary-container: #0d2c52;
+  --color-primary-light: #d6e3ff;
+  --color-accent: #6ffbbe; /* Tertiary Emerald */
+  --color-accent-light: #00a874;
+  --color-accent-green: #6ffbbe;
   --color-accent-yellow: #FDE047;
-  --color-accent-red: #F87171;
+  --color-accent-red: #ffdad6;
 
-  --color-bg: #0F172A;
-  --color-bg-elevated: #1E293B;
+  --color-bg: #081226;
+  --color-bg-elevated: #171c1f;
+  --color-bg-low: #0d2c52;
   --color-bg-overlay: rgba(255, 255, 255, 0.04);
-  --color-text-primary: #F1F5F9;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
-  --color-border: #334155;
+  --color-text-primary: #e1e2e6;
+  --color-text-secondary: #c4c6d0;
+  --color-text-muted: #909199;
+  --color-border: rgba(196, 198, 208, 0.1);
 
-  --color-score-excellent: #4ADE80;
-  --color-score-good: #6366F1;
+  --color-score-excellent: #6ffbbe;
+  --color-score-good: #adc7f7;
   --color-score-needs-work: #FDE047;
-  --color-score-practice: #F87171;
+  --color-score-practice: #ffdad6;
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 html {
@@ -96,7 +96,7 @@ body {
   width: 100%;
 }
 
-/* App container - full-width shell for mobile and desktop */
+/* App container */
 .app-container {
   width: 100%;
   min-height: 100vh;
@@ -109,9 +109,9 @@ body {
 @media (min-width: 1024px) {
   body {
     background:
-      radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 30%),
-      radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 24%),
-      var(--color-bg-elevated);
+      radial-gradient(circle at top left, rgba(0, 23, 53, 0.05), transparent 40%),
+      radial-gradient(circle at bottom right, rgba(0, 168, 116, 0.03), transparent 30%),
+      var(--color-bg);
   }
 
   .app-container {

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Mic, History, User, MessageCircle } from 'lucide-react';
+import { ClipboardList, History, Home, MessageCircle, Mic, User } from 'lucide-react';
 
 const navItems = [
   { path: '/toefl', icon: Home, label: 'Home' },
@@ -27,77 +27,63 @@ export function DesktopSidebar({
   const usagePercent = usageLimit > 0 ? Math.min((usageCount / usageLimit) * 100, 100) : 0;
 
   return (
-    <aside className="hidden md:flex md:w-[232px] md:shrink-0 md:flex-col md:gap-8 md:border-r md:border-[var(--color-border)] md:bg-white md:px-5 md:py-8">
-      <div className="flex items-center gap-3 px-1">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white shadow-[var(--shadow-button)]">
-          <MessageCircle size={20} strokeWidth={2.4} />
+    <aside className="hidden w-[264px] shrink-0 flex-col border-r border-slate-100 bg-white px-6 py-10 md:flex">
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#4b3ff1] text-white shadow-[0_10px_24px_rgba(75,63,241,0.26)]">
+          <MessageCircle size={19} strokeWidth={2.6} />
         </div>
         <div>
-          <div className="text-base font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+          <div className="text-xl font-bold leading-tight tracking-tight text-[#111936]" style={{ fontFamily: 'var(--font-heading)' }}>
             TOEFL Trainer
           </div>
-          <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+          <div className="text-sm font-medium text-[#5c6179]">
             Speaking practice
           </div>
         </div>
       </div>
 
-      <nav className="flex flex-col gap-1.5">
+      <nav className="mt-12 flex flex-col gap-4">
         {navItems.map((item) => {
           const isActive = pathname === item.path || (item.path !== '/toefl' && pathname?.startsWith(item.path));
-          const Icon = item.icon;
-
+          const Icon = item.path === '/toefl/practice' ? ClipboardList : item.icon;
+          
           return (
             <button
               key={item.path}
               type="button"
               onClick={() => router.push(item.path)}
-              className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200"
-              style={{
-                background: isActive ? 'rgba(79, 70, 22, 0.04)' : 'transparent',
-                color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-              }}
+              className="group flex items-center gap-4 rounded-xl px-3 py-3 text-left text-base font-semibold transition-all duration-200"
+              style={{ background: isActive ? '#f0eeff' : 'transparent', color: isActive ? '#372ee5' : '#151b36' }}
             >
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
-                style={{
-                  background: isActive ? 'var(--color-primary)' : 'transparent',
-                  color: isActive ? 'white' : 'inherit',
-                }}
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+                style={{ background: isActive ? '#5146ee' : 'transparent', color: isActive ? 'white' : '#6d7288' }}
               >
-                <Icon size={18} strokeWidth={isActive ? 2.4 : 2} />
-              </div>
-              <span className="text-sm font-semibold" style={{ fontFamily: 'var(--font-body)' }}>
+                <Icon size={20} strokeWidth={isActive ? 2.6 : 2.1} />
+              </span>
+              <span style={{ fontFamily: 'var(--font-heading)' }}>
                 {item.label}
               </span>
-              {isActive && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />}
             </button>
           );
         })}
       </nav>
 
-      <div className="mt-auto pt-6">
-        <div className="rounded-2xl bg-[var(--color-bg-elevated)] p-4 border border-[var(--color-border)]">
-          <div className="flex flex-col gap-3">
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--color-text-muted)' }}>
-                Usage Today
-              </div>
-              <div className="mt-1 text-sm font-bold" style={{ fontFamily: 'var(--font-body)' }}>
-                {usageText}
-              </div>
+      <div className="mt-auto rounded-2xl border border-slate-100 bg-white px-4 py-5 shadow-[0_12px_36px_rgba(15,23,42,0.06)]">
+        <div className="flex items-center gap-4">
+          <div
+            className="grid h-16 w-16 place-items-center rounded-full text-sm font-bold text-[#111936]"
+            style={{ background: `conic-gradient(#5146ee ${usagePercent}%, #ebeaf2 0)` }}
+          >
+            <div className="grid h-12 w-12 place-items-center rounded-full bg-white">
+              {usageCount}/{usageLimit}
             </div>
-            
-            <div className="relative h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-overlay)]">
-              <div 
-                className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500" 
-                style={{ width: `${usagePercent}%` }}
-              />
-            </div>
-            
-            <div className="text-[10px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-              Daily scores refresh at midnight local time.
-            </div>
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-[#111936]">{usageText}</div>
+            <p className="mt-1 text-xs leading-snug text-[#6d7288]">
+              More scores refresh tomorrow
+            </p>
           </div>
         </div>
       </div>

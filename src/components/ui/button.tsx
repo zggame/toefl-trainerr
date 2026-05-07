@@ -48,14 +48,14 @@ export function Button({
 
   const variantStyles = {
     primary: {
-      background: 'var(--color-primary)',
+      background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-container))',
       color: 'white',
       boxShadow: 'var(--shadow-button)',
     },
     secondary: {
-      background: 'transparent',
+      background: 'var(--color-bg-elevated)',
       color: 'var(--color-primary)',
-      border: '2px solid var(--color-primary)',
+      border: '1px solid var(--color-border)',
     },
     ghost: {
       background: 'transparent',
@@ -67,10 +67,11 @@ export function Button({
     if (disabled) return;
     const target = e.currentTarget;
     if (variant === 'primary') {
-      target.style.background = 'var(--color-primary-dark)';
-      target.style.transform = 'scale(1.02)';
+      target.style.filter = 'brightness(1.1)';
+      target.style.transform = 'translateY(-1px)';
+      target.style.boxShadow = 'var(--shadow-card-hover)';
     } else if (variant === 'secondary') {
-      target.style.background = 'rgba(79, 70, 229, 0.1)';
+      target.style.background = 'var(--color-bg-low)';
     } else {
       target.style.background = 'var(--color-bg-overlay)';
     }
@@ -78,17 +79,20 @@ export function Button({
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
     const target = e.currentTarget;
+    target.style.filter = 'none';
+    target.style.transform = 'translateY(0)';
+    target.style.boxShadow = variant === 'primary' ? 'var(--shadow-button)' : 'none';
     target.style.background = variantStyles[variant].background;
-    target.style.transform = 'scale(1)';
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;
-    e.currentTarget.style.transform = 'scale(0.98)';
+    e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.transform = 'scale(1.02)';
+    if (disabled) return;
+    e.currentTarget.style.transform = 'translateY(-1px) scale(1)';
   };
 
   return (
