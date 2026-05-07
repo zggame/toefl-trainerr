@@ -30,7 +30,7 @@ The `feat/ui-revamp` branch introduces a significant shift in the application ar
 | Page | Route | Status |
 |------|-------|--------|
 | Landing | `/` | ✅ Revamped (App Store Style) |
-| Dashboard | `/toefl` | ✅ Revamped (Motivational Stats) |
+| Dashboard | `/toefl` | ✅ Revamped (Responsive Desktop Layout) |
 | Practice | `/toefl/practice` | ✅ Revamped (Guided & Simulation) |
 | History | `/toefl/history` | ✅ Revamped (Filtered view) |
 | Attempt Review | `/toefl/attempt/[id]` | ✅ Revamped (Itemized Breakdown) |
@@ -99,7 +99,10 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 - **Next.js 16 Migration:** Successfully migrated `middleware.ts` to `proxy.ts` to follow the latest Next.js conventions and fix build warnings.
 - Synced `feat/ui-revamp` with simulation logic and fully merged UI Revamp v2.0 into main.
 - Hardened prompt playback and recording lifecycle for simulation: no replay/transcript reveal, stale async guards, mic/runtime error handling, duplicate-recording prevention, placeholder TTS end fallback, and React StrictMode recorder auto-start fix.
-- **Implemented interview topic grouping:** The final 4 interview items in simulation are now guaranteed to be from the same `topic_domain` (and randomized).
+- **Implemented Responsive Desktop Layout (Dashboard):** Replaced the mobile-first stretched layout with a true 12-column desktop grid. Added a quiet left sidebar (232px), a primary coaching hero, a focused diagnosis card, and a unified metrics strip.
+- **Refined Design Tokens:** Updated card radius to 24px and introduced a warmer off-white background (`#F7F4EE`) for a more student-friendly feel.
+- **Unified Sidebar Navigation:** Moved navigation and usage monitoring to a persistent desktop sidebar (hidden on mobile).
+- **Optimized Shell:** Updated `AppLayout` to support flush sidebars and cleaner desktop transitions.
 
 ---
 
@@ -169,8 +172,7 @@ v{MAJOR}.{MINOR}.{PATCH}-{phase}.{build}
 ### High Priority
 - [ ] Deploy `main` branch to Vercel + new Supabase Cloud project.
 
-### 🎨 UX/UI Polish
-- [ ] **Responsive Desktop Layout:** Design and implement a layout for larger screens (iPad, Desktop) that uses horizontal space better.
+- [x] **Responsive Desktop Layout:** Implemented a student-friendly layout for larger screens that uses horizontal space intentionally with a left sidebar and balanced main grid.
 
 ### 🎙️ AI Audio & Speech
 - [ ] **Gemini Speech Integration:** Replace browser TTS fallback with Gemini-generated audio prompts for a more natural testing experience.

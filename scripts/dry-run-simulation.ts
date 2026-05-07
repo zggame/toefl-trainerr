@@ -60,7 +60,10 @@ async function simulationDryRun() {
     'Score': r.score ?? 'N/A'
   })));
 
-  const avg = finalResults.filter(r => r.success).reduce((sum, r) => sum + r.score, 0) / finalResults.length;
+  const successfulResults = finalResults.filter(r => r.success);
+  const avg = successfulResults.length > 0
+    ? successfulResults.reduce((sum, r) => sum + (r.score ?? 0), 0) / successfulResults.length
+    : 0;
   console.log(`Average Simulation Score: ${avg.toFixed(2)}`);
   console.log('--------------------------------\n');
 
