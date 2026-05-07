@@ -43,10 +43,13 @@ describe('dashboard visual parity guardrails', () => {
     const layout = readFileSync('src/app/toefl/layout.tsx', 'utf8');
     const appLayout = readFileSync('src/components/layout/app-layout.tsx', 'utf8');
     const dashboard = readFileSync('src/app/toefl/page.tsx', 'utf8');
+    const sidebar = readFileSync('src/components/layout/desktop-sidebar.tsx', 'utf8');
 
     expect(layout).toContain('ToeflShell');
     expect(appLayout).toContain('md:max-w-[1240px]');
     expect(dashboard).not.toContain('DesktopSidebar');
     expect(dashboard).not.toContain('max-w-[1600px]');
+    expect(sidebar).toContain('sticky top-8');
+    expect(sidebar).not.toContain('mt-auto');
   });
 });

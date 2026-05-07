@@ -33,7 +33,7 @@ export function ToeflShell({ children }: { children: ReactNode }) {
   return (
     <div className="toefl-bright-scope">
       <div className="min-h-screen bg-[#f3f0ea] md:p-2">
-        <div className="mx-auto flex min-h-screen w-full max-w-[1600px] overflow-hidden bg-white shadow-[0_20px_70px_rgba(15,23,42,0.10)] md:min-h-[calc(100vh-16px)] md:rounded-2xl">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1600px] items-start overflow-hidden bg-white shadow-[0_20px_70px_rgba(15,23,42,0.10)] md:min-h-[calc(100vh-16px)] md:rounded-2xl">
           <DesktopSidebar
             usageText={`${usageCount} of 10 scores used`}
             usageCount={usageCount}

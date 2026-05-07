@@ -5,6 +5,12 @@
 **Tag:** `v0.2.0-alpha.1`
 **Last Updated:** 2026-04-22 (handoff: same-topic interview grouping in progress)
 
+**Worktree Note:** 2026-05-07, branch `feat/desktop-dashboard-redesign`, worktree `/home/pooh/work/toefl-mini/tmp-worktree/desktop-redesign`
+
+- Rolled the dashboard desktop frame out to all TOEFL pages through a shared shell.
+- Fixed the desktop sidebar issue from GitHub issue #4 by making the sidebar content-sized/sticky instead of pushing the usage card to the bottom of tall windows.
+- Verified with `npm test -- --run src/app/dashboard-layout-regression.test.ts` and `npm run build`.
+
 ---
 
 ## Tech Stack Evolution (Revamp v2.0)
