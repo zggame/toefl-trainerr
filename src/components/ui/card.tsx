@@ -50,11 +50,9 @@ export function Card({
         border: '1px solid var(--color-border)',
         borderRadius: 'var(--radius-card)',
         boxShadow: 'var(--shadow-card)',
-        transition: 'all 200ms ease',
+        transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         cursor: onClick ? 'pointer' : 'default',
-        marginBottom: marginBottom ?? (gap ? '12px' : undefined),
-        marginLeft: '4px',
-        marginRight: '4px',
+        marginBottom: marginBottom ?? (gap ? '16px' : undefined),
         ...paddingStyles[padding],
         ...style,
       }}

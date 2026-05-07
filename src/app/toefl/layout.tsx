@@ -1,9 +1,9 @@
-import { AppLayout } from '@/components/layout/app-layout';
+import { ToeflShell } from '@/components/layout/toefl-shell';
 
 export default function ToeflLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AppLayout>{children}</AppLayout>;
+  return <ToeflShell>{children}</ToeflShell>;
 }

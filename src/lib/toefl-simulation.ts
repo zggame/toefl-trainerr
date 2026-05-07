@@ -97,8 +97,11 @@ export function buildSimulationTaskPlan(tasks: SimulationSourceTask[]): Simulati
     throw new Error(INSUFFICIENT_SIMULATION_TASKS_MESSAGE);
   }
 
-  // Randomly pick one of the candidate topics to ensure variety
-  const chosenTopic = candidateTopics[Math.floor(Math.random() * candidateTopics.length)];
+  const chosenTopic = candidateTopics.sort((a, b) => {
+    const firstTaskDelta = compareSimulationTaskDifficulty(a.tasks[0], b.tasks[0]);
+    if (firstTaskDelta !== 0) return firstTaskDelta;
+    return a.domain.localeCompare(b.domain);
+  })[0];
   const interview = chosenTopic.tasks.slice(0, SIMULATION_INTERVIEW_COUNT);
 
   return [...listenRepeat.slice(0, SIMULATION_LISTEN_REPEAT_COUNT), ...interview].map((task, index) => ({
