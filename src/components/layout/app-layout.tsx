@@ -7,12 +7,12 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <main className="flex-1 px-4 pt-8 w-full overscroll-contain pb-12 animate-slide-up">
+    <div className="min-h-screen flex flex-col relative w-full">
+      <main className="flex-1 px-4 pt-8 w-full overscroll-contain pb-28 md:pb-8 animate-slide-up">
         {children}
       </main>
 
-      <div className="sticky bottom-0 z-50 safe-area-bottom">
+      <div className="sticky bottom-0 z-50 safe-area-bottom md:hidden">
         <BottomNav />
       </div>
     </div>

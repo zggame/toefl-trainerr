@@ -18,12 +18,12 @@
   --color-accent-yellow: #EAB308;
   --color-accent-red: #EF4444;
 
-  --color-bg: #FFFFFF;
-  --color-bg-elevated: #F8FAFC;
-  --color-bg-overlay: rgba(0, 0, 0, 0.04);
+  --color-bg: #F7F4EE;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-overlay: rgba(15, 23, 42, 0.04);
   --color-text-primary: #0F172A;
   --color-text-secondary: #475569;
-  --color-text-muted: #94A3B8;
+  --color-text-muted: #64748B;
   --color-border: #E2E8F0;
 
   /* Score Colors */
@@ -33,14 +33,14 @@
   --color-score-practice: #EF4444;
 
   /* Shadows */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
-  --shadow-fab: 0 4px 14px rgba(79, 70, 229, 0.4);
-  --shadow-button: 0 4px 14px rgba(79, 70, 229, 0.3);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-fab: 0 4px 14px rgba(79, 70, 229, 0.35);
+  --shadow-button: 0 4px 14px rgba(79, 70, 229, 0.25);
 
   /* Radius */
-  --radius-card: 16px;
-  --radius-button: 12px;
+  --radius-card: 24px;
+  --radius-button: 14px;
   --radius-pill: 9999px;
 }
 
@@ -92,16 +92,13 @@ body {
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Center the app on desktop */
-  display: flex;
-  justify-content: center;
   min-height: 100vh;
+  width: 100%;
 }
 
-/* App container - centered on desktop, full-width on mobile */
+/* App container - full-width shell for mobile and desktop */
 .app-container {
   width: 100%;
-  max-width: 480px;
   min-height: 100vh;
   position: relative;
   background: var(--color-bg);
@@ -109,20 +106,16 @@ body {
   flex-direction: column;
 }
 
-/* On larger screens, add a subtle frame */
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
   body {
-    background: var(--color-bg-elevated);
+    background:
+      radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 30%),
+      radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 24%),
+      var(--color-bg-elevated);
   }
-  
+
   .app-container {
-    border-left: 1px solid var(--color-border);
-    border-right: 1px solid var(--color-border);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
-  }
-  
-  .dark .app-container {
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+    background: transparent;
   }
 }
 
