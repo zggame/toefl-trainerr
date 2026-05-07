@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { buildDashboardViewModel, type DashboardAttempt } from '@/lib/dashboard';
 import { DashboardScreen } from '@/components/dashboard/dashboard-screen';
-import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
 
 type DashboardProfile = {
   total_attempts?: number;
@@ -77,18 +76,5 @@ export default function DashboardPage() {
 
   const model = buildDashboardViewModel({ attempts, profile });
   
-  return (
-    <div className="-mx-4 -mt-8 min-h-screen bg-[#f3f0ea] md:p-2">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] overflow-hidden bg-white shadow-[0_20px_70px_rgba(15,23,42,0.10)] md:min-h-[calc(100vh-16px)] md:rounded-2xl">
-        <DesktopSidebar
-          usageText={`${profile?.daily_attempt_count ?? 0} of 10 scores used`}
-          usageCount={profile?.daily_attempt_count ?? 0}
-          usageLimit={10}
-        />
-        <main className="flex-1 overflow-y-auto px-5 py-7 md:px-10 md:py-8 lg:px-11">
-          <DashboardScreen model={model} />
-        </main>
-      </div>
-    </div>
-  );
+  return <DashboardScreen model={model} />;
 }

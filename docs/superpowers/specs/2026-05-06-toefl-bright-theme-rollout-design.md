@@ -44,6 +44,15 @@ Use the dashboard reference as the source of truth:
 
 All TOEFL pages should sit inside a bright scoped wrapper. The wrapper should set light theme variables locally so existing components continue to work without hand-patching every usage.
 
+The key idea from the dashboard is:
+
+- One warm outer browser background.
+- One centered white app frame on desktop.
+- One persistent left sidebar for TOEFL navigation.
+- One bounded content column inside the frame, not full-bleed content across the browser.
+- Page content uses white cards, soft borders, and a consistent `24px` rhythm.
+- Mobile keeps the existing phone-first stacking and bottom navigation.
+
 The scope should cover:
 
 - `/toefl`
@@ -65,7 +74,7 @@ Keep the current selected dashboard layout:
 
 ### Non-Dashboard Pages
 
-Do not redesign every page from scratch in this pass. Apply the shared bright theme first, then make only narrow visual corrections where dark variables would still leak through.
+Do not redesign every page from scratch in this pass. Apply the shared bright theme and desktop shell first, then make only narrow visual corrections where dark variables would still leak through.
 
 Expected page behavior:
 
@@ -73,6 +82,8 @@ Expected page behavior:
 - Practice: bright prompt/scoring cards and light loading/error states.
 - Profile: bright stats and settings cards; no user-facing dark/system picker for TOEFL if the TOEFL area is intentionally bright-only.
 - Attempt review: bright score, transcript, audio, and feedback cards.
+
+On desktop, these pages should no longer stretch to the full browser width. They should render inside the shared app frame with a maximum content width, while dashboard can use its internal two-column composition within that same bounded frame.
 
 ## Theme Behavior
 
@@ -90,10 +101,12 @@ The profile page should not offer a TOEFL dark mode toggle until a full TOEFL da
 ## Implementation Approach
 
 1. Add a `toefl-bright-scope` wrapper in `src/app/toefl/layout.tsx`.
-2. Define `.toefl-bright-scope` and `.dark .toefl-bright-scope` tokens in `src/app/globals.css`.
-3. Remove or replace the TOEFL profile appearance picker so it does not imply supported dark mode for TOEFL pages.
-4. Keep dashboard-specific explicit light surfaces that already match the selected PNG.
-5. Add regression coverage that verifies the bright scope exists and that the profile page no longer exposes dark/system TOEFL theme choices.
+2. Move the desktop frame and sidebar into a shared TOEFL shell so all `/toefl/*` pages share the dashboard desktop structure.
+3. Define `.toefl-bright-scope` and `.dark .toefl-bright-scope` tokens in `src/app/globals.css`.
+4. Constrain desktop content in `AppLayout` with a maximum width while preserving mobile behavior.
+5. Remove or replace the TOEFL profile appearance picker so it does not imply supported dark mode for TOEFL pages.
+6. Keep dashboard-specific explicit light surfaces that already match the selected PNG.
+7. Add regression coverage that verifies the bright scope, shared shell, desktop max width, and profile theme behavior.
 
 ## Testing Expectations
 

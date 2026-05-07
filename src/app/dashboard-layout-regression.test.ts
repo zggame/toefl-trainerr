@@ -29,13 +29,24 @@ describe('dashboard visual parity guardrails', () => {
   });
 
   test('scopes TOEFL pages to the bright visual system', () => {
-    const layout = readFileSync('src/app/toefl/layout.tsx', 'utf8');
+    const shell = readFileSync('src/components/layout/toefl-shell.tsx', 'utf8');
     const css = readFileSync('src/app/globals.css', 'utf8');
     const profile = readFileSync('src/app/toefl/profile/page.tsx', 'utf8');
 
-    expect(layout).toContain('toefl-bright-scope');
+    expect(shell).toContain('toefl-bright-scope');
     expect(css).toContain('.dark .toefl-bright-scope');
     expect(profile).not.toContain("label: 'Dark'");
     expect(profile).not.toContain("label: 'System'");
+  });
+
+  test('uses the shared desktop shell instead of page-level full-width frames', () => {
+    const layout = readFileSync('src/app/toefl/layout.tsx', 'utf8');
+    const appLayout = readFileSync('src/components/layout/app-layout.tsx', 'utf8');
+    const dashboard = readFileSync('src/app/toefl/page.tsx', 'utf8');
+
+    expect(layout).toContain('ToeflShell');
+    expect(appLayout).toContain('md:max-w-[1240px]');
+    expect(dashboard).not.toContain('DesktopSidebar');
+    expect(dashboard).not.toContain('max-w-[1600px]');
   });
 });

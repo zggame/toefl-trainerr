@@ -8,7 +8,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col relative w-full">
-      <main className="flex-1 px-4 pt-8 w-full overscroll-contain pb-28 md:pb-8 animate-slide-up">
+      <main className="mx-auto w-full flex-1 px-4 pt-8 overscroll-contain pb-28 animate-slide-up md:max-w-[1240px] md:px-10 md:py-8 lg:px-11">
         {children}
       </main>
 
