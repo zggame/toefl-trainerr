@@ -7,10 +7,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScoreDisplay } from '@/components/ui/score-display';
 import {
-  Mic, TrendingUp, Target, User, Sun, Moon, Monitor,
+  Mic, TrendingUp, Target, User,
   ChevronRight, Award, BarChart3,
 } from 'lucide-react';
-import { useTheme } from '@/components/theme-provider';
 
 function getScoreColor(score: number): string {
   if (score >= 3.5) return 'var(--color-score-excellent)';
@@ -22,7 +21,6 @@ function getScoreColor(score: number): string {
 export default function ProfilePage() {
   const [attempts, setAttempts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -54,12 +52,6 @@ export default function ProfilePage() {
   const weakest = dimensions.reduce((min, d) =>
     (d.score > 0 && (min.score === 0 || d.score < min.score)) ? d : min
   , dimensions[0]);
-
-  const themeOptions = [
-    { value: 'light' as const, label: 'Light', icon: Sun },
-    { value: 'dark' as const, label: 'Dark', icon: Moon },
-    { value: 'system' as const, label: 'System', icon: Monitor },
-  ];
 
   if (loading) {
     return (
@@ -182,9 +174,7 @@ export default function ProfilePage() {
           marginBottom="0"
           style={{
             borderColor: 'rgba(249, 115, 22, 0.3)',
-            background: resolvedTheme === 'dark'
-              ? 'rgba(249, 115, 22, 0.05)'
-              : 'rgba(249, 115, 22, 0.05)',
+            background: 'rgba(249, 115, 22, 0.05)',
           } as React.CSSProperties}
         >
           <div className="flex items-start gap-3">
@@ -228,31 +218,19 @@ export default function ProfilePage() {
           Preferences
         </h2>
 
-        <div>
-          <p className="text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-            Appearance
+        <div
+          className="rounded-xl border p-4"
+          style={{
+            borderColor: 'var(--color-border)',
+            background: 'var(--color-bg-low)',
+          }}
+        >
+          <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Bright TOEFL workspace
           </p>
-          <div className="grid grid-cols-3 gap-2">
-            {themeOptions.map(opt => {
-              const Icon = opt.icon;
-              const isActive = theme === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => setTheme(opt.value)}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl transition-all touch-target"
-                  style={{
-                    background: isActive ? 'rgba(79, 70, 229, 0.1)' : 'transparent',
-                    border: `1px solid ${isActive ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                    color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                  }}
-                >
-                  <Icon size={20} />
-                  <span className="text-xs font-medium">{opt.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            TOEFL pages use the bright study theme for consistent practice, review, and dashboard screens.
+          </p>
         </div>
       </Card>
 

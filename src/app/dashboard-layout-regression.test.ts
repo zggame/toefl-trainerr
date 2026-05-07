@@ -27,4 +27,15 @@ describe('dashboard visual parity guardrails', () => {
       expect(readFileSync(file, 'utf8')).not.toContain('var(--color-bg-elevated)');
     }
   });
+
+  test('scopes TOEFL pages to the bright visual system', () => {
+    const layout = readFileSync('src/app/toefl/layout.tsx', 'utf8');
+    const css = readFileSync('src/app/globals.css', 'utf8');
+    const profile = readFileSync('src/app/toefl/profile/page.tsx', 'utf8');
+
+    expect(layout).toContain('toefl-bright-scope');
+    expect(css).toContain('.dark .toefl-bright-scope');
+    expect(profile).not.toContain("label: 'Dark'");
+    expect(profile).not.toContain("label: 'System'");
+  });
 });

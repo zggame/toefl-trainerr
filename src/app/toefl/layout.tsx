@@ -5,5 +5,9 @@ export default function ToeflLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <div className="toefl-bright-scope">
+      <AppLayout>{children}</AppLayout>
+    </div>
+  );
 }
