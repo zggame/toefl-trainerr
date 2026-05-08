@@ -13,7 +13,7 @@ export default defineConfig({
       '**/node_modules/**',
       '**/.next/**',
       '**/.worktrees/**',
-      'tests/e2e/**',
+      '**/tests/e2e/**',
     ],
   },
 });

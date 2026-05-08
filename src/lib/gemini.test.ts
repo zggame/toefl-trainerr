@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { scoreAudio, transcribeAudio } from './gemini';
+import { scoreAudio, transcribeAudio, generateTTS } from './gemini';
 
 const mockGenerateContent = vi.fn();
 
@@ -50,5 +50,25 @@ describe('gemini', () => {
 
     const text = await transcribeAudio('fakebase64', 'audio/webm');
     expect(text).toBe('Hello world');
+  });
+
+  it('generateTTS returns audio data base64', async () => {
+    mockGenerateContent.mockResolvedValue({
+      candidates: [
+        {
+          content: {
+            parts: [
+              { inlineData: { data: 'fake-audio-base64', mimeType: 'audio/mpeg' } }
+            ]
+          }
+        }
+      ]
+    });
+
+    const audioData = await generateTTS('Hello', 'Kore');
+    expect(audioData).toBe('fake-audio-base64');
+    expect(mockGenerateContent).toHaveBeenCalledWith(expect.objectContaining({
+      model: 'gemini-2.5-flash-tts'
+    }));
   });
 });
