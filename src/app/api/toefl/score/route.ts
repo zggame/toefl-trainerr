@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
   }
 
-  const MAX_FREE_DAILY = 10; // Allow 10 attempts for initial testing
+  const MAX_FREE_DAILY = 15; // Allow 15 attempts to cover a full 11-item simulation
   const now = new Date();
   const lastReset = new Date(profile.last_attempt_reset);
   const isNewDay = now.toDateString() !== lastReset.toDateString();

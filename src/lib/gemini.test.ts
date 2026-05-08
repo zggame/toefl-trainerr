@@ -54,17 +54,15 @@ describe('gemini', () => {
 
   it('generateTTS returns audio data base64', async () => {
     mockGenerateContent.mockResolvedValue({
-      response: {
-        candidates: [
-          {
-            content: {
-              parts: [
-                { inlineData: { data: 'fake-audio-base64', mimeType: 'audio/mpeg' } }
-              ]
-            }
+      candidates: [
+        {
+          content: {
+            parts: [
+              { inlineData: { data: 'fake-audio-base64', mimeType: 'audio/mpeg' } }
+            ]
           }
-        ]
-      }
+        }
+      ]
     });
 
     const audioData = await generateTTS('Hello', 'Kore');

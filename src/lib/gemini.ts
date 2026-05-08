@@ -152,8 +152,7 @@ export async function transcribeAudio(
   }));
 
   // Extraction logic depends on SDK version, assuming standard response format
-  // @ts-ignore - handled by runtime check
-  const audioPart = response.response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+  const audioPart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
   if (!audioPart?.inlineData?.data) throw new Error('Failed to generate audio');
   return audioPart.inlineData.data;
   }

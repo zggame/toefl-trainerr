@@ -1,15 +1,20 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase-config';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthenticatedUser, getSupabaseServer } from '@/lib/supabase-client';
 import { generateTTS } from '@/lib/gemini';
 import crypto from 'crypto';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { text, voice = 'Kore' } = await req.json();
     if (!text) return NextResponse.json({ error: 'Text is required' }, { status: 400 });
 
     const hash = crypto.createHash('sha256').update(`${text}:${voice}`).digest('hex');
-    const supabase = createClient();
+    const supabase = getSupabaseServer();
 
     // 1. Check Cache
     const { data: cached } = await supabase

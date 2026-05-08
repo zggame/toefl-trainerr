@@ -137,7 +137,7 @@ describe('TOEFL score route', () => {
     // Mock profile to have reached limit
     single.mockResolvedValueOnce({ 
       data: { 
-        daily_attempt_count: 10, 
+        daily_attempt_count: 15, 
         last_attempt_reset: new Date().toISOString(), 
         user_tier: 'free',
         total_attempts: 100
