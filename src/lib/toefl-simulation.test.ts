@@ -171,6 +171,7 @@ describe('toefl simulation utilities', () => {
         ...interviewTasks[index],
         id: `campus-life-${index}`,
         topic_domain: 'campus_life',
+        difficulty: "easy",
         transcript: `Campus life question ${index + 1}`,
       })),
       ...Array.from({ length: 4 }, (_, index) => ({
