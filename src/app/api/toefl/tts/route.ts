@@ -26,12 +26,12 @@ export async function POST(req: Request) {
     const audioData = await generateTTS(text, voice);
 
     // 3. Update Cache
-    await supabase.from('tts_cache').insert({
+    await supabase.from('tts_cache').upsert({
       text_hash: hash,
       text_content: text,
       voice_name: voice,
       audio_data: audioData
-    });
+    }, { onConflict: 'text_hash' });
 
     return NextResponse.json({ audioData });
   } catch (error: any) {
