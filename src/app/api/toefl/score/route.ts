@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser, getSupabaseServer } from '@/lib/supabase-client';
 import { scoreAudio } from '@/lib/gemini';
+import { SIMULATION_TOTAL_ITEMS } from '@/lib/toefl-simulation';
 
 const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
 const ALLOWED_AUDIO_TYPES = new Set([
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
   }
 
-  const MAX_FREE_DAILY = 15; // Allow 15 attempts to cover a full 11-item simulation
+  const MAX_FREE_DAILY = SIMULATION_TOTAL_ITEMS;
   const now = new Date();
   const lastReset = new Date(profile.last_attempt_reset);
   const isNewDay = now.toDateString() !== lastReset.toDateString();

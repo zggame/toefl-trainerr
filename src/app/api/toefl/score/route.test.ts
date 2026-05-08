@@ -133,11 +133,28 @@ describe('TOEFL score route', () => {
     await expect(response.json()).resolves.toEqual({ error: 'Recording upload failed' });
   });
 
-  test('enforces daily limit for free users', async () => {
+  test('allows free users to complete one full simulation per day', async () => {
+    single.mockResolvedValueOnce({
+      data: {
+        daily_attempt_count: 10,
+        last_attempt_reset: new Date().toISOString(),
+        user_tier: 'free',
+        total_attempts: 100
+      },
+      error: null
+    });
+
+    const response = await POST(request(validBody) as never);
+
+    expect(response.status).toBe(200);
+    expect(scoreAudio).toHaveBeenCalled();
+  });
+
+  test('enforces daily limit for free users after one full simulation', async () => {
     // Mock profile to have reached limit
     single.mockResolvedValueOnce({ 
       data: { 
-        daily_attempt_count: 15, 
+        daily_attempt_count: 11, 
         last_attempt_reset: new Date().toISOString(), 
         user_tier: 'free',
         total_attempts: 100
@@ -162,7 +179,7 @@ describe('TOEFL score route', () => {
     
     single.mockResolvedValueOnce({ 
       data: { 
-        daily_attempt_count: 10, 
+        daily_attempt_count: 11, 
         last_attempt_reset: yesterday.toISOString(), 
         user_tier: 'free',
         total_attempts: 100
@@ -177,10 +194,10 @@ describe('TOEFL score route', () => {
   });
 
   test('allows premium users to bypass daily limit', async () => {
-    // Mock profile with 10 attempts but premium tier
+    // Mock profile with 11 attempts but premium tier
     single.mockResolvedValueOnce({ 
       data: { 
-        daily_attempt_count: 10, 
+        daily_attempt_count: 11, 
         last_attempt_reset: new Date().toISOString(), 
         user_tier: 'premium',
         total_attempts: 100
