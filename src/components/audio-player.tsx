@@ -36,30 +36,22 @@ export function AudioPlayer({
   const [playingSourceKey, setPlayingSourceKey] = useState<string | null>(null);
   const [endedSourceKey, setEndedSourceKey] = useState<string | null>(null);
   const [startedSourceKey, setStartedSourceKey] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const onEndedRef = useRef(onEnded);
-  const ttsFallbackTimerRef = useRef<number | null>(null);
   const useTts = isPlaceholderUrl(audioUrl);
   const sourceKey = playbackKey ?? `${audioUrl}::${transcript ?? ''}`;
   const playing = playingSourceKey === sourceKey;
   const hasStartedOnce = startedSourceKey === sourceKey;
-
-  const clearTtsFallback = useCallback(() => {
-    if (ttsFallbackTimerRef.current !== null) {
-      window.clearTimeout(ttsFallbackTimerRef.current);
-      ttsFallbackTimerRef.current = null;
-    }
-  }, []);
 
   useEffect(() => {
     onEndedRef.current = onEnded;
   }, [onEnded]);
 
   useEffect(() => {
-    clearTtsFallback();
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
+    setObjectUrl(null);
+    setIsGenerating(false);
     const audio = audioRef.current;
     if (audio) {
       audio.pause();
@@ -69,52 +61,22 @@ export function AudioPlayer({
         // Ignore browsers that reject resetting before metadata is ready.
       }
     }
-  }, [clearTtsFallback, sourceKey]);
+  }, [sourceKey]);
 
-  useEffect(() => () => clearTtsFallback(), [clearTtsFallback]);
-
-  const startTts = useCallback(() => {
-    if (!transcript) return;
-    clearTtsFallback();
-    setStartedSourceKey(sourceKey);
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(transcript);
-    let finished = false;
-    const finishPlayback = () => {
-      if (finished) return;
-      finished = true;
-      clearTtsFallback();
-      setPlayingSourceKey(null);
-      setEndedSourceKey(sourceKey);
-      onEndedRef.current?.();
+  useEffect(() => {
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.onstart = () => {
-      setPlayingSourceKey(sourceKey);
-      setEndedSourceKey(null);
-    };
-    utterance.onend = finishPlayback;
-    utterance.onpause = () => setPlayingSourceKey(null);
-    utterance.onresume = () => {
-      setPlayingSourceKey(sourceKey);
-      setEndedSourceKey(null);
-    };
-    utterance.onerror = () => setPlayingSourceKey(null);
-    window.speechSynthesis.speak(utterance);
-    const estimatedDurationMs = Math.max(3000, Math.ceil(((transcript.split(/\s+/).filter(Boolean).length / 2.4) + 1) * 1000));
-    ttsFallbackTimerRef.current = window.setTimeout(finishPlayback, estimatedDurationMs);
-  }, [clearTtsFallback, sourceKey, transcript]);
+  }, [objectUrl]);
 
-  const stopSpeaking = useCallback(() => {
-    clearTtsFallback();
-    window.speechSynthesis.cancel();
-    setPlayingSourceKey(null);
-  }, [clearTtsFallback]);
-
-  const startNativeAudio = useCallback(() => {
+  const startNativeAudio = useCallback((urlOverride?: string) => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    if (urlOverride) {
+      audio.src = urlOverride;
+    }
+
     setStartedSourceKey(sourceKey);
     audio.play().then(() => {
       setPlayingSourceKey(sourceKey);
@@ -124,26 +86,55 @@ export function AudioPlayer({
     });
   }, [sourceKey]);
 
+  const fetchModelTts = useCallback(async () => {
+    if (!transcript || isGenerating) return;
+    
+    if (objectUrl) {
+      startNativeAudio(objectUrl);
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const res = await fetch('/api/toefl/tts', {
+        method: 'POST',
+        body: JSON.stringify({ text: transcript }),
+      });
+      const { audioData } = await res.json();
+      const blob = await (await fetch(`data:audio/wav;base64,${audioData}`)).blob();
+      const url = URL.createObjectURL(blob);
+      setObjectUrl(url);
+      startNativeAudio(url);
+    } catch (err) {
+      console.error('TTS Fetch failed', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [transcript, objectUrl, isGenerating, startNativeAudio]);
+
   useEffect(() => {
     if (!autoPlay) return;
     const timer = window.setTimeout(() => {
       if (useTts) {
-        startTts();
+        fetchModelTts();
       } else if (audioRef.current) {
         startNativeAudio();
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [autoPlay, sourceKey, startNativeAudio, startTts, useTts]);
+  }, [autoPlay, sourceKey, startNativeAudio, fetchModelTts, useTts]);
 
   const toggle = () => {
     if (useTts) {
       if (!allowReplay) {
-        if (!hasStartedOnce) startTts();
+        if (!hasStartedOnce) fetchModelTts();
         return;
       }
-      if (playing) stopSpeaking();
-      else startTts();
+      if (playing) {
+        audioRef.current?.pause();
+      } else {
+        fetchModelTts();
+      }
       return;
     }
     if (!audioRef.current) return;
@@ -160,26 +151,24 @@ export function AudioPlayer({
 
   return (
     <Card padding="md" gap={false}>
-      {!useTts && (
-        <audio 
-          ref={audioRef} 
-          src={audioUrl} 
-          onPlay={() => {
-            setStartedSourceKey(sourceKey);
-            setPlayingSourceKey(sourceKey);
-            setEndedSourceKey(null);
-          }}
-          onPause={() => setPlayingSourceKey(null)}
-          onEnded={() => {
-            setPlayingSourceKey(null);
-            setEndedSourceKey(sourceKey);
-            onEndedRef.current?.();
-          }} 
-        />
-      )}
+      <audio 
+        ref={audioRef} 
+        src={useTts ? (objectUrl ?? undefined) : audioUrl} 
+        onPlay={() => {
+          setStartedSourceKey(sourceKey);
+          setPlayingSourceKey(sourceKey);
+          setEndedSourceKey(null);
+        }}
+        onPause={() => setPlayingSourceKey(null)}
+        onEnded={() => {
+          setPlayingSourceKey(null);
+          setEndedSourceKey(sourceKey);
+          onEndedRef.current?.();
+        }} 
+      />
       <div className="flex items-center gap-3">
         <button
-          disabled={!allowReplay && hasStartedOnce}
+          disabled={( !allowReplay && hasStartedOnce) || isGenerating}
           onClick={toggle}
           className="touch-target flex items-center justify-center shrink-0 rounded-full active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
@@ -209,23 +198,27 @@ export function AudioPlayer({
             />
           </div>
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-            {playing ? (useTts ? 'Speaking...' : 'Playing...') : (useTts ? 'Tap to hear prompt' : 'Tap to play prompt')}
+            {isGenerating ? 'Generating...' : playing ? (useTts ? 'Speaking...' : 'Playing...') : (useTts ? 'Tap to hear prompt' : 'Tap to play prompt')}
           </p>
         </div>
         
         {allowReplay && (
           <button
+            disabled={isGenerating}
             onClick={() => {
               if (useTts) {
-                stopSpeaking();
-                startTts();
+                if (audioRef.current) {
+                  audioRef.current.pause();
+                  audioRef.current.currentTime = 0;
+                }
+                fetchModelTts();
               } else if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current.currentTime = 0;
                 startNativeAudio();
               }
             }}
-            className="touch-target p-2 rounded-lg"
+            className="touch-target p-2 rounded-lg disabled:opacity-50"
             style={{ color: 'var(--color-text-muted)' }}
             title="Replay"
           >
