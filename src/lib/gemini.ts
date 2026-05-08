@@ -132,4 +132,28 @@ export async function transcribeAudio(
   }));
 
   return response.text?.trim() ?? '';
-}
+  }
+
+  export async function generateTTS(text: string, voiceName: string = 'Kore'): Promise<string> {
+  const ai = getGemini();
+  const response = await withRetry(() => ai.models.generateContent({
+    model: 'gemini-2.5-flash-tts',
+    contents: [{ parts: [{ text }] }],
+    config: {
+      responseModalities: ['audio'],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: {
+            voiceName
+          }
+        }
+      }
+    }
+  }));
+
+  // Extraction logic depends on SDK version, assuming standard response format
+  // @ts-ignore - handled by runtime check
+  const audioPart = response.response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+  if (!audioPart?.inlineData?.data) throw new Error('Failed to generate audio');
+  return audioPart.inlineData.data;
+  }
